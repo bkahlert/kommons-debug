@@ -34,6 +34,3 @@ class RenderTest {
         ClassWithCustomToString(ClassWithCustomToString()).render() shouldBe "custom toString"
     }
 }
-
-// TODO trace
-// TODO typeString

@@ -70,6 +70,13 @@ and backslashes, line feeds, carriage returns, tabs and double quotes escaped.
 """{ bar: "baz" }""".quoted   // "{ bar: \"baz\" }"
 ```
 
+## ToDo
+
+- detect circular dependencies (render(), properties)
+- Any?.trace
+- Any.typeString
+- Release How-To
+
 ## Contributing
 
 Want to contribute? Awesome! The most basic way to show your support is to star the project, or to raise issues. You can also support this project by making
