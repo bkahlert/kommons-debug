@@ -36,14 +36,14 @@ jobs:
           arguments: build
 
       - name: Upload test reports
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: success() || failure()
         with:
           name: test-reports
           if-no-files-found: error
           path: build/tests-results/**/*.xml
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: kommons
           if-no-files-found: error
