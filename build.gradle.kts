@@ -14,7 +14,6 @@ allprojects {
 
 description = "Kommons Debug is a Kotlin Multiplatform Library to support print debugging"
 group = "com.bkahlert.kommons"
-version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
