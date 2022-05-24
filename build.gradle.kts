@@ -5,7 +5,7 @@ plugins {
     id("org.jetbrains.dokka") version "1.6.21"
     id("maven-publish")
     signing
-    id("nebula.release") version "15.3.1"
+    id("nebula.release") version "16.0.0"
 }
 
 allprojects {
