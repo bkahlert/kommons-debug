@@ -24,10 +24,14 @@ internal data class DataClass(
     @Suppress("unused") private val privateDataProperty: String = "private-data-property"
 }
 
-class ClassWithDefaultToString(@Suppress("unused") val foo: Any? = null) {
+internal class ClassWithDefaultToString(@Suppress("unused") val foo: Any? = null) {
     val bar: String = "baz"
 }
 
-class ClassWithCustomToString(@Suppress("unused") val foo: Any? = null) {
+internal class ClassWithCustomToString(@Suppress("unused") val foo: Any? = null) {
     override fun toString(): String = "custom toString"
+}
+
+internal class SelfReferencingClass : BaseClass() {
+    val selfProperty: SelfReferencingClass = this
 }

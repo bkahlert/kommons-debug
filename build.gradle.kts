@@ -61,6 +61,17 @@ kotlin {
         val jvmTest by getting
         val jsMain by getting
         val jsTest by getting
+
+        all {
+            languageSettings.apply {
+                optIn("kotlin.RequiresOptIn")
+                optIn("kotlin.ExperimentalUnsignedTypes")
+                optIn("kotlin.time.ExperimentalTime")
+                optIn("kotlin.contracts.ExperimentalContracts")
+                optIn("kotlin.experimental.ExperimentalTypeInference")
+                progressiveMode = true // false by default
+            }
+        }
     }
 }
 

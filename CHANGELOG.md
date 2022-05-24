@@ -4,7 +4,13 @@
 
 ### Added
 
-*none*
+#### Any.renderType()
+
+Renders any object's type
+
+#### Platform.Current
+
+Reflects the platform the program runs on, e.g. `Platform.JVM`
 
 ### Changed
 
@@ -31,7 +37,7 @@
 Renders any object depending on whether its `toString()` is overridden:
 
 - if there is a custom `toString()` it is simply used
-- if there is *no custom* `toString()` it is serialized in the form `<TYPE>(key0=value0, key1=value=1, ..., keyN=valueN)`
+- if there is *no custom* `toString()` the object is serialized in the form `<TYPE>(key0=value0, key1=value=1, ..., keyN=valueN)`
 
 #### Any.properties
 

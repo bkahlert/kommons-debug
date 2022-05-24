@@ -1,6 +1,7 @@
 package com.bkahlert.kommons.debug
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import kotlin.test.Test
 
 class RenderTest {
@@ -21,7 +22,10 @@ class RenderTest {
             "\n}"
         ) shouldBe """
             ClassWithDefaultToString {
-            foo=ClassWithDefaultToString(foo=␀, bar="baz")
+            foo=ClassWithDefaultToString {
+            foo=␀
+            bar="baz"
+            }
             bar="baz"
             }
         """.trimIndent()
@@ -32,5 +36,10 @@ class RenderTest {
         ClassWithCustomToString(null).render() shouldBe "custom toString"
         ClassWithCustomToString("null").render() shouldBe "custom toString"
         ClassWithCustomToString(ClassWithCustomToString()).render() shouldBe "custom toString"
+    }
+
+    @Test
+    fun render_circular_reference() {
+        SelfReferencingClass().render() shouldContain "selfProperty=<SelfReferencingClass>"
     }
 }

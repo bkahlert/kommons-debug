@@ -33,7 +33,7 @@ jobs:
         with:
           distributions-cache-enabled: true
           dependencies-cache-enabled: true
-          arguments: build
+          arguments: build -Pkotlin.tests.individualTaskReports=true
 
       - name: Upload test reports
         uses: actions/upload-artifact@v3
