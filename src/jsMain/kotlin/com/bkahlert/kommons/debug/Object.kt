@@ -18,11 +18,11 @@ public external object Object {
 }
 
 /**
- * Returns an array of a `this` object's own enumerable property names, iterated in the same order that a normal loop would.
+ * Returns an array of a this object's own enumerable property names, iterated in the same order that a normal loop would.
  */
 public val Any.keys: Array<String> get() = Object.keys(this)
 
 /**
- * Returns an array of a `this` object's own enumerable string-keyed property [key, value] pairs.
+ * Returns an array of a this object's own enumerable string-keyed property [key, value] pairs.
  */
 public val Any.entries: Array<Array<Any?>> get() = Object.entries(this)

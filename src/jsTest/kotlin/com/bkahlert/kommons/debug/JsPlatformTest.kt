@@ -1,12 +1,12 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.tests
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-class PlatformsTest {
+class JsPlatformTest {
 
-    @Test
-    fun test_current() {
+    @Test fun current() = tests {
         Platform.Current shouldBe Platform.JS
     }
 }

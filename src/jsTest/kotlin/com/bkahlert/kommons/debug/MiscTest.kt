@@ -1,5 +1,6 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.tests
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import kotlin.js.json
@@ -7,8 +8,7 @@ import kotlin.test.Test
 
 class MiscTest {
 
-
-    @Test fun iterable_to_json() {
+    @Test fun iterable_to_json() = tests {
         emptyList<Pair<String, Any?>>().toJson().entries shouldBe json().entries
         listOf("notNull" to 42, "null" to null, "map" to mapOf("foo" to "bar")).toJson().entries shouldBe json(
             "notNull" to 42,
@@ -17,7 +17,7 @@ class MiscTest {
         ).entries
     }
 
-    @Test fun map_to_json() {
+    @Test fun map_to_json() = tests {
         emptyMap<String, Any?>().toJson().entries shouldBe json().entries
         mapOf("notNull" to 42, "null" to null, "map" to mapOf("foo" to "bar")).toJson().entries shouldBe json(
             "notNull" to 42,
@@ -26,7 +26,7 @@ class MiscTest {
         ).entries
     }
 
-    @Test fun iterable_to_json_array() {
+    @Test fun iterable_to_json_array() = tests {
         emptyList<Any?>().toJsonArray().entries shouldBe json().entries
         listOf(42, null, mapOf("foo" to "bar")).toJsonArray() should {
             it.size shouldBe 3
@@ -37,7 +37,7 @@ class MiscTest {
     }
 
     @Suppress("unused")
-    @Test fun map_to_json_array() {
+    @Test fun map_to_json_array() = tests {
         emptyArray<Any?>().toJsonArray().entries shouldBe json().entries
         arrayOf(42, null, mapOf("foo" to "bar")).toJsonArray() should {
             it.size shouldBe 3
@@ -47,7 +47,7 @@ class MiscTest {
         }
     }
 
-    @Test fun object_stringify_extension() {
+    @Test fun object_stringify_extension() = tests {
         null.stringify() shouldBe "null"
         "string".stringify() shouldBe """
             "string"
@@ -95,6 +95,54 @@ class MiscTest {
               "privateBaseProperty": "private-base-property"
             }
             """.trimIndent()
+        Singleton.stringify() shouldBe """
+            {
+              "baseProperty": "base-property",
+              "openBaseProperty": 42,
+              "protectedOpenBaseProperty": "protected-open-base-property",
+              "privateBaseProperty": "private-base-property",
+              "singletonProperty": "singleton-property",
+              "privateSingletonProperty": "private-singleton-property"
+            }
+            """.trimIndent()
+        AnonymousSingleton.stringify() shouldBe """
+            {
+              "anonymousSingletonProperty": "anonymous-singleton-property",
+              "privateAnonymousSingletonProperty": "private-anonymous-singleton-property"
+            }
+            """.trimIndent()
+        ListImplementingSingleton.stringify() shouldBe """
+            {
+              "baseProperty": "base-property",
+              "openBaseProperty": 42,
+              "protectedOpenBaseProperty": "protected-open-base-property",
+              "privateBaseProperty": "private-base-property",
+              "singletonProperty": "singleton-property",
+              "privateSingletonProperty": "private-singleton-property"
+            }
+            """.trimIndent()
+        ListImplementingAnonymousSingleton.stringify() shouldBe """
+            {
+              "anonymousSingletonProperty": "anonymous-singleton-property",
+              "privateAnonymousSingletonProperty": "private-anonymous-singleton-property"
+            }
+            """.trimIndent()
+        MapImplementingSingleton.stringify() shouldBe """
+            {
+              "baseProperty": "base-property",
+              "openBaseProperty": 42,
+              "protectedOpenBaseProperty": "protected-open-base-property",
+              "privateBaseProperty": "private-base-property",
+              "singletonProperty": "singleton-property",
+              "privateSingletonProperty": "private-singleton-property"
+            }
+            """.trimIndent()
+        MapImplementingAnonymousSingleton.stringify() shouldBe """
+            {
+              "anonymousSingletonProperty": "anonymous-singleton-property",
+              "privateAnonymousSingletonProperty": "private-anonymous-singleton-property"
+            }
+            """.trimIndent()
         OrdinaryClass().stringify() shouldBe """
             {
               "baseProperty": "base-property",
@@ -117,7 +165,7 @@ class MiscTest {
             """.trimIndent()
     }
 
-    @Test fun string_parse_extension() {
+    @Test fun string_parse_extension() = tests {
         null.stringify().parse().entries shouldBe json().entries
         "string".stringify().parse().entries shouldBe "string".entries
         arrayOf("string", 42).stringify().parse().entries shouldBe json(
@@ -145,6 +193,42 @@ class MiscTest {
             "protectedOpenBaseProperty" to "protected-open-base-property",
             "privateBaseProperty" to "private-base-property",
         ).entries
+        Singleton.stringify().parse().entries shouldBe json(
+            "baseProperty" to "base-property",
+            "openBaseProperty" to 42,
+            "protectedOpenBaseProperty" to "protected-open-base-property",
+            "privateBaseProperty" to "private-base-property",
+            "singletonProperty" to "singleton-property",
+            "privateSingletonProperty" to "private-singleton-property"
+        ).entries
+        AnonymousSingleton.stringify().parse().entries shouldBe json(
+            "anonymousSingletonProperty" to "anonymous-singleton-property",
+            "privateAnonymousSingletonProperty" to "private-anonymous-singleton-property"
+        ).entries
+        ListImplementingSingleton.stringify().parse().entries shouldBe json(
+            "baseProperty" to "base-property",
+            "openBaseProperty" to 42,
+            "protectedOpenBaseProperty" to "protected-open-base-property",
+            "privateBaseProperty" to "private-base-property",
+            "singletonProperty" to "singleton-property",
+            "privateSingletonProperty" to "private-singleton-property"
+        ).entries
+        ListImplementingAnonymousSingleton.stringify().parse().entries shouldBe json(
+            "anonymousSingletonProperty" to "anonymous-singleton-property",
+            "privateAnonymousSingletonProperty" to "private-anonymous-singleton-property"
+        ).entries
+        MapImplementingSingleton.stringify().parse().entries shouldBe json(
+            "baseProperty" to "base-property",
+            "openBaseProperty" to 42,
+            "protectedOpenBaseProperty" to "protected-open-base-property",
+            "privateBaseProperty" to "private-base-property",
+            "singletonProperty" to "singleton-property",
+            "privateSingletonProperty" to "private-singleton-property"
+        ).entries
+        MapImplementingAnonymousSingleton.stringify().parse().entries shouldBe json(
+            "anonymousSingletonProperty" to "anonymous-singleton-property",
+            "privateAnonymousSingletonProperty" to "private-anonymous-singleton-property"
+        ).entries
         OrdinaryClass().stringify().parse().entries shouldBe json(
             "baseProperty" to "base-property",
             "openBaseProperty" to 42,
@@ -163,7 +247,7 @@ class MiscTest {
         ).entries
     }
 
-    @Test fun any_to_json_extension() {
+    @Test fun any_to_json_extension() = tests {
         null.toJson().entries shouldBe null.stringify().parse().entries
         "string".toJson().entries shouldBe "string".stringify().parse().entries
         arrayOf("string", 42).toJson().entries shouldBe arrayOf("string", 42).stringify().parse().entries
@@ -172,6 +256,12 @@ class MiscTest {
         mapOf("string" to "value", "digit" to 42).toJson().entries shouldBe mapOf("string" to "value", "digit" to 42).stringify().parse().entries
         nativeObject().toJson().entries shouldBe nativeObject().stringify().parse().entries
         BaseClass().toJson().entries shouldBe BaseClass().stringify().parse().entries
+        Singleton.toJson().entries shouldBe Singleton.stringify().parse().entries
+        AnonymousSingleton.toJson().entries shouldBe AnonymousSingleton.stringify().parse().entries
+        ListImplementingSingleton.toJson().entries shouldBe ListImplementingSingleton.stringify().parse().entries
+        ListImplementingAnonymousSingleton.toJson().entries shouldBe ListImplementingAnonymousSingleton.stringify().parse().entries
+//        MapImplementingSingleton.toJson().entries shouldBe MapImplementingSingleton.stringify().parse().entries
+//        MapImplementingAnonymousSingleton.toJson().entries shouldBe MapImplementingAnonymousSingleton.stringify().parse().entries
         OrdinaryClass().toJson().entries shouldBe OrdinaryClass().stringify().parse().entries
         DataClass().toJson().entries shouldBe DataClass().stringify().parse().entries
     }

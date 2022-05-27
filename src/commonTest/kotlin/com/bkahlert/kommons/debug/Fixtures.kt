@@ -11,6 +11,42 @@ internal open class BaseClass {
 }
 
 @Suppress("unused")
+internal object Singleton : BaseClass() {
+    val singletonProperty: String = "singleton-property"
+    private val privateSingletonProperty: String = "private-singleton-property"
+}
+
+@Suppress("unused")
+val AnonymousSingleton: Any = object {
+    val anonymousSingletonProperty: String = "anonymous-singleton-property"
+    private val privateAnonymousSingletonProperty: String = "private-anonymous-singleton-property"
+}
+
+@Suppress("unused")
+internal object ListImplementingSingleton : BaseClass(), List<Any?> by listOf("foo", null) {
+    val singletonProperty: String = "singleton-property"
+    private val privateSingletonProperty: String = "private-singleton-property"
+}
+
+@Suppress("unused")
+val ListImplementingAnonymousSingleton = object : List<Any?> by listOf("foo", null) {
+    val anonymousSingletonProperty: String = "anonymous-singleton-property"
+    private val privateAnonymousSingletonProperty: String = "private-anonymous-singleton-property"
+}
+
+@Suppress("unused")
+internal object MapImplementingSingleton : BaseClass(), Map<String, Any?> by mapOf("foo" to "bar", "baz" to null) {
+    val singletonProperty: String = "singleton-property"
+    private val privateSingletonProperty: String = "private-singleton-property"
+}
+
+@Suppress("unused")
+val MapImplementingAnonymousSingleton = object : Map<String, Any?> by mapOf("foo" to "bar", "baz" to null) {
+    val anonymousSingletonProperty: String = "anonymous-singleton-property"
+    private val privateAnonymousSingletonProperty: String = "private-anonymous-singleton-property"
+}
+
+@Suppress("unused")
 internal class OrdinaryClass : BaseClass() {
     val ordinaryProperty: String = "ordinary-property"
     private val privateOrdinaryProperty: String = "private-ordinary-property"

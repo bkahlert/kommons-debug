@@ -26,9 +26,26 @@ Kommons Debug is hosted on GitHub with releases provided on Maven Central.
 
 ## Features
 
-### Platform.Current
+### Any?.trace
 
-Reflects the platform the program runs on, e.g. `Platform.JVM`
+Print tracing information and easily cleanup afterwards using
+IntelliJ's code cleanup
+
+#### Example
+
+```kotlin
+"string".trace                           // prints: (Example.kt:1) ⟨ "string" ⟩
+"string".trace("caption")                // prints: (Example.kt:2) caption ⟨ "string" ⟩
+"string".trace("caption") { it.length }  // prints: (Example.kt:3) caption ⟨ "string" ⟩ { 6 }
+
+class Foo(val bar: Any = "baz")
+foo().trace.bar                          // prints: (Example.kt:6) ⟨ { bar="baz" } ⟩; returns "baz"
+
+// use inspect to print more details and ignore
+// custom toString() implementations
+foo().inspect                            // prints: (Example.kt:10) ⟨ !Foo { bar="baz" } ⟩
+foo().inspect(fullyQualified = true)       // prints: (Example.kt:11) ⟨ !my.package.Foo { bar="baz" } ⟩
+```
 
 ### Any.renderType()
 
@@ -42,7 +59,7 @@ Renders any object's type
 class Foo(val bar: Any = "baz")
 foo().renderType()                  // Foo
 
-val lambda : (String)->Unit = {}
+val lambda: (String) -> Unit = {}
 lambda.renderType()                 // (String)->Unit
 ```
 
@@ -50,8 +67,8 @@ lambda.renderType()                 // (String)->Unit
 
 Renders any object depending on whether its `toString()` is overridden:
 
-- if there is a custom `toString()` it is simply used
-- if there is *no custom* `toString()` the object is serialized in the form `<TYPE>(key0=value0, key1=value=1, ..., keyN=valueN)`
+- If there is a custom `toString()` it is simply used.
+- if there is *no custom* `toString()` the object is serialized in the form structurally
 
 #### Examples
 
@@ -59,8 +76,8 @@ Renders any object depending on whether its `toString()` is overridden:
 "string".render()               // string
 
 class Foo(val bar: Any = "baz")
-foo().render()                  // Foo(bar="baz")
-foo(foo()).render()             // Foo(bar=Foo(bar="baz"))
+foo().render()                  // { bar: "baz" }
+foo(foo()).render(typed = true)   // Foo { bar: Foo { bar: "baz" } }
 ```
 
 ### Any.properties
@@ -78,24 +95,142 @@ foo().properties                  // { bar: "baz" }
 foo(foo()).properties             // { bar: { bar: "baz" } }
 ```
 
-### CharSequence.quoted
+### Platform.Current
 
-Contains this string wrapped in double quotes
-and backslashes, line feeds, carriage returns, tabs and double quotes escaped.
+Reflects the platform the program runs on, e.g. `Platform.JVM`
+
+### Platform.isIntelliJ
+
+Tries to find out if the program is currently run inside IDEA IntelliJ
+
+### Platform.isDebugging
+
+Tries to find out if the program is currently in debug mode
+
+### Stack Trace
+
+Access the current stack trace by a simple call to `StackTrace.get()`
+or locate a specific caller using `StackTrace.findByLastKnownCallOrNull`
 
 #### Examples
 
 ```kotlin
-"string".quoted               // "string"
-"""{ bar: "baz" }""".quoted   // "{ bar: \"baz\" }"
+fun foo(block: () -> StackTraceElement?) = block()
+fun bar(block: () -> StackTraceElement?) = block()
+
+foo { bar { StackTrace.findByLastKnownCallOrNull("bar") } }?.function  // "foo"
+foo { bar { StackTrace.findByLastKnownCallOrNull(::bar) } }?.function  // "foo"
 ```
 
-## ToDo
+### Byte, UByte, ByteArray, UByteArray Conversions
 
-- detect circular dependencies (render(), properties)
-- Any?.trace
-- Any.typeString
-- Release How-To
+All Byte, UByte, ByteArray, UByteArray instances support `toHexadecimalString`, `toOctalString` and `toBinaryString`.
+
+#### Examples
+
+```kotlin
+val byteArray = byteArrayOf(0x00, 0x7f, -0x80, -0x01)
+val largeByteArrayOf = byteArrayOf(-0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01)
+val veryLargeByteArray = byteArrayOf(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+
+byteArray.map { it.toHexadecimalString() } // "00", "7f", "80", "ff"
+byteArray.toHexadecimalString()            // "007f80ff"
+largeByteArrayOf.toHexadecimalString()     // "ffffffffffffffffffffffffffffffff"
+veryLargeByteArray.toHexadecimalString()   // "0100000000000000000000000000000000"
+
+byteArray.map { it.toOctalString() } // "000", "177", "200", "377"
+byteArray.toOctalString()            // "000177200377"
+largeByteArrayOf.toOctalString()     // "377377377377377377377377377377377377377377377377"
+veryLargeByteArray.toOctalString()   // "001000000000000000000000000000000000000000000000000"
+
+byteArray.map { it.toBinaryString() } // "00000000", "01111111", "10000000", "11111111"
+byteArray.toBinaryString()            // "00000000011111111000000011111111"
+largeByteArrayOf.toBinaryString()     //         "111111111111111111111111111...111111"
+veryLargeByteArray.toBinaryString()   // "00000001000000000000000000000000000...000000"
+```
+
+### Checksums
+
+Compute `MD5`, `SHA-1`, and `SHA-256` checksums for arbitrary files.
+
+#### Examples
+
+```kotlin
+val file = Locations.Default.Home / ".gitconfig"
+file.computeMd5Checksum()
+file.computeSha1Checksum()
+file.computeSha256Checksum()
+```
+### Default system locations
+
+Easily access your working directory with `Locations.Default.Work`,
+your home directory with `Locations.Default.Home` and your system's
+temporary directory with `Locations.Default.Temp`.
+
+### Unicode
+
+Decode any string to a sequence or list of code points using `String.asCodePointSequence` or `String.toCodePointList`.
+
+Decode any string to a sequence or list of graphemes using `String.asGraphemeSequence` or `String.toGraphemeList`.
+
+#### Examples
+
+```kotlin
+"a".toCodePointList()  // CodePoint(0x61)
+"𝕓".toCodePointList()  // CodePoint(0x1D553)
+"a̳o".toCodePointList() // CodePoint('a'.code), CodePoint('̳'.code), CodePoint('o'.code)
+
+"a".toGraphemeList()   // Grapheme("a")
+"𝕓".toGraphemeList()   // Grapheme("𝕓")
+"a̳o".toGraphemeList()  // Grapheme("a̳"), Grapheme("o")
+```
+
+### String Handling
+
+Quote and escape an existing string using `quoted`,
+remote ANSI escape sequences from it using `ansiRemoved`,
+create an identifier from it using `CharSequence?.toIdentifier`,
+or create a random string using `randomString`.
+
+#### Examples
+
+```kotlin
+"string".quoted
+// returns "string"
+"""{ bar: "baz" }""".quoted
+// returns "{ bar: \"baz\" }"
+"""
+line 1
+"line 2"
+""".quoted
+// returns "line1\n\"line2\""
+
+"\u001B[1mbold \u001B[34mand blue\u001B[0m".ansiRemoved
+// returns "bold and blue"
+"\u001B[34m↗\u001B(B\u001B[m \u001B]8;;https://example.com\u001B\\link\u001B]8;;\u001B\\".ansiRemoved
+// returns "↗ link"
+
+"1👋 xy-z".toIdentifier()
+// returns "i__xy-z3" (filled up to configurable minimum length)
+
+randomString()
+// returns "Ax-212kss0-xTzy5" (16 characters by default) 
+```
+
+Easily check edge-case with a fluent interface as does `requireNotNull` does:
+
+#### Examples
+
+```kotlin
+"abc".requireNotEmpty() // passes and returns "abc"
+"   ".requireNotBlank() // throws IllegalArgumentException
+"abc".checkNotEmpty()   // passes and returns "abc"
+"   ".checkNotBlank()   // throws IllegalStateException
+"abc".takeIfNotEmpty()  // returns "abc"
+"   ".takeIfNotBlank()  // returns null
+"abc".takeUnlessEmpty() // returns "abc"
+"   ".takeUnlessBlank() // returns null
+```
 
 ## Contributing
 

@@ -4,6 +4,10 @@
 
 ### Added
 
+#### trace
+
+Print tracing information
+
 #### Any.renderType()
 
 Renders any object's type
@@ -11,6 +15,50 @@ Renders any object's type
 #### Platform.Current
 
 Reflects the platform the program runs on, e.g. `Platform.JVM`
+
+#### Platform.isIntelliJ
+
+Tries to find out if the program is currently run inside IDEA Intellij
+
+#### Platform.isDebugging
+
+Tries to find out if the program is currently in debug mode
+
+#### Stack Trace
+
+Access the current stack trace by a simple call to `StackTrace.get()`
+or locate a specific caller using `StackTrace.findByLastKnownCallOrNull`
+
+#### Byte, UByte, ByteArray, UByteArray Conversions
+
+All Byte, UByte, ByteArray, UByteArray instances support
+
+- toHexadecimalString
+- toOctalString
+- toBinaryString
+
+#### Checksums
+
+Compute MD5, SHA-1, SHA-256 checksums for arbitrary files
+
+#### Default system locations
+
+Locations.Default.Work / .Home / .Temp
+
+#### Unicode
+
+Decode any string to a sequence or list of code points using `String.asCodePointSequence` or `String.toCodePointList`.
+
+Decode any string to a sequence or list of graphemes using `String.asGraphemeSequence` or `String.toGraphemeList`.
+
+#### String Handling
+
+Create an identifier from any string using `CharSequence?.toIdentifier`
+or easily create a random string using `randomString`.
+
+Less verbose edge-case handling using `requireNotEmpty`, `requireNotBlank`, `checkNotEmpty`, `checkNotBlank`, `takeIfNotEmpty`, `takeIfNotBlank`
+, `takeUnlessEmpty` and `takeUnlessBlank`.
+
 
 ### Changed
 
@@ -36,7 +84,7 @@ Reflects the platform the program runs on, e.g. `Platform.JVM`
 
 Renders any object depending on whether its `toString()` is overridden:
 
-- if there is a custom `toString()` it is simply used
+- If there is a custom `toString()` it is simply used.
 - if there is *no custom* `toString()` the object is serialized in the form `<TYPE>(key0=value0, key1=value=1, ..., keyN=valueN)`
 
 #### Any.properties

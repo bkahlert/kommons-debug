@@ -1,12 +1,12 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.tests
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class ObjectTest {
 
-    @Test
-    fun test_keys() {
+    @Test fun test_keys() = tests {
         Object.keys(nativeObject()) shouldBe arrayOf(
             "property",
         )
@@ -14,7 +14,47 @@ class ObjectTest {
             "baseProperty_1",
             "openBaseProperty_1",
             "protectedOpenBaseProperty_1",
-            "privateBaseProperty_1"
+            "privateBaseProperty_1",
+        )
+        Object.keys(Singleton) shouldBe arrayOf(
+            "baseProperty_1",
+            "openBaseProperty_1",
+            "protectedOpenBaseProperty_1",
+            "privateBaseProperty_1",
+            "singletonProperty_1",
+            "privateSingletonProperty_1",
+        )
+        Object.keys(AnonymousSingleton) shouldBe arrayOf(
+            "anonymousSingletonProperty_1",
+            "privateAnonymousSingletonProperty_1",
+        )
+        Object.keys(ListImplementingSingleton) shouldBe arrayOf(
+            "baseProperty_1",
+            "openBaseProperty_1",
+            "protectedOpenBaseProperty_1",
+            "privateBaseProperty_1",
+            "\$\$delegate_0__1",
+            "singletonProperty_1",
+            "privateSingletonProperty_1",
+        )
+        Object.keys(ListImplementingAnonymousSingleton) shouldBe arrayOf(
+            "\$\$delegate_0__1",
+            "anonymousSingletonProperty_1",
+            "privateAnonymousSingletonProperty_1",
+        )
+        Object.keys(MapImplementingSingleton) shouldBe arrayOf(
+            "baseProperty_1",
+            "openBaseProperty_1",
+            "protectedOpenBaseProperty_1",
+            "privateBaseProperty_1",
+            "\$\$delegate_0__1",
+            "singletonProperty_1",
+            "privateSingletonProperty_1",
+        )
+        Object.keys(MapImplementingAnonymousSingleton) shouldBe arrayOf(
+            "\$\$delegate_0__1",
+            "anonymousSingletonProperty_1",
+            "privateAnonymousSingletonProperty_1",
         )
         Object.keys(OrdinaryClass()) shouldBe arrayOf(
             "baseProperty_1",
@@ -22,7 +62,7 @@ class ObjectTest {
             "protectedOpenBaseProperty_1",
             "privateBaseProperty_1",
             "ordinaryProperty_1",
-            "privateOrdinaryProperty_1"
+            "privateOrdinaryProperty_1",
         )
         Object.keys(DataClass()) shouldBe arrayOf(
             "baseProperty_1",
@@ -45,7 +85,7 @@ class ObjectTest {
         )
     }
 
-    @Test fun test_entries() {
+    @Test fun test_entries() = tests {
         Object.entries(nativeObject()) shouldBe arrayOf(
             arrayOf("property", "Function-property"),
         )
@@ -54,6 +94,46 @@ class ObjectTest {
             arrayOf("openBaseProperty_1", 42),
             arrayOf("protectedOpenBaseProperty_1", "protected-open-base-property"),
             arrayOf("privateBaseProperty_1", "private-base-property"),
+        )
+        Object.entries(Singleton) shouldBe arrayOf(
+            arrayOf("baseProperty_1", "base-property"),
+            arrayOf("openBaseProperty_1", 42),
+            arrayOf("protectedOpenBaseProperty_1", "protected-open-base-property"),
+            arrayOf("privateBaseProperty_1", "private-base-property"),
+            arrayOf("singletonProperty_1", "singleton-property"),
+            arrayOf("privateSingletonProperty_1", "private-singleton-property"),
+        )
+        Object.entries(AnonymousSingleton) shouldBe arrayOf(
+            arrayOf("anonymousSingletonProperty_1", "anonymous-singleton-property"),
+            arrayOf("privateAnonymousSingletonProperty_1", "private-anonymous-singleton-property"),
+        )
+        Object.entries(ListImplementingSingleton) shouldBe arrayOf(
+            arrayOf("baseProperty_1", "base-property"),
+            arrayOf("openBaseProperty_1", 42),
+            arrayOf("protectedOpenBaseProperty_1", "protected-open-base-property"),
+            arrayOf("privateBaseProperty_1", "private-base-property"),
+            arrayOf("\$\$delegate_0__1", listOf("foo", null)),
+            arrayOf("singletonProperty_1", "singleton-property"),
+            arrayOf("privateSingletonProperty_1", "private-singleton-property"),
+        )
+        Object.entries(ListImplementingAnonymousSingleton) shouldBe arrayOf(
+            arrayOf("\$\$delegate_0__1", listOf("foo", null)),
+            arrayOf("anonymousSingletonProperty_1", "anonymous-singleton-property"),
+            arrayOf("privateAnonymousSingletonProperty_1", "private-anonymous-singleton-property"),
+        )
+        Object.entries(MapImplementingSingleton) shouldBe arrayOf(
+            arrayOf("baseProperty_1", "base-property"),
+            arrayOf("openBaseProperty_1", 42),
+            arrayOf("protectedOpenBaseProperty_1", "protected-open-base-property"),
+            arrayOf("privateBaseProperty_1", "private-base-property"),
+            arrayOf("\$\$delegate_0__1", mapOf("foo" to "bar", "baz" to null)),
+            arrayOf("singletonProperty_1", "singleton-property"),
+            arrayOf("privateSingletonProperty_1", "private-singleton-property"),
+        )
+        Object.entries(MapImplementingAnonymousSingleton) shouldBe arrayOf(
+            arrayOf("\$\$delegate_0__1", mapOf("foo" to "bar", "baz" to null)),
+            arrayOf("anonymousSingletonProperty_1", "anonymous-singleton-property"),
+            arrayOf("privateAnonymousSingletonProperty_1", "private-anonymous-singleton-property"),
         )
         Object.entries(OrdinaryClass()) shouldBe arrayOf(
             arrayOf("baseProperty_1", "base-property"),
@@ -84,7 +164,7 @@ class ObjectTest {
         )
     }
 
-    @Test fun object_get_own_property_names() {
+    @Test fun object_get_own_property_names() = tests {
         Object.getOwnPropertyNames(nativeObject()) shouldBe arrayOf(
             "property",
         )
@@ -93,6 +173,48 @@ class ObjectTest {
             "openBaseProperty_1",
             "protectedOpenBaseProperty_1",
             "privateBaseProperty_1"
+        )
+        Object.getOwnPropertyNames(Singleton) shouldBe arrayOf(
+            "baseProperty_1",
+            "openBaseProperty_1",
+            "protectedOpenBaseProperty_1",
+            "privateBaseProperty_1",
+            "singletonProperty_1",
+            "privateSingletonProperty_1",
+        )
+        Object.getOwnPropertyNames(AnonymousSingleton) shouldBe arrayOf(
+            "anonymousSingletonProperty_1",
+            "privateAnonymousSingletonProperty_1",
+        )
+        Object.getOwnPropertyNames(ListImplementingSingleton) shouldBe arrayOf(
+            "baseProperty_1",
+            "openBaseProperty_1",
+            "protectedOpenBaseProperty_1",
+            "privateBaseProperty_1",
+            "\$\$delegate_0__1",
+            "singletonProperty_1",
+            "privateSingletonProperty_1",
+            "kotlinHashCodeValue\$",
+        )
+        Object.getOwnPropertyNames(ListImplementingAnonymousSingleton) shouldBe arrayOf(
+            "\$\$delegate_0__1",
+            "anonymousSingletonProperty_1",
+            "privateAnonymousSingletonProperty_1",
+        )
+        Object.getOwnPropertyNames(MapImplementingSingleton) shouldBe arrayOf(
+            "baseProperty_1",
+            "openBaseProperty_1",
+            "protectedOpenBaseProperty_1",
+            "privateBaseProperty_1",
+            "\$\$delegate_0__1",
+            "singletonProperty_1",
+            "privateSingletonProperty_1",
+            "kotlinHashCodeValue\$",
+        )
+        Object.getOwnPropertyNames(MapImplementingAnonymousSingleton) shouldBe arrayOf(
+            "\$\$delegate_0__1",
+            "anonymousSingletonProperty_1",
+            "privateAnonymousSingletonProperty_1",
         )
         Object.getOwnPropertyNames(OrdinaryClass()) shouldBe arrayOf(
             "baseProperty_1",
@@ -110,7 +232,7 @@ class ObjectTest {
             "dataProperty_1",
             "openBaseProperty_2",
             "protectedOpenBaseProperty_2",
-            "privateDataProperty_1"
+            "privateDataProperty_1",
         )
         val customObject = ClassWithDefaultToString(null)
         Object.getOwnPropertyNames(customObject) shouldBe arrayOf(
@@ -123,9 +245,17 @@ class ObjectTest {
         )
     }
 
-    @Test fun test_keys_extension() {
+    @Test fun test_keys_extension() = tests {
         nativeObject().keys shouldBe Object.keys(nativeObject())
         BaseClass().keys shouldBe Object.keys(BaseClass())
+        Singleton.keys shouldBe Object.keys(Singleton)
+        AnonymousSingleton.keys shouldBe Object.keys(AnonymousSingleton)
+        ListImplementingSingleton.keys shouldBe Object.keys(ListImplementingSingleton)
+        ListImplementingAnonymousSingleton.keys shouldBe Object.keys(ListImplementingAnonymousSingleton)
+//        MapImplementingSingleton.keys shouldBe Object.keys(MapImplementingSingleton)
+//        MapImplementingAnonymousSingleton.keys shouldBe Object.keys(MapImplementingAnonymousSingleton)
+        Singleton.keys shouldBe Object.keys(Singleton)
+        AnonymousSingleton.keys shouldBe Object.keys(AnonymousSingleton)
         OrdinaryClass().keys shouldBe Object.keys(OrdinaryClass())
         DataClass().keys shouldBe Object.keys(DataClass())
         val customObject = ClassWithDefaultToString(null)
@@ -133,9 +263,15 @@ class ObjectTest {
         ClassWithDefaultToString(customObject).keys shouldBe Object.keys(ClassWithDefaultToString(customObject))
     }
 
-    @Test fun test_entries_extension() {
+    @Test fun test_entries_extension() = tests {
         nativeObject().entries shouldBe Object.entries(nativeObject())
         BaseClass().entries shouldBe Object.entries(BaseClass())
+        Singleton.entries shouldBe Object.entries(Singleton)
+        AnonymousSingleton.entries shouldBe Object.entries(AnonymousSingleton)
+        ListImplementingSingleton.entries shouldBe Object.entries(ListImplementingSingleton)
+        ListImplementingAnonymousSingleton.entries shouldBe Object.entries(ListImplementingAnonymousSingleton)
+//        MapImplementingSingleton.entries shouldBe Object.entries(MapImplementingSingleton)
+//        MapImplementingAnonymousSingleton.entries shouldBe Object.entries(MapImplementingAnonymousSingleton)
         OrdinaryClass().entries shouldBe Object.entries(OrdinaryClass())
         DataClass().entries shouldBe Object.entries(DataClass())
         val customObject = ClassWithDefaultToString(null)

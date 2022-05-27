@@ -20,13 +20,13 @@ internal fun <T, V> KProperty1<T, V>.getSafely(receiver: T): Result<V> {
     return kotlin.runCatching { get(receiver) }.recover {
         val getter = this.javaGetter
         if (getter != null) {
-            if (!getter.isAccessible) getter.isAccessible = true
+            if (!getter.accessible) getter.accessible = true
             @Suppress("UNCHECKED_CAST")
             return kotlin.runCatching { getter.invoke(receiver) as V }
         }
         val field = this.javaField
         if (field != null) {
-            if (!field.isAccessible) field.isAccessible = true
+            if (!field.accessible) field.accessible = true
             @Suppress("UNCHECKED_CAST")
             return kotlin.runCatching { field.get(receiver) as V }
         }

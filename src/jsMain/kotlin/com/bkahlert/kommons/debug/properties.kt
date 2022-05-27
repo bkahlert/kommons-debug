@@ -18,16 +18,18 @@ private fun sanitizeKey(key: String): String =
 public actual val Any.properties: Map<String, Any?>
     get() = entries.associate {
         it[0].unsafeCast<String>() to it[1]
+    }.filterNot { (key, _) ->
+        key.startsWith("\$")
     }.mapKeys { (key, _) ->
         sanitizeKey(key)
     }
 
-/** Returns a simple JavaScript object (as [Json]) using `this` key-value pairs as names and values of its properties. */
+/** Returns a simple JavaScript object (as [Json]) using this key-value pairs as names and values of its properties. */
 @Suppress("NOTHING_TO_INLINE")
 public inline fun Iterable<Pair<String, Any?>>.toJson(): Json =
     json(*map { (key, value) -> key to value }.toTypedArray())
 
-/** Returns a simple JavaScript object (as [Json]) using entries of `this` map as names and values of its properties. */
+/** Returns a simple JavaScript object (as [Json]) using entries of this map as names and values of its properties. */
 @Suppress("NOTHING_TO_INLINE")
 public inline fun Map<String, Any?>.toJson(): Json = toList().toJson()
 
@@ -38,7 +40,7 @@ public fun Iterable<Any?>.toJsonArray(): Array<Json> = map { it.toJson() }.toTyp
 public fun Array<out Any?>.toJsonArray(): Array<Json> = map { it.toJson() }.toTypedArray()
 
 /**
- * Returns `this` object stringified, that is,
+ * Returns this object stringified, that is,
  * [JSON.stringify] applied to its [Any.properties] and a couple of internal properties filtered.
  */
 public fun Any?.stringify(
@@ -57,13 +59,23 @@ public fun Any?.stringify(
 ): String {
     val o = when (this) {
         null -> null
-        is Boolean -> this
-        is Number -> this
-        is String -> this
+        is CharSequence -> toString()
+
+        is Boolean, is Char, is Float, is Double,
+        is UByte, is UShort, is UInt, is ULong,
+        is Byte, is Short, is Int, is Long -> this
+
+        is BooleanArray, is CharArray, is FloatArray, is DoubleArray,
+        is UByteArray, is UShortArray, is UIntArray, is ULongArray,
+        is ByteArray, is ShortArray, is IntArray, is LongArray -> this
+
         is Array<*> -> this
-        is List<*> -> toTypedArray()
-        is Map<*, *> -> map { (key, value) -> sanitizeKey(key.toString()) to value }.toJson()
-        else -> entries.map { sanitizeKey(it[0].unsafeCast<String>()) to it[1] }.toJson()
+
+        else -> {
+            if (this is Collection<*> && this.isPlain) toTypedArray()
+            else if (this is Map<*, *> && this.isPlain) map { (key, value) -> sanitizeKey(key.toString()) to value }.toJson()
+            else entries.map { sanitizeKey(it[0].unsafeCast<String>()) to it[1] }.toJson()
+        }
     }
     return JSON.stringify(
         o = o,
@@ -81,11 +93,11 @@ public fun Any?.stringify(
     )
 }
 
-/** Returns a simple JavaScript object (as [Json]) by applying [JSON.parse] to `this` string. */
+/** Returns a simple JavaScript object (as [Json]) by applying [JSON.parse] to this string. */
 public fun String.parse(): Json = when (this) {
     "null" -> json()
     else -> JSON.parse(this)
 }
 
-/** Returns a simple JavaScript object (as [Json]) by applying [JSON.stringify] to `this` object and [JSON.parse] to its output. */
+/** Returns a simple JavaScript object (as [Json]) by applying [JSON.stringify] to this object and [JSON.parse] to its output. */
 public fun Any?.toJson(): Json = stringify().parse()

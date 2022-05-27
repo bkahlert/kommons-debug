@@ -58,8 +58,19 @@ kotlin {
                 implementation(kotlin("reflect"))
             }
         }
-        val jvmTest by getting
-        val jsMain by getting
+        val jvmTest by getting {
+            dependencies {
+                implementation(kotlin("test-junit5"))
+                implementation(project.dependencies.platform("org.junit:junit-bom:5.8.0-RC1"))
+                listOf("api", "engine").forEach { implementation("org.junit.jupiter:junit-jupiter-$it") }
+            }
+        }
+        val jsMain by getting {
+            dependencies {
+                implementation(npm("xregexp", "5.1.0"))
+                implementation(npm("grapheme-splitter", "1.0.4"))
+            }
+        }
         val jsTest by getting
 
         all {
@@ -71,6 +82,9 @@ kotlin {
                 optIn("kotlin.experimental.ExperimentalTypeInference")
                 progressiveMode = true // false by default
             }
+        }
+        jvmMain.languageSettings.apply {
+            optIn("kotlin.reflect.jvm.ExperimentalReflectionOnLambdas")
         }
     }
 }
