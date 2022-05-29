@@ -1,5 +1,23 @@
 package com.bkahlert.kommons.debug
 
+/** Constant `0x00` */
+public inline val Byte.Companion.ZERO: Byte get() = 0x0
+
+/** Constant `0x00` */
+public inline val Byte.Companion.OO: Byte get() = ZERO
+
+/** Constant `0xFF` */
+public inline val Byte.Companion.FF: Byte get() = -1
+
+/** Constant `0x00u` */
+public inline val UByte.Companion.ZERO: UByte get() = 0x0u
+
+/** Constant `0x00u` */
+public inline val UByte.Companion.OO: UByte get() = ZERO
+
+/** Constant `0xFFu` */
+public inline val UByte.Companion.FF: UByte get() = MAX_VALUE
+
 /** [ClosedRange] of all valid [UByte] values. */
 public inline val UByte.Companion.VALUE_RANGE: UIntRange get() = UByte.Companion.MIN_VALUE..UByte.Companion.MAX_VALUE
 

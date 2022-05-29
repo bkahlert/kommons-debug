@@ -37,6 +37,9 @@ public interface Locations {
      */
     public val Temp: Path
 
+    /** Directory of the currently running Java distribution. */
+    public val JavaHome: Path
+
     public companion object {
 
         /**
@@ -58,28 +61,12 @@ public interface Locations {
              * Directory in which temporary data can be stored.
              */
             override val Temp: Path = Paths.get(System.getProperty("java.io.tmpdir"))
+
+            /** Directory of the currently running Java distribution. */
+            override val JavaHome: Path = Paths.get(System.getProperty("java.home"))
         }
     }
 }
-
-/**
- * Alias for [isSubPathOf].
- */
-public fun Path.isInside(path: Path): Boolean = isSubPathOf(path)
-
-/**
- * Returns whether this path is a sub path of [path].
- */
-public fun Path.isSubPathOf(path: Path): Boolean =
-    normalize().toAbsolutePath().startsWith(path.normalize().toAbsolutePath())
-
-/**
- * Returns this [Path] with all parent directories created.
- *
- * Example: If directory `/some/where` existed and this method was called on `/some/where/resides/a/file`,
- * the missing directories `/some/where/resides` and `/some/where/resides/a` would be created.
- */
-public fun Path.createParentDirectories(): Path = apply { parent.takeUnless { it.exists() }?.createDirectories() }
 
 
 /**

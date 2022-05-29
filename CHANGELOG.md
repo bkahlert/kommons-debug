@@ -22,6 +22,19 @@
 
 *none*
 
+## [0.3.0] - 2022-05-31
+
+### Added
+
+#### Time Operations
+
+```kotlin
+Now + 2.seconds // 2 seconds in the future
+Now - 3.days    // 3 days in the past
+Instant.parse("1910-06-22T13:00:00Z") + 5.minutes // 1910-06-22T12:05:00Z
+Instant.parse("1910-06-22T13:00:00Z") - 2.hours   // 1910-06-22T10:00:00Z
+```
+
 ## [0.2.0] - 2022-05-29
 
 ### Added
@@ -49,7 +62,7 @@ Tries to find out if the program is currently in debug mode
 #### Stack Trace
 
 Access the current stack trace by a simple call to `StackTrace.get()`
-or locate a specific caller using `StackTrace.findByLastKnownCallOrNull`
+or locate a specific caller using `StackTrace.findLastKnownCallOrNull`
 
 #### Byte, UByte, ByteArray, UByteArray Conversions
 
@@ -119,7 +132,9 @@ and backslashes, line feeds, carriage returns, tabs and double quotes escaped.
 
 *none*
 
-[unreleased]: https://github.com/bkahlert/kommons/compare/v0.2.0...HEAD
+[unreleased]: https://github.com/bkahlert/kommons/compare/v0.3.0...HEAD
+
+[0.3.0]: https://github.com/bkahlert/kommons/compare/v0.2.0...v0.3.0
 
 [0.2.0]: https://github.com/bkahlert/kommons/compare/v0.1.0...v0.2.0
 

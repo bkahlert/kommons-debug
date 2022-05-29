@@ -9,7 +9,6 @@ import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.paths.shouldBeADirectory
 import io.kotest.matchers.paths.shouldBeAFile
 import io.kotest.matchers.paths.shouldBeAbsolute
-import io.kotest.matchers.paths.shouldBeEmptyDirectory
 import io.kotest.matchers.paths.shouldExist
 import io.kotest.matchers.paths.shouldNotExist
 import io.kotest.matchers.should
@@ -37,53 +36,11 @@ class LocationsKtTest {
                 Locations.Default.Work,
                 Locations.Default.Home,
                 Locations.Default.Temp,
+                Locations.Default.JavaHome,
             ).shouldForAll {
                 it.shouldBeAbsolute()
                 it.shouldExist()
                 it.shouldBeADirectory()
-            }
-        }
-    }
-
-    @Nested
-    inner class IsSubPathOf {
-
-        @Test
-        fun `should return true if child`(@TempDir tempDir: Path) = tests {
-            tempDir.resolve("child").isSubPathOf(tempDir) shouldBe true
-        }
-
-        @Test
-        fun `should return true if descendent`(@TempDir tempDir: Path) = tests {
-            tempDir.resolve("child1/child2").isSubPathOf(tempDir) shouldBe true
-        }
-
-        @Test
-        fun `should return true if path is obscure`(@TempDir tempDir: Path) = tests {
-            tempDir.resolve("child1/../child2").isSubPathOf(tempDir) shouldBe true
-        }
-
-        @Test
-        fun `should return true if same`(@TempDir tempDir: Path) = tests {
-            tempDir.isSubPathOf(tempDir) shouldBe true
-        }
-
-        @Test
-        fun `should return false if not inside`(@TempDir tempDir: Path) = tests {
-            tempDir.isSubPathOf(tempDir.resolve("child")) shouldBe false
-        }
-    }
-
-    @Nested
-    inner class CreateParentDirectories {
-
-        @Test
-        fun `should create missing directories`(@TempDir tempDir: Path) = tests {
-            val file = tempDir.resolve("some/dir/some/file")
-            file.createParentDirectories().parent should {
-                it.shouldExist()
-                it.shouldBeADirectory()
-                it.shouldBeEmptyDirectory()
             }
         }
     }

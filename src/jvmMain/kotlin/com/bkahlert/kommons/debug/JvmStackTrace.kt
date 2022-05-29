@@ -1,11 +1,9 @@
 package com.bkahlert.kommons.debug
 
-import com.bkahlert.kommons.debug.JvmStackTraceElement.Companion.FunctionMangleRegex
 import java.lang.reflect.Method
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KFunction
-import kotlin.reflect.full.instanceParameter
 
 /** Representation of a single element of a [StackTrace] on [Platform.JVM]. */
 public data class JvmStackTraceElement(
@@ -17,15 +15,17 @@ public data class JvmStackTraceElement(
 ) : StackTraceElement {
     public constructor(native: java.lang.StackTraceElement) : this(native.className, native.methodName, native.fileName, native.lineNumber, null)
 
+    public override val demangledFunction: String = StackTrace.demangleFunction(function)
+
     override fun toString(): String = "$receiver.$function($file:$line${column?.let { ":$it" } ?: ""})"
-
-    public companion object {
-
-        public val FunctionMangleRegex: Regex = "\\$.*$".toRegex()
-    }
 }
 
-public val StackTraceElement.demangledFunction: String? get() = function?.replace(FunctionMangleRegex, "")
+private val functionMangleRegex: Regex = "\\$.*$".toRegex()
+
+/** Returns the specified [function] with mangling information removed. */
+@Suppress("NOTHING_TO_INLINE") // = avoid impact on stack trace
+public actual fun StackTrace.Companion.demangleFunction(function: String): String =
+    function.replace(functionMangleRegex, "")
 
 /** The [Class] containing the execution point represented by this element. */
 public val java.lang.StackTraceElement.`class`: Class<*> get() = Class.forName(className)
@@ -49,21 +49,19 @@ public val StackTraceElement.method: Method get() = `class`.declaredMethods.sing
 @Suppress("NOTHING_TO_INLINE") // = avoid impact on stack trace
 public actual inline fun StackTrace.Companion.get(): StackTrace =
     Thread.currentThread().stackTrace
-        .asSequence()
         .dropWhile { it.className == Thread::class.qualifiedName }
         .map { JvmStackTraceElement(it) }
         .let { StackTrace(it) }
 
 /**
  * Finds the [StackTraceElement] that represents the caller
- * invoking the [StackTraceElement] matching a call to the specified [receiver] and [function].
+ * invoking the [StackTraceElement] matching a call to the specified [functions].
  */
-@Suppress("NOTHING_TO_INLINE") // = avoid impact on stack trace
-public inline fun StackTrace.Companion.findByLastKnownCallOrNull(receiver: String, function: String): StackTraceElement? {
+public fun StackTrace.findByLastKnownCallsOrNull(vararg functions: Pair<String?, String>): StackTraceElement? {
     var skipInvoke = false
-    val demangledFunction = function.replace(FunctionMangleRegex, "")
+    val demangledFunctions = functions.map { (receiver, function) -> receiver to StackTrace.demangleFunction(function) }
     return findOrNull {
-        if (it.receiver == receiver && it.demangledFunction == demangledFunction) {
+        if (demangledFunctions.any { (receiver, demangledFunction) -> it.receiver == receiver && it.demangledFunction == demangledFunction }) {
             skipInvoke = true
             true
         } else {
@@ -76,20 +74,18 @@ public inline fun StackTrace.Companion.findByLastKnownCallOrNull(receiver: Strin
  * Finds the [StackTraceElement] that represents the caller
  * invoking the [StackTraceElement] matching a call to the specified [receiver] and [function].
  */
-@Suppress("NOTHING_TO_INLINE") // = avoid impact on stack trace
-public inline fun StackTrace.Companion.findByLastKnownCallOrNull(receiver: KClassifier, function: String): StackTraceElement? =
-    findByLastKnownCallOrNull(receiver.toString(), function)
+public fun StackTrace.findByLastKnownCallsOrNull(receiver: KClassifier, function: String): StackTraceElement? =
+    findByLastKnownCallsOrNull(receiver.toString() to function)
 
 /**
  * Finds the [StackTraceElement] that represents the caller
- * invoking the [StackTraceElement] matching a call to the specified [function].
+ * invoking the [StackTraceElement] matching a call to the specified [functions].
  */
-@Suppress("NOTHING_TO_INLINE") // = avoid impact on stack trace
-public actual inline fun StackTrace.Companion.findByLastKnownCallOrNull(function: String): StackTraceElement? {
+public actual fun StackTrace.findByLastKnownCallsOrNull(vararg functions: String): StackTraceElement? {
     var skipInvoke = false
-    val demangledFunction = function.replace(FunctionMangleRegex, "")
+    val demangledFunctions = functions.map { StackTrace.demangleFunction(it) }
     return findOrNull {
-        if (it.demangledFunction == demangledFunction) {
+        if (demangledFunctions.contains(it.demangledFunction)) {
             skipInvoke = true
             true
         } else {
@@ -100,10 +96,7 @@ public actual inline fun StackTrace.Companion.findByLastKnownCallOrNull(function
 
 /**
  * Finds the [StackTraceElement] that represents the caller
- * invoking the [StackTraceElement] matching a call to the specified [function].
+ * invoking the [StackTraceElement] matching a call to the specified [functions].
  */
-@Suppress("NOTHING_TO_INLINE") // = avoid impact on stack trace
-public actual inline fun StackTrace.Companion.findByLastKnownCallOrNull(function: KFunction<*>): StackTraceElement? =
-    function.instanceParameter?.type?.classifier
-        ?.let { findByLastKnownCallOrNull(it, function.name) }
-        ?: findByLastKnownCallOrNull(function.name)
+public actual fun StackTrace.findByLastKnownCallsOrNull(vararg functions: KFunction<*>): StackTraceElement? =
+    findByLastKnownCallsOrNull(*functions.map { it.name }.toTypedArray())

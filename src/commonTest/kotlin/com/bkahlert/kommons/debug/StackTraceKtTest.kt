@@ -36,19 +36,19 @@ class StackTraceTest {
     }
 
     @Test fun find_or_null() = tests {
-        foo { bar { StackTrace.findOrNull { it.function == "foo" } } } should { it?.function shouldStartWith "find_or_null" }
-        foo { bar { StackTrace.findOrNull { false } } }.shouldBeNull()
+        foo { bar { StackTrace.get().findOrNull { it.function == "foo" } } } should { it?.function shouldStartWith "find_or_null" }
+        foo { bar { StackTrace.get().findOrNull { false } } }.shouldBeNull()
     }
 
     @Test fun find_by_last_known_call_null() = tests {
-        foo { bar { StackTrace.findByLastKnownCallOrNull("bar") } } should { it?.function shouldStartWith "foo" }
-        foo { bar { StackTrace.findByLastKnownCallOrNull(::bar) } } should { it?.function shouldStartWith "foo" }
+        foo { bar { StackTrace.get().findByLastKnownCallsOrNull("bar") } } should { it?.function shouldStartWith "foo" }
+        foo { bar { StackTrace.get().findByLastKnownCallsOrNull(::bar) } } should { it?.function shouldStartWith "foo" }
 
-        foo { bar { StackTrace.findByLastKnownCallOrNull("foo") } } should { it?.function shouldStartWith "find_by_last_known_call_null" }
-        foo { bar { StackTrace.findByLastKnownCallOrNull(::foo) } } should { it?.function shouldStartWith "find_by_last_known_call_null" }
+        foo { bar { StackTrace.get().findByLastKnownCallsOrNull("foo") } } should { it?.function shouldStartWith "find_by_last_known_call_null" }
+        foo { bar { StackTrace.get().findByLastKnownCallsOrNull(::foo) } } should { it?.function shouldStartWith "find_by_last_known_call_null" }
 
-        foo { bar { StackTrace.findByLastKnownCallOrNull("toString") } }.shouldBeNull()
-        foo { bar { StackTrace.findByLastKnownCallOrNull(String::toString) } }.shouldBeNull()
+        foo { bar { StackTrace.get().findByLastKnownCallsOrNull("toString") } }.shouldBeNull()
+        foo { bar { StackTrace.get().findByLastKnownCallsOrNull(String::toString) } }.shouldBeNull()
     }
 }
 

@@ -1,6 +1,5 @@
 package com.bkahlert.kommons.debug
 
-import com.bkahlert.kommons.debug.JsStackTraceElement.Companion.FunctionMangleRegex
 import com.bkahlert.kommons.takeUnlessEmpty
 import kotlin.reflect.KFunction
 
@@ -13,10 +12,12 @@ public data class JsStackTraceElement(
     override val column: Int,
 ) : StackTraceElement {
 
+    public override val demangledFunction: String? = function?.let { StackTrace.demangleFunction(function) }
+
     override fun toString(): String = buildString {
-        var closeBracket = false
+        var brackets = false
         if (receiver != null || function != null) {
-            closeBracket = true
+            brackets = true
             if (receiver != null) {
                 append(receiver)
                 append('.')
@@ -24,65 +25,85 @@ public data class JsStackTraceElement(
             if (function != null) {
                 append(function)
             }
-            append(" (")
+            append(" ")
+            if (brackets) append("(")
         }
         append(file)
         append(':')
         append(line)
         append(':')
         append(column)
-        if (closeBracket) {
-            append(')')
-        }
+        if (brackets) append(')')
     }
 
     public companion object {
         private val RenderedStackTraceElementRegex =
-            "^(?:(?:(?<receiver>[^. ]*)\\.)?(?<function>[^. ]*)?\\s+)?\\(?(?<file>[^()]+):(?<line>\\d+):(?<column>\\d+)\\)?\$".toRegex()
+            "^(?:(?:(?<receiver>[^. ]+)\\.)?(?<function>[^ ]*)?\\s+)?\\(?(?<file>[^()]+):(?<line>\\d+):(?<column>\\d+)\\)?\$".toRegex()
 
-        public val FunctionMangleRegex: Regex = "_[a-z\\d]+_k\\$$".toRegex()
-
-        public fun parseOrNull(renderedStackTraceElement: String): JsStackTraceElement? = RenderedStackTraceElementRegex
-            .matchEntire(renderedStackTraceElement)
-            ?.destructured
-            ?.let { (receiver, function, file, line, column) ->
-                JsStackTraceElement(
-                    receiver.takeUnlessEmpty(),
-                    function.takeUnlessEmpty(),
-                    file,
-                    line.toInt(),
-                    column.toInt()
-                )
-            }
+        public fun parseOrNull(renderedStackTraceElement: String): JsStackTraceElement? {
+            return RenderedStackTraceElementRegex
+                .matchEntire(renderedStackTraceElement)
+                ?.destructured
+                ?.let { (receiver, function, file, line, column) ->
+                    JsStackTraceElement(
+                        receiver.takeUnlessEmpty(),
+                        function.takeUnlessEmpty(),
+                        file,
+                        line.toInt(),
+                        column.toInt()
+                    )
+                }
+        }
     }
 }
 
-public val StackTraceElement.demangledFunction: String? get() = function?.replace(FunctionMangleRegex, "")
+private val functionMangleRegex: Regex = "_[a-z\\d]+_k\\$$".toRegex()
+private val renderedStackTraceElementUnificationRegex = "^(?<receiverAndFunction>[^@]*)@(?<location>[^@]*)$".toRegex()
+private val generatedFunctionRegex = "\\\$.*".toRegex()
+
+/** Returns the specified [renderedStackTraceElement]. */
+public fun StackTrace.Companion.unify(renderedStackTraceElement: String): String =
+    if (renderedStackTraceElement.contains("@")) {
+        renderedStackTraceElementUnificationRegex.replace(renderedStackTraceElement) {
+            it.destructured.let { (receiverAndFunction, location) ->
+                if (receiverAndFunction.isNotEmpty()) "$receiverAndFunction ($location)" else location
+            }
+        }
+    } else renderedStackTraceElement.removePrefix("    at ")
+
+/** Returns the specified [function] with mangling information removed. */
+public actual fun StackTrace.Companion.demangleFunction(function: String): String =
+    function.replace(functionMangleRegex, "")
 
 /** Gets the current [StackTrace]. */
 @Suppress("NOTHING_TO_INLINE") // = avoid impact on stack trace
-public actual inline fun StackTrace.Companion.get(): StackTrace {
-    val stackTraceElementSeparatorRegex = "\\n\\s+at ".toRegex()
-    return try {
+public inline fun StackTrace.Companion.get(stackTrace: () -> Sequence<String>): StackTrace = stackTrace()
+    .map { unify(it) }
+    .dropWhile { it.startsWith("RuntimeException") || it.startsWith("captureStack ") }
+    .mapNotNull { JsStackTraceElement.parseOrNull(it) }
+    .toList()
+    .let { StackTrace(it) }
+
+/** Gets the current [StackTrace]. */
+@Suppress("NOTHING_TO_INLINE") // = avoid impact on stack trace
+public actual inline fun StackTrace.Companion.get(): StackTrace = get {
+    try {
         throw RuntimeException()
     } catch (ex: Throwable) {
         ex.stackTraceToString().removeSuffix("\n")
-    }.splitToSequence(regex = stackTraceElementSeparatorRegex)
-        .dropWhile { it == "RuntimeException" }
-        .mapNotNull { JsStackTraceElement.parseOrNull(it) }
-        .let { StackTrace(it) }
+    }.lineSequence()
 }
 
 /**
  * Finds the [StackTraceElement] that represents the caller
- * invoking the [StackTraceElement] matching a call to the specified [function].
+ * invoking the [StackTraceElement] matching a call to the specified [functions].
  */
-@Suppress("NOTHING_TO_INLINE") // = avoid impact on stack trace
-public actual inline fun StackTrace.Companion.findByLastKnownCallOrNull(function: String): StackTraceElement? {
+public actual fun StackTrace.findByLastKnownCallsOrNull(vararg functions: String): StackTraceElement? {
     var skipNull = false
-    val demangledFunction = function.replace(FunctionMangleRegex, "")
+    val demangledFunctions = functions.map { StackTrace.demangleFunction(it) }
+
     return findOrNull {
-        if (it.demangledFunction == demangledFunction) {
+        if (demangledFunctions.contains(it.demangledFunction) || demangledFunctions.contains(it.demangledFunction?.replace(generatedFunctionRegex, ""))) {
             skipNull = true
             true
         } else {
@@ -95,8 +116,7 @@ public actual inline fun StackTrace.Companion.findByLastKnownCallOrNull(function
 
 /**
  * Finds the [StackTraceElement] that represents the caller
- * invoking the [StackTraceElement] matching a call to the specified [function].
+ * invoking the [StackTraceElement] matching a call to the specified [functions].
  */
-@Suppress("NOTHING_TO_INLINE") // = avoid impact on stack trace
-public actual inline fun StackTrace.Companion.findByLastKnownCallOrNull(function: KFunction<*>): StackTraceElement? =
-    findByLastKnownCallOrNull(function.name)
+public actual fun StackTrace.findByLastKnownCallsOrNull(vararg functions: KFunction<*>): StackTraceElement? =
+    findByLastKnownCallsOrNull(*functions.map { it.name }.toTypedArray())

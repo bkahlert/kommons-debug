@@ -3,35 +3,12 @@ package com.bkahlert.kommons.debug
 import kotlin.reflect.KFunction
 
 /** Representation of a stack trace. */
-public class StackTrace(elements: Sequence<StackTraceElement>) : Sequence<StackTraceElement> by elements {
-    public companion object {
-
-        /**
-         * Finds the [StackTraceElement] that immediately follows the one
-         * the specified [predicate] stops returning `true` for the first time.
-         *
-         * In other words:
-         * - The [predicate] is used to drop irrelevant calls for as long as it returns `false`.
-         * - As soon as it responds `true` calls that are expected to exist are dropped.
-         * - Finally, the next element which represents the caller of the last matched call is returned.
-         */
-        @Suppress("NOTHING_TO_INLINE") // = avoid impact on stack trace
-        public inline fun findOrNull(crossinline predicate: (StackTraceElement) -> Boolean): StackTraceElement? =
-            get().dropWhile { !predicate(it) }.dropWhile { predicate(it) }.firstOrNull()
-
-        /**
-         * Finds the [StackTraceElement] that immediately follows the one
-         * the specified [predicate] stops returning `true` for the first time.
-         *
-         * In other words:
-         * - The [predicate] is used to drop irrelevant calls for as long as it returns `false`.
-         * - As soon as it responds `true` calls that are expected to exist are dropped.
-         * - Finally, the next element which represents the caller of the last matched call is returned.
-         */
-        @Suppress("NOTHING_TO_INLINE") // = avoid impact on stack trace
-        public inline fun find(crossinline predicate: (StackTraceElement) -> Boolean): StackTraceElement =
-            findOrNull(predicate) ?: throw NoSuchElementException()
+public class StackTrace(elements: List<StackTraceElement>) : List<StackTraceElement> by elements {
+    override fun toString(): String {
+        return joinToString("\nat ")
     }
+
+    public companion object
 }
 
 /** Representation of a single element of a [StackTrace]. */
@@ -43,6 +20,9 @@ public interface StackTraceElement {
     /** Name of the invoked function. */
     public val function: String?
 
+    /** Name of the invoked function with mangling information removed. */
+    public val demangledFunction: String?
+
     /** File in which the invocation takes place. */
     public val file: String?
 
@@ -53,18 +33,45 @@ public interface StackTraceElement {
     public val column: Int?
 }
 
+/** Returns the specified [function] with mangling information removed. */
+public expect fun StackTrace.Companion.demangleFunction(function: String): String
+
 /** Gets the current [StackTrace]. */
 public expect inline fun StackTrace.Companion.get(): StackTrace
 
 
 /**
- * Finds the [StackTraceElement] that represents the caller
- * invoking the [StackTraceElement] matching a call to the specified [function].
+ * Finds the [StackTraceElement] that immediately follows the one
+ * the specified [predicate] stops returning `true` for the first time.
+ *
+ * In other words:
+ * - The [predicate] is used to drop irrelevant calls for as long as it returns `false`.
+ * - As soon as it responds `true` calls that are expected to exist are dropped.
+ * - Finally, the next element which represents the caller of the last matched call is returned.
  */
-public expect inline fun StackTrace.Companion.findByLastKnownCallOrNull(function: String): StackTraceElement?
+public fun StackTrace.findOrNull(predicate: (StackTraceElement) -> Boolean): StackTraceElement? =
+    (if (firstOrNull()?.let(predicate) == false) dropWhile { !predicate(it) } else this).dropWhile { predicate(it) }.firstOrNull()
+
+/**
+ * Finds the [StackTraceElement] that immediately follows the one
+ * the specified [predicate] stops returning `true` for the first time.
+ *
+ * In other words:
+ * - The [predicate] is used to drop irrelevant calls for as long as it returns `false`.
+ * - As soon as it responds `true` calls that are expected to exist are dropped.
+ * - Finally, the next element which represents the caller of the last matched call is returned.
+ */
+public fun StackTrace.find(predicate: (StackTraceElement) -> Boolean): StackTraceElement =
+    findOrNull(predicate) ?: throw NoSuchElementException()
 
 /**
  * Finds the [StackTraceElement] that represents the caller
- * invoking the [StackTraceElement] matching a call to the specified [function].
+ * invoking the [StackTraceElement] matching a call to the specified [functions].
  */
-public expect inline fun StackTrace.Companion.findByLastKnownCallOrNull(function: KFunction<*>): StackTraceElement?
+public expect fun StackTrace.findByLastKnownCallsOrNull(vararg functions: String): StackTraceElement?
+
+/**
+ * Finds the [StackTraceElement] that represents the caller
+ * invoking the [StackTraceElement] matching a call to the specified [functions].
+ */
+public expect fun StackTrace.findByLastKnownCallsOrNull(vararg functions: KFunction<*>): StackTraceElement?

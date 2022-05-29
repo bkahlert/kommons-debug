@@ -1,7 +1,9 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.debug.CustomToString.Ignore
 import com.bkahlert.kommons.debug.Platform.JS
 import com.bkahlert.kommons.debug.Platform.JVM
+import com.bkahlert.kommons.debug.Typing.SimplyTyped
 import com.bkahlert.kommons.tests
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -11,7 +13,7 @@ import kotlin.test.Test
 @Suppress("DEPRECATION")
 class TraceTest {
 
-    @Test fun test_no_arguments() = tests {
+    @Test fun trace_with_no_arguments() = tests {
         buildString {
             "subject".trace(highlight = false, includeCallSite = false, out = this::append)
         } shouldBe """
@@ -19,7 +21,7 @@ class TraceTest {
         """.trimIndent()
     }
 
-    @Test fun test_with_caption() = tests {
+    @Test fun trace_with_caption() = tests {
         buildString {
             "subject".trace("caption", highlight = false, includeCallSite = false, out = this::append)
         } shouldBe """
@@ -27,7 +29,7 @@ class TraceTest {
         """.trimIndent()
     }
 
-    @Test fun test_with_inspect() = tests {
+    @Test fun trace_with_inspect() = tests {
         buildString {
             "subject".trace(highlight = false, includeCallSite = false, out = this::append) { it.length }
         } shouldBe """
@@ -35,7 +37,7 @@ class TraceTest {
         """.trimIndent()
     }
 
-    @Test fun test_with_caption_and_inspect() = tests {
+    @Test fun trace_with_caption_and_inspect() = tests {
         buildString {
             "subject".trace("caption", highlight = false, includeCallSite = false, out = this::append) { it.length }
         } shouldBe """
@@ -44,7 +46,7 @@ class TraceTest {
     }
 
     @Suppress("LongLine")
-    @Test fun test_with_highlighting() = tests {
+    @Test fun trace_with_highlighting() = tests {
         buildString {
             "subject".trace("caption", highlight = true, includeCallSite = false, out = this::append) { it.length.toString() }
         } shouldBe when (Platform.Current) {
@@ -57,7 +59,7 @@ class TraceTest {
         }
     }
 
-    @Test fun test_with_call_site() = tests {
+    @Test fun trace_with_call_site() = tests {
         buildString {
             "subject".trace(highlight = false, out = this::append) { it.length.toString() }
         } should {
@@ -65,13 +67,13 @@ class TraceTest {
             when (Platform.Current) {
                 JS -> it shouldMatch ".ͭ \\(.*/commons\\.js.*\\) ⟨ \"subject\" ⟩ \\{ \"7\" \\}".toRegex()
                 JVM -> it shouldBe """
-                    .ͭ (TraceKtTest.kt:62) ⟨ "subject" ⟩ { "7" }
+                    .ͭ (TraceKtTest.kt:64) ⟨ "subject" ⟩ { "7" }
                 """.trimIndent()
             }
         }
     }
 
-    @Test fun test_with_custom_render() = tests {
+    @Test fun trace_with_custom_render() = tests {
         buildString {
             "subject".trace("caption", highlight = false, includeCallSite = false, render = { ">>> $it <<<" }, out = this::append) { it.length.toString() }
         } shouldBe """
@@ -79,7 +81,7 @@ class TraceTest {
         """.trimIndent()
     }
 
-    @Test fun test_with_multiline() = tests {
+    @Test fun trace_with_multiline() = tests {
         buildString {
             "subject 1\nsubject 2".trace(
                 highlight = false,
@@ -151,5 +153,36 @@ class TraceTest {
             inspect 2
             }
         """.trimIndent()
+    }
+
+    @Test fun inspect() = tests {
+        buildString {
+            "subject".inspect(
+                highlight = false,
+                includeCallSite = false,
+                out = this::append
+            ) { it.length.toString() }
+        } shouldBe buildString {
+            "subject".trace(
+                highlight = false,
+                includeCallSite = false,
+                render = { it.render(typing = SimplyTyped, customToString = Ignore) },
+                out = this::append
+            ) { it.length.toString() }
+        }
+    }
+
+    @Test fun inspect_with_call_site() = tests {
+        buildString {
+            "subject".inspect(highlight = false, out = this::append)
+        } should {
+            @Suppress("RegExpRedundantEscape")
+            when (Platform.Current) {
+                JS -> it shouldMatch ".ͭ \\(.*/commons\\.js.*\\) ⟨ !String \"subject\" ⟩".toRegex()
+                JVM -> it shouldBe """
+                    .ͭ (TraceKtTest.kt:177) ⟨ !String "subject" ⟩
+                """.trimIndent()
+            }
+        }
     }
 }

@@ -58,7 +58,8 @@ public fun Any?.render(
     compression: Compression = Auto(),
     customToString: CustomToString = IgnoreForPlainCollectionsAndMaps,
     rendered: MutableSet<Any> = mutableSetOf(),
-): String = buildString { this@render.renderTo(this, typing, compression, customToString, rendered) }
+    include: (Any?, String?) -> Boolean = { _, _ -> true },
+): String = buildString { this@render.renderTo(this, typing, compression, customToString, rendered, include) }
 
 /**
  * Renders this object depending on whether its `toString()` is overridden:
@@ -71,8 +72,10 @@ public fun Any?.renderTo(
     typing: Typing = Untyped,
     compression: Compression = Auto(),
     customToString: CustomToString = IgnoreForPlainCollectionsAndMaps,
-    rendered: MutableSet<Any>,
+    rendered: MutableSet<Any> = mutableSetOf(),
+    include: (Any?, String?) -> Boolean = { _, _ -> true },
 ) {
+    if (!include(this, null)) return
     if (this == null) {
         out.append("null")
     } else {
@@ -100,7 +103,7 @@ public fun Any?.renderTo(
             is UByteArray, is UShortArray, is UIntArray, is ULongArray,
             is ByteArray, is ShortArray, is IntArray, is LongArray -> renderPrimitiveArrayTo(out, this)
 
-            is Array<*> -> renderArrayTo(out, this, typing, compression, customToString, rendered)
+            is Array<*> -> renderArrayTo(out, this, typing, compression, customToString, rendered, include)
 
             else -> {
                 if (rendered.contains(this)) {
@@ -113,15 +116,15 @@ public fun Any?.renderTo(
                     rendered.add(this)
 
                     when {
-                        this is Collection<*> && this.isPlain -> renderCollectionTo(out, this, typing, compression, customToString, rendered)
-                        this is Map<*, *> && this.isPlain -> renderObjectTo(out, this, typing, compression, customToString, rendered)
+                        this is Collection<*> && this.isPlain -> renderCollectionTo(out, this, typing, compression, customToString, rendered, include)
+                        this is Map<*, *> && this.isPlain -> renderObjectTo(out, this, typing, compression, customToString, rendered, include)
                         else -> {
                             when (customToString) {
                                 IgnoreForPlainCollectionsAndMaps -> toCustomStringOrNull()
                                 Ignore -> null
                             }
                                 ?.also { out.append(it) }
-                                ?: kotlin.runCatching { renderObjectTo(out, this, typing, compression, customToString, rendered) }
+                                ?: kotlin.runCatching { renderObjectTo(out, this, typing, compression, customToString, rendered, include) }
                                     .recoverCatching { out.append("<$this>") }
                                     .recoverCatching { out.append("<unsupported:$it>") }
                         }
@@ -226,7 +229,7 @@ private fun renderPrimitivesTo(
     out.append('[')
     primitives.withIndex().forEach { (index, value) ->
         if (index != 0) out.append(", ")
-        value.renderTo(out, Untyped, Auto(), Ignore, mutableSetOf())
+        value.renderTo(out, Untyped, Auto(), Ignore, mutableSetOf()) { _, _ -> true }
     }
     out.append(']')
 }
@@ -237,7 +240,8 @@ internal fun renderArray(
     compression: Compression = Auto(),
     customToString: CustomToString = IgnoreForPlainCollectionsAndMaps,
     rendered: MutableSet<Any> = mutableSetOf(),
-): String = buildString { renderArrayTo(this, array, typing, compression, customToString, rendered) }
+    include: (Any?, String?) -> Boolean = { _, _ -> true },
+): String = buildString { renderArrayTo(this, array, typing, compression, customToString, rendered, include) }
 
 internal fun renderArrayTo(
     out: StringBuilder,
@@ -246,7 +250,8 @@ internal fun renderArrayTo(
     compression: Compression,
     customToString: CustomToString,
     rendered: MutableSet<Any>,
-) = renderObjectsTo(out, array.asList(), typing, compression, customToString, rendered)
+    include: (Any?, String?) -> Boolean,
+) = renderObjectsTo(out, array.asList(), typing, compression, customToString, rendered, include)
 
 
 internal fun renderCollection(
@@ -255,7 +260,8 @@ internal fun renderCollection(
     compression: Compression = Auto(),
     customToString: CustomToString = IgnoreForPlainCollectionsAndMaps,
     rendered: MutableSet<Any> = mutableSetOf(),
-): String = buildString { renderCollectionTo(this, collection, typing, compression, customToString, rendered) }
+    include: (Any?, String?) -> Boolean = { _, _ -> true },
+): String = buildString { renderCollectionTo(this, collection, typing, compression, customToString, rendered, include) }
 
 internal fun renderCollectionTo(
     out: StringBuilder,
@@ -263,8 +269,9 @@ internal fun renderCollectionTo(
     typing: Typing,
     compression: Compression,
     customToString: CustomToString,
-    rendered: MutableSet<Any>
-) = renderObjectsTo(out, collection.toList(), typing, compression, customToString, rendered)
+    rendered: MutableSet<Any>,
+    include: (Any?, String?) -> Boolean,
+) = renderObjectsTo(out, collection.toList(), typing, compression, customToString, rendered, include)
 
 
 private fun renderObjectsTo(
@@ -273,16 +280,17 @@ private fun renderObjectsTo(
     typing: Typing,
     compression: Compression,
     customToString: CustomToString,
-    rendered: MutableSet<Any>
+    rendered: MutableSet<Any>,
+    include: (Any?, String?) -> Boolean,
 ) {
     when (compression) {
-        Always -> renderCompressedObjectsTo(out, objects, typing, customToString, rendered)
-        Never -> renderNonCompressedObjectsTo(out, objects, typing, customToString, rendered)
+        Always -> renderCompressedObjectsTo(out, objects, typing, customToString, rendered, include)
+        Never -> renderNonCompressedObjectsTo(out, objects, typing, customToString, rendered, include)
         is Auto -> {
-            buildString { renderCompressedObjectsTo(this, objects, typing, customToString, rendered.toMutableSet()) }
+            buildString { renderCompressedObjectsTo(this, objects, typing, customToString, rendered.toMutableSet(), include) }
                 .takeUnless { it.length > compression.maxLength }
                 ?.also { out.append(it); rendered.addAll(objects.filterNotNull()) }
-                ?: renderNonCompressedObjectsTo(out, objects, typing, customToString, rendered)
+                ?: renderNonCompressedObjectsTo(out, objects, typing, customToString, rendered, include)
         }
     }
 }
@@ -292,15 +300,17 @@ private fun renderCompressedObjectsTo(
     objects: List<*>,
     typing: Typing,
     customToString: CustomToString,
-    rendered: MutableSet<Any>
+    rendered: MutableSet<Any>,
+    include: (Any?, String?) -> Boolean,
 ) {
     out.append("[")
-    if (objects.isNotEmpty()) out.append(" ")
-    objects.forEachIndexed { index, value ->
+    val filteredObjects = objects.filterIndexed { index, _ -> include(objects, "$index") }
+    if (filteredObjects.isNotEmpty()) out.append(" ")
+    filteredObjects.forEachIndexed { index, value ->
         if (index > 0) out.append(", ")
-        value.renderTo(out, typing, Always, customToString, rendered)
+        value.renderTo(out, typing, Always, customToString, rendered, include)
     }
-    if (objects.isNotEmpty()) out.append(" ")
+    if (filteredObjects.isNotEmpty()) out.append(" ")
     out.append("]")
 }
 
@@ -309,18 +319,20 @@ private fun renderNonCompressedObjectsTo(
     objects: List<*>,
     typing: Typing,
     customToString: CustomToString,
-    rendered: MutableSet<Any>
+    rendered: MutableSet<Any>,
+    include: (Any?, String?) -> Boolean,
 ) {
     val indent = "    "
     out.append("[")
-    if (objects.isNotEmpty()) out.append("\n")
-    objects.forEachIndexed { index, value ->
+    val filteredObjects = objects.filterIndexed { index, _ -> include(objects, "$index") }
+    if (filteredObjects.isNotEmpty()) out.append("\n")
+    filteredObjects.forEachIndexed { index, value ->
         if (index > 0) out.append(",\n")
         out.append(indent)
-        val renderedElement = value.render(typing, Never, customToString, rendered).prependIndent(indent)
+        val renderedElement = value.render(typing, Never, customToString, rendered, include).prependIndent(indent)
         out.append(renderedElement, indent.length, renderedElement.length)
     }
-    if (objects.isNotEmpty()) out.append("\n")
+    if (filteredObjects.isNotEmpty()) out.append("\n")
     out.append("]")
 }
 
@@ -330,7 +342,8 @@ internal fun renderObject(
     compression: Compression = Auto(),
     customToString: CustomToString = IgnoreForPlainCollectionsAndMaps,
     rendered: MutableSet<Any> = mutableSetOf(),
-): String = buildString { renderObjectTo(this, obj, typing, compression, customToString, rendered) }
+    include: (Any?, String?) -> Boolean = { _, _ -> true },
+): String = buildString { renderObjectTo(this, obj, typing, compression, customToString, rendered, include) }
 
 internal fun renderObjectTo(
     out: StringBuilder,
@@ -339,15 +352,16 @@ internal fun renderObjectTo(
     compression: Compression,
     customToString: CustomToString,
     rendered: MutableSet<Any>,
+    include: (Any?, String?) -> Boolean,
 ) {
     when (compression) {
-        Always -> renderCompressedObjectTo(out, obj, typing, customToString, rendered)
-        Never -> renderNonCompressedObjectTo(out, obj, typing, customToString, rendered)
+        Always -> renderCompressedObjectTo(out, obj, typing, customToString, rendered, include)
+        Never -> renderNonCompressedObjectTo(out, obj, typing, customToString, rendered, include)
         is Auto -> {
-            buildString { renderCompressedObjectTo(this, obj, typing, customToString, rendered.toMutableSet()) }
+            buildString { renderCompressedObjectTo(this, obj, typing, customToString, rendered.toMutableSet(), include) }
                 .takeUnless { it.length > compression.maxLength }
                 ?.also { out.append(it); rendered.add(obj) }
-                ?: renderNonCompressedObjectTo(out, obj, typing, customToString, rendered)
+                ?: renderNonCompressedObjectTo(out, obj, typing, customToString, rendered, include)
         }
     }
 }
@@ -358,18 +372,22 @@ private fun renderCompressedObjectTo(
     typing: Typing,
     customToString: CustomToString,
     rendered: MutableSet<Any>,
+    include: (Any?, String?) -> Boolean,
 ) {
     out.append("{")
-    val entries = if (obj is Map<*, *>) obj.entries else obj.properties.entries
+    val entries = (if (obj is Map<*, *>) obj.entries else obj.properties.entries)
+        .map { (key, value) ->
+            val renderedKey = if (key is CharSequence) key.quoted.removeSurrounding("\"") else key.render(typing, Always, customToString, rendered, include)
+            renderedKey to value
+        }.filter { (key, _) -> include(obj, key) }
     if (entries.isNotEmpty()) out.append(" ")
     entries.forEachIndexed { index, (key, value) ->
         if (index > 0) out.append(", ")
-        if (key is CharSequence) out.append(key.quoted.removeSurrounding("\""))
-        else key.renderTo(out, typing, Always, customToString, rendered)
 
+        out.append(key)
         out.append(": ")
 
-        value.renderTo(out, typing, Always, customToString, rendered)
+        value.renderTo(out, typing, Always, customToString, rendered, include)
     }
     if (entries.isNotEmpty()) out.append(" ")
     out.append("}")
@@ -381,22 +399,25 @@ private fun renderNonCompressedObjectTo(
     typing: Typing,
     customToString: CustomToString,
     rendered: MutableSet<Any>,
+    include: (Any?, String?) -> Boolean,
 ) {
     val keyIndent = "    "
     out.append("{")
-    val entries = if (obj is Map<*, *>) obj.entries else obj.properties.entries
+    val entries = (if (obj is Map<*, *>) obj.entries else obj.properties.entries)
+        .map { (key, value) ->
+            val renderedKey = if (key is CharSequence) key.quoted.removeSurrounding("\"") else key.render(typing, Always, customToString, rendered, include)
+            renderedKey to value
+        }.filter { (key, _) -> include(obj, key) }
     if (entries.isNotEmpty()) out.append("\n")
     entries.forEachIndexed { index, (key, value) ->
         if (index > 0) out.append(",\n")
         out.append(keyIndent)
 
-        val renderedKey = if (key is CharSequence) key.quoted.removeSurrounding("\"") else key.render(typing, Always, customToString, rendered)
-        out.append(renderedKey)
-
+        out.append(key)
         out.append(": ")
 
-        val valueIndent = " ".repeat(keyIndent.length + renderedKey.length + 2)
-        val renderedValue = value.render(typing, Never, customToString, rendered).prependIndent(valueIndent)
+        val valueIndent = " ".repeat(keyIndent.length + key.length + 2)
+        val renderedValue = value.render(typing, Never, customToString, rendered, include).prependIndent(valueIndent)
         out.append(renderedValue, valueIndent.length, renderedValue.length)
     }
     if (entries.isNotEmpty()) out.append("\n")

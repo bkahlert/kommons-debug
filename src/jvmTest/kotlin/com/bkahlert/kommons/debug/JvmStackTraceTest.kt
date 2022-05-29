@@ -11,17 +11,17 @@ class JvmStackTraceTest {
 
     @Test fun find_by_last_known_call_null() = tests {
         val receiver = "com.bkahlert.kommons.debug.StackTraceKtTestKt"
-        foo { bar { StackTrace.findByLastKnownCallOrNull(receiver, "bar") } } should { it?.function shouldBe "foo" }
-        foo { bar { StackTrace.findByLastKnownCallOrNull("bar") } } should { it?.function shouldBe "foo" }
-        foo { bar { StackTrace.findByLastKnownCallOrNull(::bar) } } should { it?.function shouldBe "foo" }
+        foo { bar { StackTrace.get().findByLastKnownCallsOrNull(receiver to "bar") } } should { it?.function shouldBe "foo" }
+        foo { bar { StackTrace.get().findByLastKnownCallsOrNull("bar") } } should { it?.function shouldBe "foo" }
+        foo { bar { StackTrace.get().findByLastKnownCallsOrNull(::bar) } } should { it?.function shouldBe "foo" }
 
-        foo { bar { StackTrace.findByLastKnownCallOrNull(receiver, "foo") } } should { it?.function shouldBe "find_by_last_known_call_null" }
-        foo { bar { StackTrace.findByLastKnownCallOrNull("foo") } } should { it?.function shouldBe "find_by_last_known_call_null" }
-        foo { bar { StackTrace.findByLastKnownCallOrNull(::foo) } } should { it?.function shouldBe "find_by_last_known_call_null" }
+        foo { bar { StackTrace.get().findByLastKnownCallsOrNull(receiver to "foo") } } should { it?.function shouldBe "find_by_last_known_call_null" }
+        foo { bar { StackTrace.get().findByLastKnownCallsOrNull("foo") } } should { it?.function shouldBe "find_by_last_known_call_null" }
+        foo { bar { StackTrace.get().findByLastKnownCallsOrNull(::foo) } } should { it?.function shouldBe "find_by_last_known_call_null" }
 
-        foo { bar { StackTrace.findByLastKnownCallOrNull(String::class, "toString") } }.shouldBeNull()
-        foo { bar { StackTrace.findByLastKnownCallOrNull("toString") } }.shouldBeNull()
-        foo { bar { StackTrace.findByLastKnownCallOrNull(String::toString) } }.shouldBeNull()
+        foo { bar { StackTrace.get().findByLastKnownCallsOrNull(String::class, "toString") } }.shouldBeNull()
+        foo { bar { StackTrace.get().findByLastKnownCallsOrNull("toString") } }.shouldBeNull()
+        foo { bar { StackTrace.get().findByLastKnownCallsOrNull(String::toString) } }.shouldBeNull()
     }
 
     @Test fun equality() = tests {

@@ -497,6 +497,18 @@ class RenderTest {
         ClassWithCustomToString().render(customToString = Ignore) shouldBe "{ foo: null }"
     }
 
+    @Test fun render_with_filter() = tests {
+        ClassWithDefaultToString(ClassTypes.triple).render() shouldBe """
+            { foo: (39, 40, 41), bar: "baz" }
+        """.trimIndent()
+        ClassWithDefaultToString(ClassTypes.triple).render { obj, _ -> obj != ClassTypes.triple } shouldBe """
+            { foo: , bar: "baz" }
+        """.trimIndent()
+        ClassWithDefaultToString(ClassTypes.triple).render { _, prop -> prop != "bar" } shouldBe """
+            { foo: (39, 40, 41) }
+        """.trimIndent()
+    }
+
     @Test fun render_circular_reference() = tests {
         SelfReferencingClass().render() shouldContain "selfProperty: <SelfReferencingClass@-?\\d+>".toRegex()
     }

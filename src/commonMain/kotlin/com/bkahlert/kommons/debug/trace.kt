@@ -60,12 +60,11 @@ public fun <T> T.trace(
     out: ((String) -> Unit)? = null,
     inspect: ((T) -> Any?)? = null
 ): T {
+    val call = if (includeCallSite) StackTrace.get().findByLastKnownCallsOrNull(::inspect, ::trace) else null
     buildString {
-        if (includeCallSite) {
-            StackTrace.findByLastKnownCallOrNull(::trace)?.also {
-                append(".ͭ ")
-                append("(${it.file}:${it.line}) ")
-            }
+        if (call != null) {
+            append(".ͭ ")
+            append("(${call.file}:${call.line}) ")
         }
         caption?.also {
             append(caption.let { if (highlight) it.highlighted else it })
@@ -92,24 +91,24 @@ public fun <T> T.trace(
  */
 @Suppress("GrazieInspection", "DEPRECATION")
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
-public inline val <T> T.inspect: T get(): T = inspect()
+public val <T> T.inspect: T get(): T = inspect()
 
 /**
  * Special version of [trace] that inspects the structure of
  * each object, no matter if a custom [Any.toString] exists or not.
  */
-@Suppress("GrazieInspection", "DEPRECATION", "NOTHING_TO_INLINE") // = avoid impact on stack trace
+@Suppress("GrazieInspection", "DEPRECATION")
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
-public inline fun <T> T.inspect(
+public fun <T> T.inspect(
     caption: CharSequence? = null,
     highlight: Boolean = Platform.Current == JVM,
     includeCallSite: Boolean = true,
     typing: Typing = Typing.SimplyTyped,
-    noinline out: ((String) -> Unit)? = null,
-    noinline inspect: ((T) -> Any?)? = null
+    out: ((String) -> Unit)? = null,
+    inspect: ((T) -> Any?)? = null
 ): T = trace(caption, highlight, includeCallSite, { it.render(typing = typing, customToString = CustomToString.Ignore) }, out, inspect)
 
-private fun StringBuilder.appendWrapped(value: String, brackets: Pair<String, String>) {
+internal fun StringBuilder.appendWrapped(value: String, brackets: Pair<String, String>) {
     val separator = if (value.isMultiline) Unicode.LINE_FEED else ' '
     append(brackets.first)
     append(separator)

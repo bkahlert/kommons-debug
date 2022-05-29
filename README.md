@@ -13,14 +13,14 @@
 
 Kommons Debug is hosted on GitHub with releases provided on Maven Central.
 
-* **Gradle** `implementation("com.bkahlert.kommons:kommons-debug:0.1.0")`
+* **Gradle** `implementation("com.bkahlert.kommons:kommons-debug:0.3.0")`
 
 * **Maven**
   ```xml
   <dependency>
       <groupId>com.bkahlert.kommons</groupId>
       <artifactId>kommons-debug</artifactId>
-      <version>0.1.0</version>
+      <version>0.3.0</version>
   </dependency>
   ```
 
@@ -110,7 +110,7 @@ Tries to find out if the program is currently in debug mode
 ### Stack Trace
 
 Access the current stack trace by a simple call to `StackTrace.get()`
-or locate a specific caller using `StackTrace.findByLastKnownCallOrNull`
+or locate a specific caller using `StackTrace.get().findLastKnownCallOrNull`.
 
 #### Examples
 
@@ -118,8 +118,8 @@ or locate a specific caller using `StackTrace.findByLastKnownCallOrNull`
 fun foo(block: () -> StackTraceElement?) = block()
 fun bar(block: () -> StackTraceElement?) = block()
 
-foo { bar { StackTrace.findByLastKnownCallOrNull("bar") } }?.function  // "foo"
-foo { bar { StackTrace.findByLastKnownCallOrNull(::bar) } }?.function  // "foo"
+foo { bar { StackTrace.findLastKnownCallOrNull("bar") } }?.function  // "foo"
+foo { bar { StackTrace.findLastKnownCallOrNull(::bar) } }?.function  // "foo"
 ```
 
 ### Byte, UByte, ByteArray, UByteArray Conversions
@@ -231,6 +231,15 @@ Easily check edge-case with a fluent interface as does `requireNotNull` does:
 "   ".takeIfNotBlank()  // returns null
 "abc".takeUnlessEmpty() // returns "abc"
 "   ".takeUnlessBlank() // returns null
+```
+
+### Time Operations
+
+```kotlin
+Now + 2.seconds // 2 seconds in the future
+Now - 3.days    // 3 days in the past
+Instant.parse("1910-06-22T13:00:00Z") + 5.minutes // 1910-06-22T12:05:00Z
+Instant.parse("1910-06-22T13:00:00Z") - 2.hours   // 1910-06-22T10:00:00Z
 ```
 
 ## Contributing

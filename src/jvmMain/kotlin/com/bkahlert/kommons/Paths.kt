@@ -16,6 +16,7 @@ import java.security.DigestInputStream
 import java.security.MessageDigest
 import java.util.stream.Stream
 import kotlin.concurrent.thread
+import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.forEachDirectoryEntry
 import kotlin.io.path.getLastModifiedTime
@@ -27,6 +28,25 @@ import kotlin.streams.asSequence
 import kotlin.streams.toList
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+
+/**
+ * Alias for [isSubPathOf].
+ */
+public fun Path.isInside(path: Path): Boolean = isSubPathOf(path)
+
+/**
+ * Returns whether this path is a sub path of [path].
+ */
+public fun Path.isSubPathOf(path: Path): Boolean =
+    normalize().toAbsolutePath().startsWith(path.normalize().toAbsolutePath())
+
+/**
+ * Returns this [Path] with all parent directories created.
+ *
+ * Example: If directory `/some/where` existed and this method was called on `/some/where/resides/a/file`,
+ * the missing directories `/some/where/resides` and `/some/where/resides/a` would be created.
+ */
+public fun Path.createParentDirectories(): Path = apply { parent.takeUnless { it.exists() }?.createDirectories() }
 
 /**
  * Contains since when this file was last modified.

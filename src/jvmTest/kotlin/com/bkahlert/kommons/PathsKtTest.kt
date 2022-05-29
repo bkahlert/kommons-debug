@@ -8,6 +8,7 @@ import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
 import io.kotest.matchers.comparables.shouldBeLessThan
 import io.kotest.matchers.comparables.shouldBeLessThanOrEqualTo
+import io.kotest.matchers.paths.shouldBeADirectory
 import io.kotest.matchers.paths.shouldBeEmptyDirectory
 import io.kotest.matchers.paths.shouldBeSymbolicLink
 import io.kotest.matchers.paths.shouldExist
@@ -18,6 +19,7 @@ import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import java.io.IOException
 import java.nio.file.DirectoryNotEmptyException
 import java.nio.file.Files
 import java.nio.file.LinkOption.NOFOLLOW_LINKS
@@ -25,7 +27,6 @@ import java.nio.file.NoSuchFileException
 import java.nio.file.NotDirectoryException
 import java.nio.file.Path
 import java.nio.file.attribute.FileTime
-import java.time.Instant
 import java.time.LocalDate
 import java.time.Period
 import java.time.Year
@@ -34,18 +35,61 @@ import java.time.temporal.Temporal
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createFile
+import kotlin.io.path.div
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.pathString
 import kotlin.io.path.writeBytes
-import kotlin.io.path.writeText
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 class PathsKtTest {
+
+    @Nested
+    inner class IsSubPathOf {
+
+        @Test
+        fun `should return true if child`(@TempDir tempDir: Path) = tests {
+            (tempDir / "child").isSubPathOf(tempDir) shouldBe true
+        }
+
+        @Test
+        fun `should return true if descendent`(@TempDir tempDir: Path) = tests {
+            (tempDir / "child1" / "child2").isSubPathOf(tempDir) shouldBe true
+        }
+
+        @Test
+        fun `should return true if path is obscure`(@TempDir tempDir: Path) = tests {
+            (tempDir / "child1" / ".." / "child2").isSubPathOf(tempDir) shouldBe true
+        }
+
+        @Test
+        fun `should return true if same`(@TempDir tempDir: Path) = tests {
+            tempDir.isSubPathOf(tempDir) shouldBe true
+        }
+
+        @Test
+        fun `should return false if not inside`(@TempDir tempDir: Path) = tests {
+            tempDir.isSubPathOf(tempDir / "child") shouldBe false
+        }
+    }
+
+    @Nested
+    inner class CreateParentDirectories {
+
+        @Test
+        fun `should create missing directories`(@TempDir tempDir: Path) = tests {
+            val file = tempDir.resolve("some/dir/some/file")
+            file.createParentDirectories().parent should {
+                it.shouldExist()
+                it.shouldBeADirectory()
+                it.shouldBeEmptyDirectory()
+            }
+        }
+    }
 
     @Nested
     inner class Age {
@@ -144,27 +188,69 @@ class PathsKtTest {
         }
     }
 
-    @Suppress("SpellCheckingInspection")
-    @Test
-    fun `should compute checksums`(@TempDir tempDir: Path) = tests {
-        val file = tempDir.resolve("file").apply { writeText("content") }
-        file.computeHash(MessageDigests.MD5()) shouldBe byteArrayOf(
-            -102, 3, 100, -71, -23, -101, -76, -128, -35, 37, -31, -16, 40, 76, -123, 85
-        )
-        file.computeChecksum(MessageDigests.MD5()) shouldBe "9a0364b9e99bb480dd25e1f0284c8555"
-        file.computeMd5Checksum() shouldBe "9a0364b9e99bb480dd25e1f0284c8555"
+    @Nested
+    inner class ComputeHash {
 
-        file.computeHash(MessageDigests.`SHA-1`()) shouldBe byteArrayOf(
-            4, 15, 6, -3, 119, 64, -110, 71, -115, 69, 7, 116, -11, -70, 48, -59, -38, 120, -84, -56
-        )
-        file.computeChecksum(MessageDigests.`SHA-1`()) shouldBe "040f06fd774092478d450774f5ba30c5da78acc8"
-        file.computeSha1Checksum() shouldBe "040f06fd774092478d450774f5ba30c5da78acc8"
+        private fun byteArrayOf(vararg bytes: Int) =
+            bytes.map { it.toByte() }.toByteArray()
 
-        file.computeHash(MessageDigests.`SHA-256`()) shouldBe byteArrayOf(
-            -19, 112, 2, -76, 57, -23, -84, -124, 95, 34, 53, 125, -126, 43, -84, 20, 68, 115, 15, -67, -74, 1, 109, 62, -55, 67, 34, -105, -71, -20, -97, 115
-        )
-        file.computeChecksum(MessageDigests.`SHA-256`()) shouldBe "ed7002b439e9ac845f22357d822bac1444730fbdb6016d3ec9432297b9ec9f73"
-        file.computeSha256Checksum() shouldBe "ed7002b439e9ac845f22357d822bac1444730fbdb6016d3ec9432297b9ec9f73"
+        private val bytes = byteArrayOf(Byte.MIN_VALUE, -1, 0, 1, Byte.MAX_VALUE)
+
+        @Test
+        fun `should compute hash`(@TempDir tempDir: Path) = tests {
+            val file = (tempDir / "md5").apply { writeBytes(bytes) }
+            file.computeHash(MessageDigests.MD5()) shouldBe byteArrayOf(
+                0x0A, 0x12, 0xF1, 0xE7, 0xD3, 0x46, 0xDE, 0x6D,
+                0x51, 0xE7, 0x78, 0x8F, 0xE8, 0x7E, 0xCC, 0xD3,
+            )
+            file.computeHash(MessageDigests.`SHA-1`()) shouldBe byteArrayOf(
+                0x44, 0x5D, 0x11, 0xBD, 0xF8, 0x71, 0x3F, 0x3D, 0x7F, 0xA1,
+                0x33, 0x5B, 0x14, 0x1A, 0x77, 0x98, 0x27, 0x2C, 0xF7, 0x81,
+            )
+            file.computeHash(MessageDigests.`SHA-256`()) shouldBe byteArrayOf(
+                0xFE, 0xDA, 0xBE, 0x10, 0xE6, 0x1B, 0x00, 0xD9, 0x13, 0x00, 0x50, 0x16, 0x9D, 0x67, 0x96, 0xDD,
+                0x86, 0xFC, 0x72, 0xAE, 0xB4, 0xE8, 0x95, 0xCC, 0x0F, 0x8E, 0xF1, 0x90, 0x1B, 0xED, 0x58, 0x27,
+            )
+        }
+
+        @Test
+        fun `should throw on missing file`(@TempDir tempDir: Path) {
+            shouldThrow<NoSuchFileException> { tempDir.resolve("i-dont-exist").computeHash() }
+        }
+
+        @Test
+        fun `should throw on directory`(@TempDir tempDir: Path) {
+            shouldThrow<IOException> { tempDir.computeHash() }
+        }
+    }
+
+    @Nested
+    inner class ComputeChecksum {
+
+        private val bytes = byteArrayOf(Byte.MIN_VALUE, -1, 0, 1, Byte.MAX_VALUE)
+
+        @Suppress("SpellCheckingInspection")
+        @Test
+        fun `should compute checksum`(@TempDir tempDir: Path) = tests {
+            val file = (tempDir / "md5").apply { writeBytes(bytes) }
+            file.computeChecksum(MessageDigests.MD5()) shouldBe "0a12f1e7d346de6d51e7788fe87eccd3"
+            file.computeChecksum(MessageDigests.`SHA-1`()) shouldBe "445d11bdf8713f3d7fa1335b141a7798272cf781"
+            file.computeChecksum(MessageDigests.`SHA-256`()) shouldBe "fedabe10e61b00d9130050169d6796dd86fc72aeb4e895cc0f8ef1901bed5827"
+
+            file.computeMd5Checksum() shouldBe "0a12f1e7d346de6d51e7788fe87eccd3"
+            file.computeSha1Checksum() shouldBe "445d11bdf8713f3d7fa1335b141a7798272cf781"
+            file.computeSha256Checksum() shouldBe "fedabe10e61b00d9130050169d6796dd86fc72aeb4e895cc0f8ef1901bed5827"
+        }
+
+        @Test
+        fun `should throw on missing file`(@TempDir tempDir: Path) {
+            shouldThrow<NoSuchFileException> { tempDir.resolve("i-dont-exist").computeChecksum() }
+        }
+
+        @Test
+        fun `should throw on directory`(@TempDir tempDir: Path) {
+            shouldThrow<IOException> { tempDir.computeChecksum() }
+        }
     }
 
     @Nested
@@ -349,18 +435,6 @@ private inline operator fun <reified T : Temporal> T.minus(duration: Duration): 
         }
     }
 }
-
-/**
- * Returns this file time with the specified [duration] subtracted.
- */
-private operator fun FileTime.minus(duration: Duration): FileTime =
-    FileTime.from(toInstant().minus(duration))
-
-/**
- * Returns a [FileTime] representing the same point of time value
- * on the time-line as this instant.
- */
-private fun Instant.toFileTime(): FileTime = FileTime.from(this)
 
 
 internal fun Path.symbolicLink(): Path = randomPath()
