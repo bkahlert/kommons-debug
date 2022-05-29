@@ -4,6 +4,28 @@
 
 ### Added
 
+*none*
+
+### Changed
+
+*none*
+
+### Deprecated
+
+*none*
+
+### Removed
+
+*none*
+
+### Fixed
+
+*none*
+
+## [0.2.0] - 2022-05-29
+
+### Added
+
 #### trace
 
 Print tracing information
@@ -56,25 +78,9 @@ Decode any string to a sequence or list of graphemes using `String.asGraphemeSeq
 Create an identifier from any string using `CharSequence?.toIdentifier`
 or easily create a random string using `randomString`.
 
-Less verbose edge-case handling using `requireNotEmpty`, `requireNotBlank`, `checkNotEmpty`, `checkNotBlank`, `takeIfNotEmpty`, `takeIfNotBlank`
-, `takeUnlessEmpty` and `takeUnlessBlank`.
+Less verbose edge-case handling using `requireNotEmpty`, `requireNotBlank`, `checkNotEmpty`, `checkNotBlank`,
+`takeIfNotEmpty`, `takeIfNotBlank`, `takeUnlessEmpty` and `takeUnlessBlank`.
 
-
-### Changed
-
-*none*
-
-### Deprecated
-
-*none*
-
-### Removed
-
-*none*
-
-### Fixed
-
-*none*
 
 ## [0.1.0] - 2022-05-24
 
@@ -113,6 +119,8 @@ and backslashes, line feeds, carriage returns, tabs and double quotes escaped.
 
 *none*
 
-[unreleased]: https://github.com/bkahlert/kommons/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/bkahlert/kommons/compare/v0.2.0...HEAD
+
+[0.2.0]: https://github.com/bkahlert/kommons/compare/v0.1.0...v0.2.0
 
 [0.1.0]: https://github.com/bkahlert/kommons/releases/tag/v0.1.0

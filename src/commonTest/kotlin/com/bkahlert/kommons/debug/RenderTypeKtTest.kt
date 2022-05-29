@@ -32,13 +32,13 @@ class RenderTypeTest {
                 )
                 PrimitiveTypes.allValues.map { it.renderType(simplified = false) } shouldContainExactly listOf(
                     "String",
-                    "Boolean", "Char", "Double", "Double",
+                    "Boolean", "Char", "Number", "Number",
                     "UByte", "UShort", "UInt", "ULong",
-                    "Int", "Int", "Int", "Long",
+                    "Number", "Number", "Number", "Long",
 
-                    "BooleanArray", "CharArray", "FloatArray", "DoubleArray",
+                    "Array", "Uint16Array", "Float32Array", "Float64Array",
                     "UByteArray", "UShortArray", "UIntArray", "ULongArray",
-                    "ByteArray", "ShortArray", "IntArray", "LongArray",
+                    "Int8Array", "Int16Array", "Int32Array", "Array",
                     "Array",
                 )
             }
@@ -76,7 +76,7 @@ class RenderTypeTest {
                     "Iterable", "EmptySet", "List", "List"
                 )
                 CollectionTypes.allValues.map { it.renderType(simplified = false) } shouldContainExactly listOf(
-                    "undefined", "EmptySet", "ArrayList", "ArrayList"
+                    "<object>", "EmptySet", "ArrayList", "ArrayList"
                 )
             }
             JVM -> {
@@ -84,10 +84,7 @@ class RenderTypeTest {
                     "Iterable", "Set", "List", "List"
                 )
                 CollectionTypes.allValues.map { it.renderType(simplified = false) } shouldContainExactly listOf(
-                    "com.bkahlert.kommons.debug.CollectionTypes\$iterable$1",
-                    "kotlin.collections.EmptySet",
-                    "java.util.Arrays\$ArrayList",
-                    "java.util.ArrayList",
+                    "<object>", "kotlin.collections.EmptySet", "java.util.Arrays.ArrayList", "java.util.ArrayList",
                 )
             }
         }
@@ -98,11 +95,11 @@ class RenderTypeTest {
             JS -> {
                 ClassTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
                     "Singleton",
-                    "object",
+                    "<object>",
                     "ListImplementingSingleton",
-                    "object",
+                    "<object>",
                     "MapImplementingSingleton",
-                    "object",
+                    "<object>",
                     "OrdinaryClass",
                     "Pair",
                     "Triple",
@@ -110,11 +107,11 @@ class RenderTypeTest {
                 )
                 ClassTypes.allValues.map { it.renderType(simplified = false) } shouldContainExactly listOf(
                     "Singleton",
-                    "undefined",
+                    "<object>",
                     "ListImplementingSingleton",
-                    "undefined",
+                    "<object>",
                     "MapImplementingSingleton",
-                    "undefined",
+                    "<object>",
                     "OrdinaryClass",
                     "Pair",
                     "Triple",
@@ -124,11 +121,11 @@ class RenderTypeTest {
             JVM -> {
                 ClassTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
                     "Singleton",
-                    "object",
+                    "<object>",
                     "ListImplementingSingleton",
-                    "object",
+                    "<object>",
                     "MapImplementingSingleton",
-                    "object",
+                    "<object>",
                     "OrdinaryClass",
                     "Pair",
                     "Triple",
@@ -136,11 +133,11 @@ class RenderTypeTest {
                 )
                 ClassTypes.allValues.map { it.renderType(simplified = false) } shouldContainExactly listOf(
                     "com.bkahlert.kommons.debug.Singleton",
-                    "com.bkahlert.kommons.debug.FixturesKt\$AnonymousSingleton$1",
+                    "<object>",
                     "com.bkahlert.kommons.debug.ListImplementingSingleton",
-                    "com.bkahlert.kommons.debug.FixturesKt\$ListImplementingAnonymousSingleton$1",
+                    "<object>",
                     "com.bkahlert.kommons.debug.MapImplementingSingleton",
-                    "com.bkahlert.kommons.debug.FixturesKt\$MapImplementingAnonymousSingleton$1",
+                    "<object>",
                     "com.bkahlert.kommons.debug.OrdinaryClass",
                     "kotlin.Pair",
                     "kotlin.Triple",
@@ -204,6 +201,7 @@ internal abstract class TypeMap : AbstractMap<KClass<*>, Any>() {
     override val entries: Set<Entry<KClass<out Any>, Any>> by lazy { allValues.associateBy { it::class }.entries }
 }
 
+@Suppress("MemberVisibilityCanBePrivate")
 internal object PrimitiveTypes : TypeMap() {
     const val string: String = "string"
 
@@ -253,6 +251,7 @@ internal object PrimitiveTypes : TypeMap() {
     )
 }
 
+@Suppress("MemberVisibilityCanBePrivate")
 internal object CollectionTypes : TypeMap() {
     val iterable: Iterable<Any?> = object : Iterable<Any?> {
         override fun iterator(): Iterator<Any?> = PrimitiveTypes.values.iterator()
@@ -263,6 +262,7 @@ internal object CollectionTypes : TypeMap() {
     override val allValues: Collection<Any> = listOf(iterable, set, list, mutableList)
 }
 
+@Suppress("MemberVisibilityCanBePrivate")
 internal object ClassTypes : TypeMap() {
     val singleton: Singleton = Singleton
     val anonymousSingleton: Any = AnonymousSingleton
@@ -358,6 +358,7 @@ internal class Owner {
     }
 }
 
+@Suppress("MemberVisibilityCanBePrivate")
 internal object FunctionTypes : TypeMap() {
     val worker: KFunction0<Unit> = ::work0
     val provider: KFunction0<Any> = ::provide0

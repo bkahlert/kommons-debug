@@ -161,6 +161,7 @@ file.computeMd5Checksum()
 file.computeSha1Checksum()
 file.computeSha256Checksum()
 ```
+
 ### Default system locations
 
 Easily access your working directory with `Locations.Default.Work`,

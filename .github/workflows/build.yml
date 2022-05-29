@@ -31,8 +31,6 @@ jobs:
       - name: Build
         uses: gradle/gradle-build-action@v2
         with:
-          distributions-cache-enabled: true
-          dependencies-cache-enabled: true
           arguments: build -Pkotlin.tests.individualTaskReports=true
 
       - name: Upload test reports

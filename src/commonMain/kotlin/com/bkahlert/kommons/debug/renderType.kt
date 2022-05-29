@@ -1,5 +1,6 @@
 package com.bkahlert.kommons.debug
 
+import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty
@@ -7,30 +8,32 @@ import kotlin.reflect.KProperty
 public fun Any.renderType(simplified: Boolean = true): String = buildString { this@renderType.renderTypeTo(this, simplified) }
 
 public fun Any.renderTypeTo(out: StringBuilder, simplified: Boolean = true) {
-    if (simplified) {
-        when (this) {
-            is UByteArray -> out.append("UByteArray")
-            is UShortArray -> out.append("UShortArray")
-            is UIntArray -> out.append("UIntArray")
-            is ULongArray -> out.append("ULongArray")
+    if (simplified) when (this) {
+        is UByteArray -> out.append("UByteArray")
+        is UShortArray -> out.append("UShortArray")
+        is UIntArray -> out.append("UIntArray")
+        is ULongArray -> out.append("ULongArray")
 
-            is Map<*, *> -> if (isPlain) out.append("Map") else out.append(this::class.simpleName ?: "object")
-            is Set<*> -> if (isPlain) out.append("Set") else out.append(this::class.simpleName ?: "object")
-            is List<*> -> if (isPlain) out.append("List") else out.append(this::class.simpleName ?: "object")
-            is Collection<*> -> if (isPlain) out.append("Collection") else out.append(this::class.simpleName ?: "object")
-            is Iterable<*> -> out.append("Iterable")
+        is Map<*, *> -> if (isPlain) out.append("Map") else out.append(this::class.simpleName.sanitize())
+        is Set<*> -> if (isPlain) out.append("Set") else out.append(this::class.simpleName.sanitize())
+        is List<*> -> if (isPlain) out.append("List") else out.append(this::class.simpleName.sanitize())
+        is Collection<*> -> if (isPlain) out.append("Collection") else out.append(this::class.simpleName.sanitize())
+        is Iterable<*> -> out.append("Iterable")
 
-            is KClassifier -> out.append(this::class.simpleName?.removeSuffix("Impl") ?: "⁉️")
-            is KProperty<*> -> out.append(this::class.simpleName?.removeSuffix("Impl") ?: "⁉️")
-            is KFunction<*> -> renderFunctionTypeTo(out)
-            is Function<*> -> renderFunctionTypeTo(out)
-            else -> out.append(this::class.simpleName ?: "object")
-        }
-    } else {
-        out.append(this::class.toString().removePrefix("class ").takeUnless { it == "null" } ?: "object")
-    }
+        is KClassifier -> out.append(this::class.simpleName.sanitize())
+        is KProperty<*> -> out.append(this::class.simpleName.sanitize())
+        is KFunction<*> -> renderFunctionTypeTo(out)
+        is Function<*> -> renderFunctionTypeTo(out)
+        else -> out.append(this::class.simpleName.sanitize())
+    } else this::class.renderQualifiedTypeTo(out)
 }
 
-public fun Function<*>.renderFunctionType(simplified: Boolean = true): String = buildString { this@renderFunctionType.renderFunctionTypeTo(this, simplified) }
+private val objectRegex = "\\$\\d+$".toRegex()
+private fun String?.sanitize() =
+    this?.takeUnless { objectRegex.containsMatchIn(it) }?.removeSuffix("Impl") ?: "<object>"
 
-public expect fun Function<*>.renderFunctionTypeTo(out: StringBuilder, simplified: Boolean = true)
+internal fun KClass<*>.renderQualifiedType(): String = buildString { this@renderQualifiedType.renderQualifiedTypeTo(this) }
+
+internal fun Function<*>.renderFunctionType(simplified: Boolean = true): String = buildString { this@renderFunctionType.renderFunctionTypeTo(this, simplified) }
+
+internal expect fun Function<*>.renderFunctionTypeTo(out: StringBuilder, simplified: Boolean = true)
