@@ -61,7 +61,7 @@ kotlin {
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit5"))
-                implementation(project.dependencies.platform("org.junit:junit-bom:5.8.0-RC1"))
+                implementation(project.dependencies.platform("org.junit:junit-bom:5.9.0-M1"))
                 listOf("api", "engine").forEach { implementation("org.junit.jupiter:junit-jupiter-$it") }
             }
         }
