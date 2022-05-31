@@ -5,7 +5,7 @@ import kotlin.reflect.KFunction
 /** Representation of a stack trace. */
 public class StackTrace(elements: List<StackTraceElement>) : List<StackTraceElement> by elements {
     override fun toString(): String {
-        return joinToString("\nat ")
+        return joinToString("\n    at ")
     }
 
     public companion object

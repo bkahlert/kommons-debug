@@ -3,16 +3,28 @@ package com.bkahlert.kommons.debug
 import com.bkahlert.kommons.debug.Platform.JS
 import com.bkahlert.kommons.debug.Platform.JVM
 import com.bkahlert.kommons.tests
-import io.kotest.matchers.comparables.shouldBeGreaterThan
+import io.kotest.inspectors.shouldForAll
+import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotStartWith
 import io.kotest.matchers.string.shouldStartWith
 import kotlin.test.Test
 
 class StackTraceTest {
+
+    @Test fun to_string() = tests {
+        var stackTrace = ""
+        foo { bar { StackTrace.get().also { stackTrace = it.toString() }.firstOrNull() } }
+        stackTrace.lines() should {
+            it.size shouldBeGreaterThan 3
+            it.first() shouldNotStartWith "    at "
+            it.drop(1).shouldForAll { line -> line shouldStartWith "    at " }
+        }
+    }
 
     @Test fun get_first() = tests {
         StackTrace.get().first() should {
