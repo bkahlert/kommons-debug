@@ -38,16 +38,18 @@ public inline fun <T> T.inspectJs(
     caption: CharSequence? = null,
     includeCallSite: Boolean = true,
     inspect: (Any?) -> Json = { it.toJson() },
-    out: (Json) -> Unit = {
-        if (includeCallSite) console.trace(it)
-        else console.log(it)
-    },
+    noinline out: ((Json) -> Unit)? = null,
     noinline transform: ((T) -> Any?)? = null,
 ): T {
     if (transform != null) {
-        out(json((caption?.toString() ?: "") to inspect(this@inspectJs), "transformed" to inspect(transform(this@inspectJs))))
+        json((caption?.toString() ?: "") to inspect(this@inspectJs), "transformed" to inspect(transform(this@inspectJs)))
     } else {
-        out(inspect(this@inspectJs))
+        inspect(this@inspectJs)
+    }.also {
+        out?.invoke(it) ?: run {
+            if (includeCallSite) console.trace(it)
+            else console.log(it)
+        }
     }
     return this
 }

@@ -54,10 +54,7 @@ public inline fun <T> T.traceJs(
     caption: CharSequence? = null,
     includeCallSite: Boolean = true,
     render: (Any?) -> String = { it.render() },
-    out: (String) -> Unit = {
-        if (includeCallSite) console.trace(it)
-        else console.log(it)
-    },
+    noinline out: ((String) -> Unit)? = null,
     noinline transform: ((T) -> Any?)? = null,
 ): T {
 
@@ -88,6 +85,11 @@ public inline fun <T> T.traceJs(
                 "{" to "}",
             )
         }
-    }.also { out(it) }
+    }.also {
+        out?.invoke(it) ?: run {
+            if (includeCallSite) console.trace(it)
+            else console.log(it)
+        }
+    }
     return this
 }

@@ -76,7 +76,6 @@ public actual fun StackTrace.Companion.demangleFunction(function: String): Strin
     function.replace(functionMangleRegex, "")
 
 /** Gets the current [StackTrace]. */
-@Suppress("NOTHING_TO_INLINE") // = avoid impact on stack trace
 public inline fun StackTrace.Companion.get(stackTrace: () -> Sequence<String>): StackTrace = stackTrace()
     .map { unify(it) }
     .dropWhile { it.startsWith("RuntimeException") || it.startsWith("captureStack ") }
@@ -85,7 +84,7 @@ public inline fun StackTrace.Companion.get(stackTrace: () -> Sequence<String>): 
     .let { StackTrace(it) }
 
 /** Gets the current [StackTrace]. */
-@Suppress("NOTHING_TO_INLINE") // = avoid impact on stack trace
+@Suppress("NOTHING_TO_INLINE") // inline to avoid impact on stack trace
 public actual inline fun StackTrace.Companion.get(): StackTrace = get {
     try {
         throw RuntimeException()
@@ -94,16 +93,23 @@ public actual inline fun StackTrace.Companion.get(): StackTrace = get {
     }.lineSequence()
 }
 
+private fun String.jsBeanMethodToKotlinProperty() = takeUnless {
+    length >= 6 && substring(0, 5).let { it == "_get_" || it == "_set_" }
+} ?: substring(5).replace("__\\d+$".toRegex(), "")
+
+private fun String.simplifyFunction() =
+    replace(generatedFunctionRegex, "").jsBeanMethodToKotlinProperty()
+
 /**
  * Finds the [StackTraceElement] that represents the caller
  * invoking the [StackTraceElement] matching a call to the specified [functions].
  */
 public actual fun StackTrace.findByLastKnownCallsOrNull(vararg functions: String): StackTraceElement? {
     var skipNull = false
-    val demangledFunctions = functions.map { StackTrace.demangleFunction(it) }
+    val simplifiedFunctions = functions.map { StackTrace.demangleFunction(it).simplifyFunction() }
 
     return findOrNull {
-        if (demangledFunctions.contains(it.demangledFunction) || demangledFunctions.contains(it.demangledFunction?.replace(generatedFunctionRegex, ""))) {
+        if (simplifiedFunctions.contains(it.demangledFunction?.simplifyFunction())) {
             skipNull = true
             true
         } else {

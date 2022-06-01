@@ -1,6 +1,7 @@
 package com.bkahlert.kommons.debug
 
 import java.lang.reflect.Method
+import java.util.Locale
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KFunction
@@ -21,9 +22,9 @@ public data class JvmStackTraceElement(
 }
 
 private val functionMangleRegex: Regex = "\\$.*$".toRegex()
+private val generatedFunctionRegex = "\\\$.*".toRegex()
 
 /** Returns the specified [function] with mangling information removed. */
-@Suppress("NOTHING_TO_INLINE") // = avoid impact on stack trace
 public actual fun StackTrace.Companion.demangleFunction(function: String): String =
     function.replace(functionMangleRegex, "")
 
@@ -40,13 +41,12 @@ public val StackTraceElement.`class`: Class<*> get() = Class.forName(receiver)
 public val StackTraceElement.kClass: KClass<*> get() = `class`.kotlin
 
 /** The method containing the execution point represented by this element. */
-public val java.lang.StackTraceElement.method: Method get() = `class`.declaredMethods.single { it.name == methodName }
 
 /** The method containing the execution point represented by this element. */
 public val StackTraceElement.method: Method get() = `class`.declaredMethods.single { it.name == function }
 
 /** Gets the current [StackTrace]. */
-@Suppress("NOTHING_TO_INLINE") // = avoid impact on stack trace
+@Suppress("NOTHING_TO_INLINE") // inline to avoid impact on stack trace
 public actual inline fun StackTrace.Companion.get(): StackTrace =
     Thread.currentThread().stackTrace
         .dropWhile { it.className == Thread::class.qualifiedName }
@@ -77,15 +77,23 @@ public fun StackTrace.findByLastKnownCallsOrNull(vararg functions: Pair<String?,
 public fun StackTrace.findByLastKnownCallsOrNull(receiver: KClassifier, function: String): StackTraceElement? =
     findByLastKnownCallsOrNull(receiver.toString() to function)
 
+private fun String.javaBeanMethodToKotlinProperty() = takeUnless {
+    length >= 4 && substring(0, 3).let { it == "get" || it == "set" } && this[3].isUpperCase()
+} ?: substring(3).replaceFirstChar { it.lowercase(Locale.getDefault()) }
+
+private fun String.simplifyFunction() =
+    replace(generatedFunctionRegex, "").javaBeanMethodToKotlinProperty()
+
 /**
  * Finds the [StackTraceElement] that represents the caller
  * invoking the [StackTraceElement] matching a call to the specified [functions].
  */
 public actual fun StackTrace.findByLastKnownCallsOrNull(vararg functions: String): StackTraceElement? {
     var skipInvoke = false
-    val demangledFunctions = functions.map { StackTrace.demangleFunction(it) }
+    val simplifiedFunctions = functions.map { StackTrace.demangleFunction(it).simplifyFunction() }
+
     return findOrNull {
-        if (demangledFunctions.contains(it.demangledFunction)) {
+        if (simplifiedFunctions.contains(it.demangledFunction?.simplifyFunction())) {
             skipInvoke = true
             true
         } else {

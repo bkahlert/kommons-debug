@@ -5,7 +5,6 @@ import com.bkahlert.kommons.isSubPathOf
 import com.bkahlert.kommons.tests
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.nio.file.Path
@@ -14,6 +13,7 @@ import kotlin.io.path.div
 import kotlin.io.path.pathString
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
+import kotlin.system.exitProcess
 
 class IsolatedProcessTest {
 
@@ -29,7 +29,7 @@ class IsolatedProcessTest {
     fun `should return non-zero exit code on error`(@TempDir tempDir: Path) = tests {
         val file = tempDir / "not-existing-dir" / "file"
         val result = IsolatedProcess.exec(TestClass::class, file.pathString)
-        result shouldNotBe 0
+        result shouldBe 1
     }
 
     @Test
@@ -43,9 +43,11 @@ class TestClass {
     companion object {
         @JvmStatic
         fun main(vararg args: String) {
-            val file = Paths.get(args.first())
-            require(file.isSubPathOf(Locations.Default.Temp))
-            file.writeText("foo")
+            kotlin.runCatching {
+                val file = Paths.get(args.first())
+                require(file.isSubPathOf(Locations.Default.Temp))
+                file.writeText("foo")
+            }.onFailure { exitProcess(1) }
         }
     }
 }

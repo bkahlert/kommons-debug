@@ -37,6 +37,7 @@ public interface StackTraceElement {
 public expect fun StackTrace.Companion.demangleFunction(function: String): String
 
 /** Gets the current [StackTrace]. */
+@Suppress("NOTHING_TO_INLINE") // inline to avoid impact on stack trace
 public expect inline fun StackTrace.Companion.get(): StackTrace
 
 

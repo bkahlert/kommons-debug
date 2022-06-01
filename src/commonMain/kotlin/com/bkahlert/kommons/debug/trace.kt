@@ -27,7 +27,7 @@ import com.bkahlert.kommons.isMultiline
  */
 @Suppress("GrazieInspection", "DEPRECATION")
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
-public inline val <T> T.trace: T get(): T = trace()
+public val <T> T.trace: T get(): T = trace()
 
 /**
  * Helper property that supports
