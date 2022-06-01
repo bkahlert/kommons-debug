@@ -5,8 +5,21 @@ import kotlin.reflect.KClassifier
 import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty
 
+/**
+ * Renders the (simplified) type of this object.
+ *
+ * Example:
+ * ```kotlin
+ * "string".renderType() // "kotlin.String"
+ * "string".renderType(simplified=false) // "String"
+ * ```
+ */
 public fun Any.renderType(simplified: Boolean = true): String = buildString { this@renderType.renderTypeTo(this, simplified) }
 
+/**
+ * Renders the (simplified) type of this object to the specified [out].
+ * @see renderType
+ */
 public fun Any.renderTypeTo(out: StringBuilder, simplified: Boolean = true) {
     if (simplified) when (this) {
         is UByteArray -> out.append("UByteArray")
@@ -32,8 +45,24 @@ private val objectRegex = "\\$\\d+$".toRegex()
 private fun String?.sanitize() =
     this?.takeUnless { objectRegex.containsMatchIn(it) }?.removeSuffix("Impl") ?: "<object>"
 
+/**
+ * Renders the qualified type of this class.
+ */
 internal fun KClass<*>.renderQualifiedType(): String = buildString { this@renderQualifiedType.renderQualifiedTypeTo(this) }
 
+/**
+ * Renders the qualified type of this class to the specified [out].
+ * @see renderQualifiedType
+ */
+internal expect fun KClass<*>.renderQualifiedTypeTo(out: StringBuilder)
+
+/**
+ * Renders the type of this function.
+ */
 internal fun Function<*>.renderFunctionType(simplified: Boolean = true): String = buildString { this@renderFunctionType.renderFunctionTypeTo(this, simplified) }
 
+/**
+ * Renders the type of this function to the specified [out].
+ * @see renderFunctionType
+ */
 internal expect fun Function<*>.renderFunctionTypeTo(out: StringBuilder, simplified: Boolean = true)

@@ -29,17 +29,6 @@ class JsStackTraceTest {
         JsStackTraceElement.parseOrNull("$file:5:20") shouldBe stackTraceElement
     }
 
-    fun String.unifyStackTraceElement(): String =
-        if (contains("@")) "^(?<receiverAndFunction>[^@]*)@(?<location>[^@]*)$".toRegex().replace(this) {
-            it.destructured.let { (receiverAndFunction, location) ->
-                if (receiverAndFunction.isNotEmpty()) "$receiverAndFunction ($location)" else location
-            }
-        } else removePrefix("    at ")
-
-    fun String.y(): Sequence<String> {
-        return lineSequence().map { it.unifyStackTraceElement() }
-    }
-
     @Test fun get_firefox_stack_trace() = tests {
         StackTrace.get { firefoxStackTrace.lineSequence() }.shouldContainExactly(
             JsStackTraceElement(null, "trace", "webpack-internal:///./kotlin/hello.js", 1949, 35),
@@ -72,6 +61,7 @@ class JsStackTraceTest {
         )
     }
 
+    @Suppress("SpellCheckingInspection")
     @Test fun get_headless_chrome_stack_trace() = tests {
         StackTrace.get { headlessChromeStackTrace.lineSequence() }.shouldContainExactly(
             JsStackTraceElement(null, "trace", "http://localhost:9876/absolute/karma/commons.js?16bb", 40617, 35),
@@ -100,7 +90,7 @@ class JsStackTraceTest {
     }
 }
 
-private val file = "http://localhost:9876/absolute/your/path/commons.js?09b8"
+private const val file = "http://localhost:9876/absolute/your/path/commons.js?09b8"
 internal val stackTraceElementWithReceiverAndFunction = JsStackTraceElement("AnyReceiver", "anyFun_hash_k\$", file, 5, 20)
 internal val stackTraceElementWithReceiverAndAnonymousFunction = JsStackTraceElement("AnyReceiver", "<anonymous>", file, 5, 20)
 internal val stackTraceElementWithFunction = JsStackTraceElement(null, "anyFun", file, 5, 20)
@@ -136,6 +126,8 @@ internal val chromeStackTrace = """
         at http://localhost:8080/hello.js:4235:37
         at http://localhost:8080/hello.js:4238:12
 """.trimIndent()
+
+@Suppress("SpellCheckingInspection")
 internal val headlessChromeStackTrace = """
     RuntimeException
         at trace (http://localhost:9876/absolute/karma/commons.js?16bb:40617:35)

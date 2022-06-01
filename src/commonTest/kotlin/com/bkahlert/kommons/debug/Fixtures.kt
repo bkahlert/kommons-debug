@@ -1,3 +1,5 @@
+@file:Suppress("MayBeConstant")
+
 package com.bkahlert.kommons.debug
 
 internal expect fun nativeObject(): Any
@@ -69,5 +71,5 @@ internal class ClassWithCustomToString(@Suppress("unused") val foo: Any? = null)
 }
 
 internal class SelfReferencingClass : BaseClass() {
-    val selfProperty: SelfReferencingClass = this
+    @Suppress("unused") val selfProperty: SelfReferencingClass = this
 }

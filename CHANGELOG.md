@@ -8,7 +8,33 @@
 
 ### Changed
 
-*none*
+Move parameter of `inspect` parameter of tracing functions to receiver, so that
+
+```kotlin
+data class Foo(val bar: String = "baz") {
+    private val baz = 42.0
+}
+
+Foo().trace("details") { it.bar.reversed() }
+// output: (sample.kt:5) details ⟨ Foo(bar=baz) ⟩ { "zab" }
+
+Foo().inspect("details") { it.bar.reversed() }
+// output: (sample.kt:8) details ⟨ !Foo { baz: !Double 42.0, bar: !String "baz" } ⟩ { !String "zab" }
+```
+
+becomes
+
+```kotlin
+data class Foo(val bar: String = "baz") {
+    private val baz = 42.0
+}
+
+Foo().trace("details") { bar.reversed() }
+// output: (sample.kt:33) details ⟨ Foo(bar=baz) ⟩ { "zab" }
+
+Foo().inspect("details") { bar.reversed() }
+// output: (sample.kt:36) details ⟨ !Foo { baz: !Double 42.0, bar: !String "baz" } ⟩ { !String "zab" }
+```
 
 ### Deprecated
 

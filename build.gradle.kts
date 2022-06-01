@@ -67,6 +67,7 @@ kotlin {
         }
         val jsMain by getting {
             dependencies {
+                @Suppress("SpellCheckingInspection")
                 implementation(npm("xregexp", "5.1.0"))
                 implementation(npm("grapheme-splitter", "1.0.4"))
             }
@@ -132,6 +133,7 @@ val javadocJar = tasks.register<Jar>("javadocJar") {
 
 publishing {
     repositories {
+        @Suppress("SpellCheckingInspection")
         maven {
             name = "OSSRH"
             url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")

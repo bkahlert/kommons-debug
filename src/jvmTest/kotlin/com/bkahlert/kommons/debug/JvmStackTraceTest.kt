@@ -36,7 +36,7 @@ class JvmStackTraceTest {
     }
 }
 
-private val file = "AnyReceiverImpl.kt"
+private const val file = "AnyReceiverImpl.kt"
 internal val stackTraceElementWithColumn = JvmStackTraceElement("any.package.AnyReceiver", "anyFun", file, 5, 20)
 internal val stackTraceElementWithNegativeLine = JvmStackTraceElement("any.package.AnyReceiver", "anyFun", file, -5, null)
 internal val stackTraceElement = JvmStackTraceElement("any.package.AnyReceiver", "anyFun", file, 5, null)

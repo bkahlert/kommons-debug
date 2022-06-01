@@ -1,3 +1,5 @@
+@file:Suppress("MayBeConstant")
+
 package com.bkahlert.kommons.debug
 
 internal object NativeObject {

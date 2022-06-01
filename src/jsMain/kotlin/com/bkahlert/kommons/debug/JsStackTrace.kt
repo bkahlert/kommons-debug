@@ -40,6 +40,10 @@ public data class JsStackTraceElement(
         private val RenderedStackTraceElementRegex =
             "^(?:(?:(?<receiver>[^. ]+)\\.)?(?<function>[^ ]*)?\\s+)?\\(?(?<file>[^()]+):(?<line>\\d+):(?<column>\\d+)\\)?\$".toRegex()
 
+        /**
+         * Parses the specified [renderedStackTraceElement] as [JsStackTraceElement] and,
+         * if successful, returns it. Returns `null` otherwise.
+         */
         public fun parseOrNull(renderedStackTraceElement: String): JsStackTraceElement? {
             return RenderedStackTraceElementRegex
                 .matchEntire(renderedStackTraceElement)

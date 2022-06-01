@@ -129,6 +129,8 @@ public fun String.withSuffix(suffix: CharSequence): String = if (endsWith(suffix
 
 private const val randomSuffixLength = 4
 private const val randomSuffixSeparator = "--"
+
+@Suppress("RegExpSimplifiable")
 private val randomSuffixMatcher: Regex = Regex(".*$randomSuffixSeparator[\\da-zA-Z]{$randomSuffixLength}\$")
 
 /** Returns this char sequence with a random suffix of two dashes dash and four alphanumeric characters. */

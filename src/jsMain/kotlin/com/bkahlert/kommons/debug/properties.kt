@@ -6,7 +6,7 @@ import kotlin.js.Json
 import kotlin.js.json
 
 private fun sanitizeKey(key: String): String =
-    key.replace("(.+)_\\d+".toRegex()) { it.groupValues.drop(1).first() }
+    key.replace("(?<key>.+)_\\d+".toRegex()) { it.groupValues.drop(1).first() }
 
 /**
  * Contains a [Map] of this object's properties with each [Map.Entry.key] representing

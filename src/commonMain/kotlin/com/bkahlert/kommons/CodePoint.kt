@@ -63,9 +63,7 @@ public value class CodePoint(
     public val isAlphanumeric: Boolean get() = Regex("[\\p{L} \\p{Nd}]").matches(string)
 }
 
-/**
- * Contains the character pointed to and represented by a [String].
- */
+/** Contains the character pointed to and represented by a [String]. */
 public expect val CodePoint.string: String
 
 /** Contains the [Char] representing this code point **if** it can be represented by a single [Char]. */

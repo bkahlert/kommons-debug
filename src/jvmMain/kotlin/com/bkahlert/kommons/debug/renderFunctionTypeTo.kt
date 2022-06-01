@@ -5,15 +5,19 @@ import kotlin.reflect.KParameter
 import kotlin.reflect.KType
 import kotlin.reflect.jvm.reflect
 
+/**
+ * Renders the type of this function to the specified [out].
+ * @see renderFunctionType
+ */
 public actual fun Function<*>.renderFunctionTypeTo(out: StringBuilder, simplified: Boolean) {
     when (val kFunction = if (this is KFunction<*>) this else reflect()) {
         is KFunction<*> -> {
             val parametersByKind = kFunction.parameters.groupBy { it.kind }
-            parametersByKind.getOrDefault(KParameter.Kind.INSTANCE, emptyList()).forEach { it: KParameter ->
+            parametersByKind.getOrDefault(KParameter.Kind.INSTANCE, emptyList()).forEach {
                 out.append(renderType(it.type, simplified))
                 out.append(".")
             }
-            parametersByKind.getOrDefault(KParameter.Kind.EXTENSION_RECEIVER, emptyList()).forEach { it: KParameter ->
+            parametersByKind.getOrDefault(KParameter.Kind.EXTENSION_RECEIVER, emptyList()).forEach {
                 out.append(renderType(it.type, simplified))
                 out.append(".")
             }

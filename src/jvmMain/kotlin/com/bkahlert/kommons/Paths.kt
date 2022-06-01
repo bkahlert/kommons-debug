@@ -84,19 +84,17 @@ public var Path.lastModified: FileTime
         Files.setLastModifiedTime(this, fileTime)
     }
 
-/** [MessageDigest] implementations safe to use on all Java platforms. */
-public enum class MessageDigests {
-    MD5, `SHA-1`, `SHA-256`;
+/** Provider for [MessageDigest] implementations safe to use on all Java platforms. */
+public enum class MessageDigestProvider : () -> MessageDigest {
+    MD5, @Suppress("EnumEntryName") `SHA-1`, @Suppress("EnumEntryName") `SHA-256`;
 
-    public operator fun invoke(): MessageDigest =
+    public override operator fun invoke(): MessageDigest =
         checkNotNull(MessageDigest.getInstance(name)) { "Failed to instantiate $name message digest" }
 }
 
-/**
- * Computes the hash of this file using the specified [messageDigest].
- */
-public fun Path.computeHash(messageDigest: MessageDigest = MessageDigests.`SHA-256`()): ByteArray =
-    DigestInputStream(inputStream(), messageDigest).use {
+/** Computes the hash of this file using the specified [messageDigestProvider]. */
+public fun Path.computeHash(messageDigestProvider: () -> MessageDigest = MessageDigestProvider.`SHA-256`): ByteArray =
+    DigestInputStream(inputStream(), messageDigestProvider()).use {
         while (it.read() != -1) {
             // clear data
         }
@@ -104,26 +102,26 @@ public fun Path.computeHash(messageDigest: MessageDigest = MessageDigests.`SHA-2
     }
 
 /**
- * Computes the hash of this file using the specified [messageDigest]
+ * Computes the hash of this file using the specified [messageDigestProvider]
  * and returns it formatted as a checksum.
  */
-public fun Path.computeChecksum(messageDigest: MessageDigest = MessageDigests.`SHA-256`()): String =
-    computeHash(messageDigest).toHexadecimalString()
+public fun Path.computeChecksum(messageDigestProvider: () -> MessageDigest = MessageDigestProvider.`SHA-256`): String =
+    computeHash(messageDigestProvider).toHexadecimalString()
 
 /**
- * Computes the [MessageDigests.MD5] hash of this file and returns it formatted as a checksum.
+ * Computes the [MessageDigestProvider.MD5] hash of this file and returns it formatted as a checksum.
  */
-public fun Path.computeMd5Checksum(): String = computeChecksum(MessageDigests.MD5())
+public fun Path.computeMd5Checksum(): String = computeChecksum(MessageDigestProvider.MD5)
 
 /**
  * Computes the [MessageDigests.SHA-1] hash of this file and returns it formatted as a checksum.
  */
-public fun Path.computeSha1Checksum(): String = computeChecksum(MessageDigests.`SHA-1`())
+public fun Path.computeSha1Checksum(): String = computeChecksum(MessageDigestProvider.`SHA-1`)
 
 /**
  * Computes the [MessageDigests.SHA-256] hash of this file and returns it formatted as a checksum.
  */
-public fun Path.computeSha256Checksum(): String = computeChecksum(MessageDigests.`SHA-256`())
+public fun Path.computeSha256Checksum(): String = computeChecksum(MessageDigestProvider.`SHA-256`)
 
 
 private fun Path.getPathMatcher(glob: String): PathMatcher? {

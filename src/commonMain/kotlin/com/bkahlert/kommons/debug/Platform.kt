@@ -2,7 +2,11 @@ package com.bkahlert.kommons.debug
 
 /** Platforms this program can be run on. */
 public enum class Platform {
-    JS, JVM;
+    /** JavaScript based platform, e.g. browser. */
+    JS,
+
+    /** Java virtual machine. */
+    JVM;
 
     public companion object
 }

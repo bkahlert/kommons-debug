@@ -1,5 +1,8 @@
 package com.bkahlert.kommons
 
+/**
+ * Contains the character pointed to and represented by a [String].
+ */
 public actual val CodePoint.string: String
     get() = if (index < 0x10000) {
         index.toChar().toString()
@@ -10,6 +13,7 @@ public actual val CodePoint.string: String
         "${high.toChar()}${low.toChar()}"
     }
 
+@Suppress("SpellCheckingInspection")
 private val XRegExp = js("require('xregexp')")
 private val letterRegexp = XRegExp("^\\p{L}$")
 private val digitRegexp = XRegExp("^\\p{N}$")

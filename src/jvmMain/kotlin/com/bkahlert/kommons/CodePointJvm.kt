@@ -1,8 +1,10 @@
 package com.bkahlert.kommons
 
+/**
+ * Contains the character pointed to and represented by a [String].
+ */
 public actual val CodePoint.string: String
     get() = buildString { appendCodePoint(index) }
-
 
 /** Whether this code point is a letter. */
 public actual val CodePoint.isLetter: Boolean
@@ -16,7 +18,7 @@ public actual val CodePoint.isDigit: Boolean
 public actual val CodePoint.isWhitespace: Boolean
     get() = Character.isWhitespace(index)
 
-
+/** Returns a sequence yielding the [CodePoint] instances this string consists of. */
 public actual fun String.asCodePointSequence(): Sequence<CodePoint> {
     var pos = 0
     return sequence {

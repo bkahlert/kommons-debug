@@ -39,7 +39,7 @@ public inline fun <T> T.inspectJs(
     includeCallSite: Boolean = true,
     inspect: (Any?) -> Json = { it.toJson() },
     noinline out: ((Json) -> Unit)? = null,
-    noinline transform: ((T) -> Any?)? = null,
+    noinline transform: Inspector<T>? = null,
 ): T {
     if (transform != null) {
         json((caption?.toString() ?: "") to inspect(this@inspectJs), "transformed" to inspect(transform(this@inspectJs)))

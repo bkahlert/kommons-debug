@@ -25,19 +25,23 @@ public interface Locations {
     /**
      * Working directory, that is, the directory in which this binary is located.
      */
+    @Suppress("PropertyName")
     public val Work: Path
 
     /**
      * Home directory of the currently logged-in user.
      */
+    @Suppress("PropertyName")
     public val Home: Path
 
     /**
      * Directory in which temporary data can be stored.
      */
+    @Suppress("PropertyName")
     public val Temp: Path
 
     /** Directory of the currently running Java distribution. */
+    @Suppress("PropertyName")
     public val JavaHome: Path
 
     public companion object {

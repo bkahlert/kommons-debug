@@ -62,10 +62,8 @@ public fun Any?.render(
 ): String = buildString { this@render.renderTo(this, typing, compression, customToString, rendered, include) }
 
 /**
- * Renders this object depending on whether its `toString()` is overridden:
- * - If there is a custom `toString()` it is simply used.
- * - If there is *no custom* `toString()` the object is serialized structurally.
- *   The serialization can be [typing] (default: [Typing.Untyped]) and [compression] (default: [Compression.Auto]).
+ * Renders this object to the specified [out].
+ * @see render
  */
 public fun Any?.renderTo(
     out: StringBuilder,

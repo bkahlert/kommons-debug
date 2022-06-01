@@ -53,11 +53,11 @@ class DelegatingCharSequenceTest {
 
 private fun assertFoo(foo: CharSequence) {
     assertEquals(3, foo.length)
-    assertTrue { kotlin.runCatching { foo[-1] }.isFailure }
+    assertTrue { runCatching { foo[-1] }.isFailure }
     assertEquals('f', foo[0])
     assertEquals('o', foo[1])
     assertEquals('o', foo[2])
-    assertTrue { kotlin.runCatching { foo[3] }.isFailure }
+    assertTrue { runCatching { foo[3] }.isFailure }
     assertEquals("foo", foo.subSequence(0, 3).toString())
     assertEquals("fo", foo.subSequence(0, 2).toString())
     assertEquals("o", foo.subSequence(1, 2).toString())

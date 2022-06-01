@@ -2,7 +2,15 @@ package com.bkahlert.kommons.debug
 
 import com.bkahlert.kommons.Unicode
 import com.bkahlert.kommons.debug.Platform.JVM
+import com.bkahlert.kommons.debug.Typing.SimplyTyped
 import com.bkahlert.kommons.isMultiline
+
+/** Function that renders any object. */
+public typealias Renderer = (Any?) -> String
+/** Function that outputs any string. */
+public typealias Printer = (String) -> Unit
+/** Function that transform an instance of type `T` for further inspection. */
+public typealias Inspector<T> = T.() -> Any?
 
 /**
  * Helper property that supports
@@ -56,9 +64,9 @@ public fun <T> T.trace(
     caption: CharSequence? = null,
     highlight: Boolean = Platform.Current == JVM,
     includeCallSite: Boolean = true,
-    render: (Any?) -> String = { it.render() },
-    out: ((String) -> Unit)? = null,
-    inspect: ((T) -> Any?)? = null
+    render: Renderer = { it.render() },
+    out: Printer? = null,
+    inspect: Inspector<T>? = null
 ): T {
     val call = if (includeCallSite) StackTrace.get().findByLastKnownCallsOrNull(::inspect, ::trace) else null
     buildString {
@@ -103,9 +111,9 @@ public fun <T> T.inspect(
     caption: CharSequence? = null,
     highlight: Boolean = Platform.Current == JVM,
     includeCallSite: Boolean = true,
-    typing: Typing = Typing.SimplyTyped,
-    out: ((String) -> Unit)? = null,
-    inspect: ((T) -> Any?)? = null
+    typing: Typing = SimplyTyped,
+    out: Printer? = null,
+    inspect: Inspector<T>? = null
 ): T = trace(caption, highlight, includeCallSite, { it.render(typing = typing, customToString = CustomToString.Ignore) }, out, inspect)
 
 internal fun StringBuilder.appendWrapped(value: String, brackets: Pair<String, String>) {

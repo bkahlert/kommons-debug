@@ -53,18 +53,18 @@ public inline val <T> T.traceJs: T get(): T = traceJs()
 public inline fun <T> T.traceJs(
     caption: CharSequence? = null,
     includeCallSite: Boolean = true,
-    render: (Any?) -> String = { it.render() },
-    noinline out: ((String) -> Unit)? = null,
-    noinline transform: ((T) -> Any?)? = null,
+    render: Renderer = { it.render() },
+    noinline out: Printer? = null,
+    noinline transform: Inspector<T>? = null,
 ): T {
 
-    val appendWrapped: (StringBuilder, String, Pair<String, String>) -> Unit = { sb, value, brackets ->
+    val appendWrapped: (StringBuilder, String, Pair<String, String>) -> Unit = { sb, value, (left, right) ->
         val separator = if (value.isMultiline) Unicode.LINE_FEED else ' '
-        sb.append(brackets.first)
+        sb.append(left)
         sb.append(separator)
         sb.append(value)
         sb.append(separator)
-        sb.append(brackets.second)
+        sb.append(right)
     }
 
     buildString {

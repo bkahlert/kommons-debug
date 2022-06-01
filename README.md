@@ -26,7 +26,7 @@ Kommons Debug is hosted on GitHub with releases provided on Maven Central.
 
 ## Features
 
-### Any?.trace
+### Any?.trace / Any?.inspect
 
 Print tracing information and easily cleanup afterwards using
 IntelliJ's code cleanup
@@ -34,18 +34,36 @@ IntelliJ's code cleanup
 #### Example
 
 ```kotlin
-"string".trace                           // prints: (Example.kt:1) ⟨ "string" ⟩
-"string".trace("caption")                // prints: (Example.kt:2) caption ⟨ "string" ⟩
-"string".trace("caption") { it.length }  // prints: (Example.kt:3) caption ⟨ "string" ⟩ { 6 }
+data class Foo(val bar: String = "baz") {
+    private val baz = 42.0
+}
 
-class Foo(val bar: Any = "baz")
-foo().trace.bar                          // prints: (Example.kt:6) ⟨ { bar="baz" } ⟩; returns "baz"
+Foo().trace
+// output: (sample.kt:5) ⟨ Foo(bar=baz) ⟩
 
-// use inspect to print more details and ignore
-// custom toString() implementations
-foo().inspect                            // prints: (Example.kt:10) ⟨ !Foo { bar="baz" } ⟩
-foo().inspect(fullyQualified = true)       // prints: (Example.kt:11) ⟨ !my.package.Foo { bar="baz" } ⟩
+Foo().trace("caption")
+// output: (sample.kt:8) caption ⟨ Foo(bar=baz) ⟩
+
+Foo().trace("details") { it.bar.reversed() }
+// output: (sample.kt:11) details ⟨ Foo(bar=baz) ⟩ { "zab" }
+
+Foo().inspect
+// output: (sample.kt:14) ⟨ !Foo { baz: !Double 42.0, bar: !String "baz" } ⟩
+
+Foo().inspect("caption")
+// output: (sample.kt:17) caption ⟨ !Foo { baz: !Double 42.0, bar: !String "baz" } ⟩
+
+Foo().inspect("details") { it.bar.reversed() }
+// output: (sample.kt:20) details ⟨ !Foo { baz: !Double 42.0, bar: !String "baz" } ⟩ { !String "zab" }
 ```
+
+![docs/trace-cleanup.png](docs/trace-cleanup.png)
+
+The example above also work in browsers:
+
+![docs/trace-browser-console.png](docs/trace-browser-console.png)
+
+![docs/trace-browser-sources.png](docs/trace-browser-sources.png)
 
 ### Any.renderType()
 
@@ -245,7 +263,7 @@ Instant.parse("1910-06-22T13:00:00Z") - 2.hours   // 1910-06-22T10:00:00Z
 ## Contributing
 
 Want to contribute? Awesome! The most basic way to show your support is to star the project, or to raise issues. You can also support this project by making
-a [Paypal donation](https://www.paypal.me/bkahlert) to ensure this journey continues indefinitely!
+a [PayPal donation](https://www.paypal.me/bkahlert) to ensure this journey continues indefinitely!
 
 Thanks again for your support, it is much appreciated! :pray:
 

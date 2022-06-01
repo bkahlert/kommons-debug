@@ -189,19 +189,19 @@ internal val charSequence: CharSequence = StringBuilder().append("char sequence"
 internal val emptyCharSequence: CharSequence = StringBuilder()
 internal val blankCharSequence: CharSequence = StringBuilder().append("   ")
 
-internal val string: String = "string"
-internal val emptyString: String = ""
-internal val blankString: String = "   "
+internal const val string: String = "string"
+internal const val emptyString: String = ""
+internal const val blankString: String = "   "
 
 
 /** [String] containing CSI (`control sequence intro`) escape sequences */
-internal val ansiCsiString: String = "[1mbold [34mand blue[0m"
+internal const val ansiCsiString: String = "[1mbold [34mand blue[0m"
 
 /** [CharSequence] containing CSI (`control sequence intro`) escape sequences */
 internal val ansiCsiCharSequence: CharSequence = StringBuilder().append(ansiCsiString)
 
 /** [String] containing CSI (`control sequence intro`) escape sequences */
-internal val ansiOscString: String = "[34m↗(B[m ]8;;https://example.com\\link]8;;\\"
+internal const val ansiOscString: String = "[34m↗(B[m ]8;;https://example.com\\link]8;;\\"
 
 /** [CharSequence] containing CSI (`control sequence intro`) escape sequences */
 internal val ansiOscCharSequence: CharSequence = StringBuilder().append(ansiOscString)
