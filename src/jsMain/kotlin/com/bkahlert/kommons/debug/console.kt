@@ -1,9 +1,6 @@
 package com.bkahlert.kommons.debug
 
-/**
- * Exposes the [console API](https://developer.mozilla.org/en/DOM/console) to Kotlin.
- */
-@Suppress("NOT_DOCUMENTED")
+/** Exposes the [console API](https://developer.mozilla.org/en/DOM/console) to Kotlin. */
 public external interface Console : kotlin.js.Console {
 
     /**
