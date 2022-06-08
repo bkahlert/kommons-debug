@@ -1,6 +1,5 @@
-package com.bkahlert.kommons.debug
+package com.bkahlert.kommons
 
-import com.bkahlert.kommons.Locations
 import java.nio.file.Path
 import kotlin.io.path.div
 import kotlin.io.path.pathString

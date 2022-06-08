@@ -1,6 +1,5 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.debug.toHexadecimalString
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.comparables.shouldBeEqualComparingTo

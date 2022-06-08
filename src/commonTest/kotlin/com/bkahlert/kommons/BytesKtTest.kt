@@ -1,6 +1,5 @@
-package com.bkahlert.kommons.debug
+package com.bkahlert.kommons
 
-import com.bkahlert.kommons.tests
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe

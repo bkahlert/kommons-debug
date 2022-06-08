@@ -1,6 +1,5 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.debug.toHexadecimalString
 import java.io.IOException
 import java.nio.file.DirectoryNotEmptyException
 import java.nio.file.FileSystem

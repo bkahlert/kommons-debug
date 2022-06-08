@@ -185,9 +185,9 @@ class StringsTest {
     }
 }
 
-internal val charSequence: CharSequence = StringBuilder().append("char sequence")
+internal val charSequence: CharSequence = StringBuilder("char sequence")
 internal val emptyCharSequence: CharSequence = StringBuilder()
-internal val blankCharSequence: CharSequence = StringBuilder().append("   ")
+internal val blankCharSequence: CharSequence = StringBuilder("   ")
 
 internal const val string: String = "string"
 internal const val emptyString: String = ""

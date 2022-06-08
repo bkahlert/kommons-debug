@@ -1,8 +1,10 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.Current
+import com.bkahlert.kommons.Platform
+import com.bkahlert.kommons.Platform.JS
+import com.bkahlert.kommons.Platform.JVM
 import com.bkahlert.kommons.Unicode
-import com.bkahlert.kommons.debug.Platform.JS
-import com.bkahlert.kommons.debug.Platform.JVM
 
 /** This string platform-specifically cyan colored and emphasized. */
 public val CharSequence.highlighted: String

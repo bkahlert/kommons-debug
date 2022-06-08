@@ -1,8 +1,6 @@
-package com.bkahlert.kommons.debug
+package com.bkahlert.kommons
 
-import com.bkahlert.kommons.debug.Platform.JVM
-import com.bkahlert.kommons.randomString
-import com.bkahlert.kommons.tests
+import com.bkahlert.kommons.Platform.JVM
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test

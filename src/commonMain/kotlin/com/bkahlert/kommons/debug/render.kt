@@ -1,5 +1,6 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.VALUE_RANGE
 import com.bkahlert.kommons.debug.Compression.Always
 import com.bkahlert.kommons.debug.Compression.Auto
 import com.bkahlert.kommons.debug.Compression.Never
@@ -9,6 +10,8 @@ import com.bkahlert.kommons.debug.Typing.FullyTyped
 import com.bkahlert.kommons.debug.Typing.SimplyTyped
 import com.bkahlert.kommons.debug.Typing.Untyped
 import com.bkahlert.kommons.isMultiline
+import com.bkahlert.kommons.quoted
+import com.bkahlert.kommons.toHexadecimalString
 
 /** Serialization option that specifies if and how type information should be included. */
 public sealed class Typing {

@@ -1,5 +1,7 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.Current
+import com.bkahlert.kommons.Platform
 import com.bkahlert.kommons.debug.Compression.Always
 import com.bkahlert.kommons.debug.Compression.Never
 import com.bkahlert.kommons.debug.CustomToString.Ignore

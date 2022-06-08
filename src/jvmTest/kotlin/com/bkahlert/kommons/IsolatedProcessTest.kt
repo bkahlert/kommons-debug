@@ -1,5 +1,6 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.IsolatedProcess
 import com.bkahlert.kommons.Locations
 import com.bkahlert.kommons.isSubPathOf
 import com.bkahlert.kommons.tests

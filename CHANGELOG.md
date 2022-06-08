@@ -4,6 +4,38 @@
 
 ### Added
 
+#### Case Manipulations
+
+Capitalize / de-capitalize strings using `capitalize`/`decapitalize` or
+manipulate the case style using `toCasesString` or any of its specializations.
+
+##### Examples
+
+```kotlin
+"fooBar".capitalize()    // "FooBar"
+"FooBar".decapitalize()  // "fooBar"
+
+"FooBar".toCamelCasedString()           // "fooBar"
+"FooBar".toPascalCasedString()          // "FooBar"
+"FooBar".toScreamingSnakeCasedString()  // "FOO_BAR"
+"FooBar".toKebabCasedString()           // "foo-bar"
+"FooBar".toTitleCasedString()           // "Foo Bar"
+
+enum class FooBar { FooBaz }
+
+FooBar::class.simpleCamelCasedName           // "fooBar"
+FooBar::class.simplePascalCasedName          // "FooBar"
+FooBar::class.simpleScreamingSnakeCasedName  // "FOO_BAR"
+FooBar::class.simpleKebabCasedName           // "foo-bar"
+FooBar::class.simpleTitleCasedName           // "Foo Bar"
+
+FooBar.FooBaz.camelCasedName           // "fooBaz"
+FooBar.FooBaz.pascalCasedName          // "FooBaz"
+FooBar.FooBaz.screamingSnakeCasedName  // "FOO_BAZ"
+FooBar.FooBaz.kebabCasedName           // "foo-baz"
+FooBar.FooBaz.titleCasedName           // "Foo Baz"
+```
+
 #### Time Operations for JS
 
 ### Changed

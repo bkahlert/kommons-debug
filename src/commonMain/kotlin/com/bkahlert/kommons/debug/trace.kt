@@ -1,7 +1,9 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.Current
+import com.bkahlert.kommons.Platform
+import com.bkahlert.kommons.Platform.JVM
 import com.bkahlert.kommons.Unicode
-import com.bkahlert.kommons.debug.Platform.JVM
 import com.bkahlert.kommons.debug.Typing.SimplyTyped
 import com.bkahlert.kommons.isMultiline
 

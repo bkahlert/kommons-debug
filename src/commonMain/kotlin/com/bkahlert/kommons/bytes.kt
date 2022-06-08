@@ -1,4 +1,4 @@
-package com.bkahlert.kommons.debug
+package com.bkahlert.kommons
 
 /** Constant `0x00` */
 public inline val Byte.Companion.ZERO: Byte get() = 0x0

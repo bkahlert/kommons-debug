@@ -1,6 +1,4 @@
-package com.bkahlert.kommons.debug
-
-import com.bkahlert.kommons.containsAny
+package com.bkahlert.kommons
 
 /** The platforms this program runs on. */
 public actual inline val Platform.Companion.Current: Platform get() = Platform.JVM
@@ -38,9 +36,9 @@ private val jvmJavaAgents: List<String>
 private val intellijTraits: List<String> = listOf("jetbrains", "intellij", "idea", "idea_rt.jar")
 
 /** Whether this program is started by IDEA Intellij. */
-public actual val Platform.Companion.isIntelliJ: Boolean
+public val Platform.Companion.isIntelliJ: Boolean
     get() = runCatching { jvmJavaAgents.any { it.containsAny(intellijTraits) } }.getOrElse { false }
 
 /** Whether this program is running in debug mode. */
-public actual val Platform.Companion.isDebugging: Boolean
+public val Platform.Companion.isDebugging: Boolean
     get() = jvmArgs.any { it.startsWith("-agentlib:jdwp") } || jvmJavaAgents.any { it.contains("debugger") }
