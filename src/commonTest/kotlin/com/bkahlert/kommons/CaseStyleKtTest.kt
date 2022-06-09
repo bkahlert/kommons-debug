@@ -99,7 +99,7 @@ class CaseStyleKtTest {
             }
         }
         caseJoinedWords
-            .filterNot { (key, value) -> key == caseStyle }
+            .filterNot { (key, _) -> key == caseStyle }
             .forEach { (otherCaseStyle, otherPhrases) ->
                 otherPhrases
                     .filterNot { phrases.contains(it) }

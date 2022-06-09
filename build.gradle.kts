@@ -1,11 +1,11 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
-    kotlin("multiplatform") version "1.6.21"
+    kotlin("multiplatform") version "1.7.0"
     id("org.jetbrains.dokka") version "1.6.21"
     id("maven-publish")
     signing
-    id("nebula.release") version "15.3.1"
+    id("nebula.release") version "16.0.0"
 }
 
 allprojects {
@@ -23,9 +23,6 @@ kotlin {
     explicitApi()
 
     jvm {
-        compilations.all {
-            kotlinOptions.jvmTarget = "1.8"
-        }
         withJava()
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
@@ -61,7 +58,7 @@ kotlin {
         val jvmTest by getting {
             dependencies {
                 implementation(kotlin("test-junit5"))
-                implementation(project.dependencies.platform("org.junit:junit-bom:5.8.0-RC1"))
+                implementation(project.dependencies.platform("org.junit:junit-bom:5.9.0-M1"))
                 listOf("api", "engine").forEach { implementation("org.junit.jupiter:junit-jupiter-$it") }
             }
         }
@@ -76,7 +73,6 @@ kotlin {
 
         all {
             languageSettings.apply {
-                optIn("kotlin.RequiresOptIn")
                 optIn("kotlin.ExperimentalUnsignedTypes")
                 optIn("kotlin.time.ExperimentalTime")
                 optIn("kotlin.contracts.ExperimentalContracts")

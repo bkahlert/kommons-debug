@@ -4,6 +4,28 @@
 
 ### Added
 
+*none*
+
+### Changed
+
+*none*
+
+### Deprecated
+
+*none*
+
+### Removed
+
+*none*
+
+### Fixed
+
+*none*
+
+## [0.4.0] - 2022-06-09
+
+### Added
+
 #### Case Manipulations
 
 Capitalize / de-capitalize strings using `capitalize`/`decapitalize` or
@@ -67,18 +89,6 @@ Foo().trace("details") { bar.reversed() }
 Foo().inspect("details") { bar.reversed() }
 // output: (sample.kt:36) details ⟨ !Foo { baz: !Double 42.0, bar: !String "baz" } ⟩ { !String "zab" }
 ```
-
-### Deprecated
-
-*none*
-
-### Removed
-
-*none*
-
-### Fixed
-
-*none*
 
 ## [0.3.1] - 2022-06-01
 
@@ -197,7 +207,9 @@ and backslashes, line feeds, carriage returns, tabs and double quotes escaped.
 
 *none*
 
-[unreleased]: https://github.com/bkahlert/kommons/compare/v0.3.1...HEAD
+[unreleased]: https://github.com/bkahlert/kommons/compare/v0.4.0...HEAD
+
+[0.4.0]: https://github.com/bkahlert/kommons/compare/v0.3.1...v0.4.0
 
 [0.3.1]: https://github.com/bkahlert/kommons/compare/v0.3.0...v0.3.1
 

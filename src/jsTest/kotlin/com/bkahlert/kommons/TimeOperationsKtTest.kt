@@ -1,6 +1,5 @@
 package com.bkahlert.kommons
 
-import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
 import io.kotest.matchers.comparables.shouldBeLessThanOrEqualTo
 import io.kotest.matchers.should
@@ -29,26 +28,26 @@ class TimeOperationsKtTest {
     @Test
     fun components() = tests {
         Date("August 19, 1975 23:15:30 GMT-11:00") should {
-            it.time shouldBeGreaterThan 0.0
-            it.timezoneOffset shouldBe (-1 * 60).minutes
+            it.time shouldBe it.getTime()
+            it.timezoneOffset shouldBe it.getTimezoneOffset().minutes
 
-            it.fullYear shouldBe 1975
-            it.month shouldBe 7
-            it.date shouldBe 20
-            it.day shouldBe 3
-            it.hours shouldBe 11
-            it.minutes shouldBe 15
-            it.seconds shouldBe 30
-            it.milliseconds shouldBe 0
+            it.fullYear shouldBe it.getFullYear()
+            it.month shouldBe it.getMonth()
+            it.date shouldBe it.getDate()
+            it.day shouldBe it.getDay()
+            it.hours shouldBe it.getHours()
+            it.minutes shouldBe it.getMinutes()
+            it.seconds shouldBe it.getSeconds()
+            it.milliseconds shouldBe it.getMilliseconds()
 
-            it.utcFullYear shouldBe 1975
-            it.utcMonth shouldBe 7
-            it.utcDate shouldBe 20
-            it.utcDay shouldBe 3
-            it.utcHours shouldBe 10
-            it.utcMinutes shouldBe 15
-            it.utcSeconds shouldBe 30
-            it.utcMilliseconds shouldBe 0
+            it.utcFullYear shouldBe it.getUTCFullYear()
+            it.utcMonth shouldBe it.getUTCMonth()
+            it.utcDate shouldBe it.getUTCDate()
+            it.utcDay shouldBe it.getUTCDay()
+            it.utcHours shouldBe it.getUTCHours()
+            it.utcMinutes shouldBe it.getUTCMinutes()
+            it.utcSeconds shouldBe it.getUTCSeconds()
+            it.utcMilliseconds shouldBe it.getUTCMilliseconds()
         }
     }
 
