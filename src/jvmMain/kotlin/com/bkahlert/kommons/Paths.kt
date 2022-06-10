@@ -24,7 +24,6 @@ import kotlin.io.path.isDirectory
 import kotlin.io.path.pathString
 import kotlin.io.path.setLastModifiedTime
 import kotlin.streams.asSequence
-import kotlin.streams.toList
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -153,7 +152,7 @@ private fun Path.streamContentsRecursively(glob: String = "*", vararg options: L
  * @see Files.walk
  */
 public fun Path.listDirectoryEntriesRecursively(glob: String = "*", vararg options: LinkOption): List<Path> =
-    streamContentsRecursively(glob, *options).toList()
+    streamContentsRecursively(glob, *options).asSequence().toList()
 
 /**
  * Calls the [block] callback with a sequence of all entries in this directory

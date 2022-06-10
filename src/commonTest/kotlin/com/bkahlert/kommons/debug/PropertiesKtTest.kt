@@ -10,7 +10,7 @@ import kotlin.test.Test
 
 class PropertiesTest {
 
-    @Test fun object_properties_extension() = tests {
+    @Test fun properties() = tests {
         nativeObject().properties shouldBe mapOf(
             "property" to "Function-property",
         )
@@ -90,6 +90,12 @@ class PropertiesTest {
             put("dataProperty", "data-property")
             put("privateDataProperty", "private-data-property")
         }
+        if (Platform.Current != JS) {
+            ThrowingClass().properties shouldBe buildMap {
+                put("throwingProperty", "<error:java.lang.RuntimeException: error reading property>")
+                put("privateThrowingProperty", "<error:java.lang.RuntimeException: error reading private property>")
+            }
+        }
         val customObject = ClassWithDefaultToString(null)
         customObject.properties shouldBe mapOf(
             "foo" to null,
@@ -98,6 +104,37 @@ class PropertiesTest {
         ClassWithDefaultToString(customObject).properties shouldBe mapOf(
             "foo" to customObject,
             "bar" to "baz",
+        )
+    }
+
+    @Test fun get_or_else() = tests {
+
+        DataClass().kProperties0().associate { prop -> prop.name to prop.getOrElse { it } } shouldBe mapOf(
+            "baseProperty" to "base-property",
+            "openBaseProperty" to 37,
+            "protectedOpenBaseProperty" to "overridden-protected-open-base-property",
+            "privateBaseProperty" to "private-base-property",
+            "dataProperty" to "data-property",
+            "privateDataProperty" to "private-data-property",
+        )
+
+        DataClass.kProperties1().associate { prop -> prop.name to prop.getOrElse(DataClass()) { it } } shouldBe mapOf(
+            "baseProperty" to "base-property",
+            "openBaseProperty" to 37,
+            "protectedOpenBaseProperty" to "overridden-protected-open-base-property",
+            "privateBaseProperty" to "private-base-property",
+            "dataProperty" to "data-property",
+            "privateDataProperty" to "private-data-property",
+        )
+
+        ThrowingClass().kProperties0().associate { prop -> prop.name to prop.getOrElse { it } } shouldBe mapOf(
+            "privateThrowingProperty" to RuntimeException("error reading private property"),
+            "throwingProperty" to RuntimeException("error reading property"),
+        )
+
+        ThrowingClass.kProperties1().associate { prop -> prop.name to prop.getOrElse(ThrowingClass()) { it } } shouldBe mapOf(
+            "privateThrowingProperty" to RuntimeException("error reading private property"),
+            "throwingProperty" to RuntimeException("error reading property"),
         )
     }
 }

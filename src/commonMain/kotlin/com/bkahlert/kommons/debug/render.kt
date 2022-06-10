@@ -120,8 +120,11 @@ public fun Any?.renderTo(
                         this is Collection<*> && this.isPlain -> renderCollectionTo(out, this, typing, compression, customToString, rendered, include)
                         this is Map<*, *> && this.isPlain -> renderObjectTo(out, this, typing, compression, customToString, rendered, include)
                         else -> {
+                            val likelyRenderInvokingToString =
+                                StackTrace.get().findByLastKnownCallsOrNull(Any::render, Any::renderTo)?.function == "toString"
+
                             when (customToString) {
-                                IgnoreForPlainCollectionsAndMaps -> toCustomStringOrNull()
+                                IgnoreForPlainCollectionsAndMaps -> if (likelyRenderInvokingToString) null else toCustomStringOrNull()
                                 Ignore -> null
                             }
                                 ?.also { out.append(it) }

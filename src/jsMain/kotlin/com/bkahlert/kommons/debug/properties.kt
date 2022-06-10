@@ -4,6 +4,8 @@ import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlin.js.Json
 import kotlin.js.json
+import kotlin.reflect.KProperty0
+import kotlin.reflect.KProperty1
 
 private fun sanitizeKey(key: String): String =
     key.replace("(?<key>.+)_\\d+".toRegex()) { it.groupValues.drop(1).first() }
@@ -23,6 +25,15 @@ public actual val Any.properties: Map<String, Any?>
     }.mapKeys { (key, _) ->
         sanitizeKey(key)
     }
+
+/** Gets the value of this property or the result of [onFailure]. */
+public actual fun <V> KProperty0<V>.getOrElse(onFailure: (Throwable) -> V): V =
+    kotlin.runCatching { get() }.getOrElse(onFailure)
+
+/** Gets the value of this property or the result of [onFailure]. */
+public actual fun <T, V> KProperty1<T, V>.getOrElse(receiver: T, onFailure: (Throwable) -> V): V =
+    kotlin.runCatching { get(receiver) }.getOrElse(onFailure)
+
 
 /** Returns a simple JavaScript object (as [Json]) using this key-value pairs as names and values of its properties. */
 @Suppress("NOTHING_TO_INLINE")

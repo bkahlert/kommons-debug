@@ -13,6 +13,7 @@ public fun CharSequence.capitalize(): CharSequence = if (isNotEmpty() && first()
 /** Returns this string with its first letter in upper case. */
 public fun String.capitalize(): String = if (isNotEmpty() && first().isLowerCase()) first().uppercaseChar() + substring(1) else this
 
+
 /** Returns this char sequence with its first letter in upper case. */
 @Suppress("SpellCheckingInspection")
 public fun CharSequence.decapitalize(): CharSequence = if (isNotEmpty() && first().isUpperCase()) first().lowercaseChar() + substring(1) else this

@@ -20,7 +20,7 @@
 
 ### Fixed
 
-*none*
+- reduce chance of recursion due to `render` invoking `toString`
 
 ## [0.4.0] - 2022-06-09
 

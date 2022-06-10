@@ -2,6 +2,9 @@
 
 package com.bkahlert.kommons.debug
 
+import kotlin.reflect.KProperty0
+import kotlin.reflect.KProperty1
+
 internal expect fun nativeObject(): Any
 
 @Suppress("unused")
@@ -10,6 +13,22 @@ internal open class BaseClass {
     open val openBaseProperty: Int = 42
     protected open val protectedOpenBaseProperty: String = "protected-open-base-property"
     private val privateBaseProperty: String = "private-base-property"
+
+    open fun kProperties0(): Set<KProperty0<Any?>> = setOf(
+        this::baseProperty,
+        this::openBaseProperty,
+        this::protectedOpenBaseProperty,
+        this::privateBaseProperty,
+    )
+
+    companion object {
+        fun kProperties1(): Set<KProperty1<out BaseClass, Any?>> = setOf(
+            BaseClass::baseProperty,
+            BaseClass::openBaseProperty,
+            BaseClass::protectedOpenBaseProperty,
+            BaseClass::privateBaseProperty,
+        )
+    }
 }
 
 @Suppress("unused")
@@ -60,6 +79,24 @@ internal data class DataClass(
 ) : BaseClass() {
     override val protectedOpenBaseProperty: String = "overridden-protected-open-base-property"
     @Suppress("unused") private val privateDataProperty: String = "private-data-property"
+
+    override fun kProperties0(): Set<KProperty0<Any?>> = buildSet {
+        addAll(super.kProperties0())
+        add(this@DataClass::dataProperty)
+        add(this@DataClass::openBaseProperty)
+        add(this@DataClass::protectedOpenBaseProperty)
+        add(this@DataClass::privateDataProperty)
+    }
+
+    companion object {
+        fun kProperties1(): Set<KProperty1<DataClass, Any?>> = buildSet {
+            addAll(BaseClass.kProperties1().filterIsInstance<KProperty1<DataClass, Any?>>())
+            add(DataClass::dataProperty)
+            add(DataClass::openBaseProperty)
+            add(DataClass::protectedOpenBaseProperty)
+            add(DataClass::privateDataProperty)
+        }
+    }
 }
 
 internal class ClassWithDefaultToString(@Suppress("unused") val foo: Any? = null) {
@@ -70,6 +107,27 @@ internal class ClassWithCustomToString(@Suppress("unused") val foo: Any? = null)
     override fun toString(): String = "custom toString"
 }
 
+internal class ClassWithRenderingToString(@Suppress("unused") val foo: Any? = null) {
+    override fun toString(): String = render()
+}
+
 internal class SelfReferencingClass : BaseClass() {
     @Suppress("unused") val selfProperty: SelfReferencingClass = this
+}
+
+internal class ThrowingClass {
+    private val privateThrowingProperty: Any get() = throw RuntimeException("error reading private property")
+    val throwingProperty: Any get() = throw RuntimeException("error reading property")
+
+    fun kProperties0(): Set<KProperty0<Any?>> = setOf(
+        this::privateThrowingProperty,
+        this::throwingProperty,
+    )
+
+    companion object {
+        fun kProperties1(): Set<KProperty1<ThrowingClass, Any?>> = setOf(
+            ThrowingClass::privateThrowingProperty,
+            ThrowingClass::throwingProperty,
+        )
+    }
 }

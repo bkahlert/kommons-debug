@@ -487,6 +487,10 @@ class RenderTest {
         ClassWithDefaultToString(ClassWithDefaultToString()).render() shouldBe "{ foo: { foo: null, bar: \"baz\" }, bar: \"baz\" }"
     }
 
+    @Test fun render_object_with_rendering_to_string() = tests {
+        ClassWithRenderingToString().render() shouldBe "{ foo: null }"
+    }
+
     @Test fun render_option_custom_to_string() = tests {
         CollectionTypes.list.render(customToString = IgnoreForPlainCollectionsAndMaps) shouldBe CollectionTypes.list.render(customToString = Ignore)
         ListImplementingSingleton.render(customToString = IgnoreForPlainCollectionsAndMaps) shouldBe ListImplementingSingleton.render(customToString = Ignore)

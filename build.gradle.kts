@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
@@ -23,7 +24,9 @@ kotlin {
     explicitApi()
 
     jvm {
-        withJava()
+        compilations.all {
+            kotlinOptions.jvmTarget = "1.8"
+        }
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
         }
@@ -95,7 +98,7 @@ tasks {
                 TestLogEvent.STANDARD_OUT,
                 TestLogEvent.STANDARD_ERROR
             )
-            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+            exceptionFormat = TestExceptionFormat.FULL
             showExceptions = true
             showCauses = true
             showStackTraces = true
