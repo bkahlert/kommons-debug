@@ -1,6 +1,12 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.debug.Typing.Untyped
+import com.bkahlert.kommons.debug.getOrNull
+import com.bkahlert.kommons.debug.properties
+import com.bkahlert.kommons.debug.render
+import com.bkahlert.kommons.debug.renderType
 import kotlin.random.Random
+import kotlin.reflect.KProperty
 
 /**
  * Returns `true` if this character sequence contains any of the specified [others] as a substring.
@@ -149,3 +155,30 @@ public fun randomString(length: Int = 16, vararg allowedCharacters: Char = (('0'
 
 /** Whether this string consists of more than one line. */
 public val CharSequence.isMultiline: Boolean get() = lineSequence().take(2).count() > 1
+
+/**
+ * Returns a string representing this class and all specified [include]
+ * in the format `ClassName(name1=value1, name2=value2, …)`.
+ */
+public fun <T : Any> T.asString(
+    vararg include: KProperty<*>,
+    excludeNullValues: Boolean = true,
+    exclude: Iterable<KProperty<*>> = emptyList(),
+): String {
+    val properties = include.takeUnlessEmpty()?.mapNotNull { prop ->
+        prop.getOrNull(this)?.let { prop.name to it }
+    }?.toMap() ?: properties
+    val excludedProperties = exclude.map { it.name }
+    val renderedType = renderType()
+    val rendered = properties.render {
+        typing = Untyped
+        filterProperties { receiver, prop ->
+            (!excludeNullValues || receiver != null) && !excludedProperties.contains(prop)
+        }
+    }
+    return buildString {
+        append(renderedType)
+        append(" ")
+        append(rendered.removePrefix(renderedType))
+    }
+}

@@ -22,6 +22,19 @@
 
 - reduce chance of recursion due to `render` invoking `toString`
 
+## [0.5.0] - 2022-06-13
+
+### Added
+
+#### Any.asString
+
+##### Examples
+
+```kotlin
+foo().asString()                             // { bar: "baz" }
+foo(null).asString(excludeNullValues = false)  // { }
+```
+
 ## [0.4.0] - 2022-06-09
 
 ### Added
@@ -207,7 +220,9 @@ and backslashes, line feeds, carriage returns, tabs and double quotes escaped.
 
 *none*
 
-[unreleased]: https://github.com/bkahlert/kommons/compare/v0.4.0...HEAD
+[unreleased]: https://github.com/bkahlert/kommons/compare/v0.5.0...HEAD
+
+[0.5.0]: https://github.com/bkahlert/kommons/compare/v0.4.0...v0.5.0
 
 [0.4.0]: https://github.com/bkahlert/kommons/compare/v0.3.1...v0.4.0
 

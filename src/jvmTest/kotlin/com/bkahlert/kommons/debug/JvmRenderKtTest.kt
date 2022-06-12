@@ -32,7 +32,7 @@ class JvmRenderTest {
             }
         }
 
-        evilMap.render(customToString = Ignore) shouldBe "<string representation>"
-        veryEvilMap.render(customToString = Ignore) shouldBe "<unsupported:java.lang.IllegalStateException: no string>"
+        evilMap.render { customToString = Ignore } shouldBe "<string representation>"
+        veryEvilMap.render { customToString = Ignore } shouldBe "<unsupported:java.lang.IllegalStateException: no string>"
     }
 }

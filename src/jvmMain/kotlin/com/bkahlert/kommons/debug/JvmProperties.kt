@@ -18,8 +18,8 @@ public actual val Any.properties: Map<String, Any?>
         .mapNotNull { prop: KCallable<*> ->
             @Suppress("UNCHECKED_CAST")
             when (prop) {
-                is KProperty0<*> -> prop.name to prop.getOrElse { "<error:$it>" }
-                is KProperty1<*, *> -> prop.name to (prop as KProperty1<Any, *>).getOrElse(this@properties) { "<error:$it>" }
+                is KProperty0<*> -> prop.name to prop.getOrElse { PropertyAccessError(it) }
+                is KProperty1<*, *> -> prop.name to prop.getOrElse(this@properties) { PropertyAccessError(it) }
                 else -> null
             }
         }.toMap()

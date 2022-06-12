@@ -116,7 +116,7 @@ public fun <T> T.inspect(
     typing: Typing = SimplyTyped,
     out: Printer? = null,
     inspect: Inspector<T>? = null
-): T = trace(caption, highlight, includeCallSite, { it.render(typing = typing, customToString = CustomToString.Ignore) }, out, inspect)
+): T = trace(caption, highlight, includeCallSite, { it.render { this.typing = typing; customToString = CustomToString.Ignore } }, out, inspect)
 
 internal fun StringBuilder.appendWrapped(value: String, brackets: Pair<String, String>) {
     val separator = if (value.isMultiline) Unicode.LINE_FEED else ' '

@@ -26,20 +26,24 @@ class RenderTest {
         renderString("string", compression = Always) shouldBe "\"string\""
         renderString("line 1\nline 2", compression = Always) shouldBe "\"line 1\\nline 2\""
 
-        renderString("", compression = Never) shouldBe ""
-        renderString(" ", compression = Never) shouldBe " "
-        renderString("string", compression = Never) shouldBe "string"
+        renderString("", compression = Never) shouldBe "\"\""
+        renderString(" ", compression = Never) shouldBe "\" \""
+        renderString("string", compression = Never) shouldBe "\"string\""
         renderString("line 1\nline 2", compression = Never) shouldBe """
+            "${"\""}"
             line 1
             line 2
+            "${"\""}"
         """.trimIndent()
 
         renderString("") shouldBe "\"\""
         renderString(" ") shouldBe "\" \""
         renderString("string") shouldBe "\"string\""
         renderString("line 1\nline 2") shouldBe """
+            "${"\""}"
             line 1
             line 2
+            "${"\""}"
         """.trimIndent()
     }
 
@@ -89,20 +93,22 @@ class RenderTest {
         renderArray(arrayOf<String>(), compression = Never) shouldBe "[]"
         renderArray(arrayOf("string"), compression = Never) shouldBe """
             [
-                string
+                "string"
             ]
         """.trimIndent()
         renderArray(arrayOf("string", null), compression = Never) shouldBe """
             [
-                string,
+                "string",
                 null
             ]
         """.trimIndent()
         renderArray(arrayOf("string", "line 1\nline 2"), compression = Never) shouldBe """
             [
-                string,
+                "string",
+                "${"\""}"
                 line 1
                 line 2
+                "${"\""}"
             ]
         """.trimIndent()
 
@@ -111,9 +117,11 @@ class RenderTest {
         renderArray(arrayOf("string", null)) shouldBe "[ \"string\", null ]"
         renderArray(arrayOf("string", "line 1 -------------------------\nline 2 -------------------------")) shouldBe """
             [
-                string,
+                "string",
+                "${"\""}"
                 line 1 -------------------------
                 line 2 -------------------------
+                "${"\""}"
             ]
         """.trimIndent()
 
@@ -121,8 +129,7 @@ class RenderTest {
             [
                 !ClassWithDefaultToString {
                     foo: null,
-                    bar: !String 
-                         baz
+                    bar: !String "baz"
                 }
             ]
         """.trimIndent()
@@ -138,20 +145,22 @@ class RenderTest {
         renderCollection(listOf<String>(), compression = Never) shouldBe "[]"
         renderCollection(listOf("string"), compression = Never) shouldBe """
             [
-                string
+                "string"
             ]
         """.trimIndent()
         renderCollection(listOf("string", null), compression = Never) shouldBe """
             [
-                string,
+                "string",
                 null
             ]
         """.trimIndent()
         renderCollection(listOf("string", "line 1\nline 2"), compression = Never) shouldBe """
             [
-                string,
+                "string",
+                "${"\""}"
                 line 1
                 line 2
+                "${"\""}"
             ]
         """.trimIndent()
 
@@ -160,9 +169,11 @@ class RenderTest {
         renderCollection(listOf("string", null)) shouldBe "[ \"string\", null ]"
         renderCollection(listOf("string", "line 1 -------------------------\nline 2 -------------------------")) shouldBe """
             [
-                string,
+                "string",
+                "${"\""}"
                 line 1 -------------------------
                 line 2 -------------------------
+                "${"\""}"
             ]
         """.trimIndent()
 
@@ -170,8 +181,7 @@ class RenderTest {
             [
                 !ClassWithDefaultToString {
                     foo: null,
-                    bar: !String 
-                         baz
+                    bar: !String "baz"
                 }
             ]
         """.trimIndent()
@@ -187,20 +197,22 @@ class RenderTest {
         renderObject(emptyMap<String, Any?>(), compression = Never) shouldBe "{}"
         renderObject(mapOf("foo" to "string"), compression = Never) shouldBe """
             {
-                foo: string
+                foo: "string"
             }
         """.trimIndent()
         renderObject(mapOf("foo" to "string", "bar" to null), compression = Never) shouldBe """
             {
-                foo: string,
+                foo: "string",
                 bar: null
             }
         """.trimIndent()
         renderObject(mapOf("foo" to "string", "bar" to "line 1\nline 2"), compression = Never) shouldBe """
             {
-                foo: string,
-                bar: line 1
+                foo: "string",
+                bar: "${"\""}"
+                     line 1
                      line 2
+                     "${"\""}"
             }
         """.trimIndent()
 
@@ -209,9 +221,11 @@ class RenderTest {
         renderObject(mapOf("foo" to "string", "bar" to null)) shouldBe "{ foo: \"string\", bar: null }"
         renderObject(mapOf("foo" to "string", "bar" to "line 1 -------------------------\nline 2 -------------------------")) shouldBe """
             {
-                foo: string,
-                bar: line 1 -------------------------
+                foo: "string",
+                bar: "${"\""}"
+                     line 1 -------------------------
                      line 2 -------------------------
+                     "${"\""}"
             }
         """.trimIndent()
 
@@ -219,8 +233,7 @@ class RenderTest {
             {
                 foo: !ClassWithDefaultToString {
                          foo: null,
-                         bar: !String 
-                              baz
+                         bar: !String "baz"
                      }
             }
         """.trimIndent()
@@ -232,21 +245,20 @@ class RenderTest {
         """.trimIndent()
         renderObject(mapOf(DataClass() to "foo", null to "bar"), compression = Never) shouldBe """
             {
-                DataClass(dataProperty=data-property, openBaseProperty=37): foo,
-                null: bar
+                DataClass(dataProperty=data-property, openBaseProperty=37): "foo",
+                null: "bar"
             }
         """.trimIndent()
         renderObject(mapOf(DataClass() to "foo", null to "bar")) shouldBe """
             {
-                DataClass(dataProperty=data-property, openBaseProperty=37): foo,
-                null: bar
+                DataClass(dataProperty=data-property, openBaseProperty=37): "foo",
+                null: "bar"
             }
         """.trimIndent()
 
         renderObject(mapOf(ClassWithDefaultToString() to "foo"), typing = SimplyTyped) shouldBe """
             {
-                !ClassWithDefaultToString { foo: null, bar: !String "baz" }: !String 
-                                                                             foo
+                !ClassWithDefaultToString { foo: null, bar: !String "baz" }: !String "foo"
             }
         """.trimIndent()
     }
@@ -262,38 +274,40 @@ class RenderTest {
         renderObject(ClassWithDefaultToString(), compression = Never) shouldBe """
             {
                 foo: null,
-                bar: baz
+                bar: "baz"
             }
         """.trimIndent()
         renderObject(ClassWithDefaultToString("string"), compression = Never) shouldBe """
             {
-                foo: string,
-                bar: baz
+                foo: "string",
+                bar: "baz"
             }
         """.trimIndent()
         renderObject(ClassWithDefaultToString("line 1\nline 2"), compression = Never) shouldBe """
             {
-                foo: line 1
-                     line 2,
-                bar: baz
+                foo: "${"\""}"
+                     line 1
+                     line 2
+                     "${"\""}",
+                bar: "baz"
             }
         """.trimIndent()
         renderObject(ClassWithDefaultToString(listOf("string", null)), compression = Never) shouldBe """
             {
                 foo: [
-                         string,
+                         "string",
                          null
                      ],
-                bar: baz
+                bar: "baz"
             }
         """.trimIndent()
         renderObject(ClassWithDefaultToString(ClassWithDefaultToString()), compression = Never) shouldBe """
             {
                 foo: {
                          foo: null,
-                         bar: baz
+                         bar: "baz"
                      },
-                bar: baz
+                bar: "baz"
             }
         """.trimIndent()
 
@@ -301,9 +315,11 @@ class RenderTest {
         renderObject(ClassWithDefaultToString("string")) shouldBe "{ foo: \"string\", bar: \"baz\" }"
         renderObject(ClassWithDefaultToString("line 1 -------------------------\nline 2 -------------------------")) shouldBe """
             {
-                foo: line 1 -------------------------
-                     line 2 -------------------------,
-                bar: baz
+                foo: "${"\""}"
+                     line 1 -------------------------
+                     line 2 -------------------------
+                     "${"\""}",
+                bar: "baz"
             }
         """.trimIndent()
         renderObject(ClassWithDefaultToString(listOf("string", null))) shouldBe "{ foo: [ \"string\", null ], bar: \"baz\" }"
@@ -313,11 +329,9 @@ class RenderTest {
             {
                 foo: !ClassWithDefaultToString {
                          foo: null,
-                         bar: !String 
-                              baz
+                         bar: !String "baz"
                      },
-                bar: !String 
-                     baz
+                bar: !String "baz"
             }
         """.trimIndent()
     }
@@ -326,152 +340,149 @@ class RenderTest {
 
     @Suppress("SpellCheckingInspection")
     @Test fun render() = tests {
-        null.render(typing = SimplyTyped, compression = Always) shouldBe "null"
-        "line 1\nline 2".render(typing = SimplyTyped, compression = Always) shouldBe "!String \"line 1\\nline 2\""
-        PrimitiveTypes.double.render(typing = SimplyTyped, compression = Always) shouldBe "!Double 42.12"
-        PrimitiveTypes.doubleArray.render(typing = SimplyTyped, compression = Always) shouldBe "!DoubleArray [0x61, 0x72, 0x72, 0x61, 0x79]"
-        arrayOf("string", "line 1\nline 2").render(
-            typing = SimplyTyped,
-            compression = Always
-        ) shouldBe "!Array [ !String \"string\", !String \"line 1\\nline 2\" ]"
-        listOf("string", "line 1\nline 2").render(
-            typing = SimplyTyped,
-            compression = Always
-        ) shouldBe "!List [ !String \"string\", !String \"line 1\\nline 2\" ]"
-        mapOf("foo" to "string", "bar" to "line 1\nline 2").render(
-            typing = SimplyTyped,
-            compression = Always
-        ) shouldBe "!Map { foo: !String \"string\", bar: !String \"line 1\\nline 2\" }"
-        mapOf(DataClass() to "foo", null to "bar").render(
-            typing = SimplyTyped,
-            compression = Always
-        ) shouldBe "!Map { !DataClass DataClass(dataProperty=data-property, openBaseProperty=37): !String \"foo\", null: !String \"bar\" }"
-        ClassWithDefaultToString(ClassWithDefaultToString()).render(
-            typing = SimplyTyped,
-            compression = Always
-        ) shouldBe "!ClassWithDefaultToString { foo: !ClassWithDefaultToString { foo: null, bar: !String \"baz\" }, bar: !String \"baz\" }"
 
-        null.render(typing = SimplyTyped, compression = Never) shouldBe "null"
-        "line 1\nline 2".render(typing = SimplyTyped, compression = Never) shouldBe """
-            !String 
+        val simplyTypedAlwaysCompressingSettings = RenderingSettings.build { typing = SimplyTyped; compression = Always }
+        null.render(simplyTypedAlwaysCompressingSettings) shouldBe "null"
+        "line 1\nline 2".render(simplyTypedAlwaysCompressingSettings) shouldBe "!String \"line 1\\nline 2\""
+        PrimitiveTypes.double.render(simplyTypedAlwaysCompressingSettings) shouldBe "!Double 42.12"
+        PrimitiveTypes.doubleArray.render(simplyTypedAlwaysCompressingSettings) shouldBe "!DoubleArray [0x61, 0x72, 0x72, 0x61, 0x79]"
+        arrayOf("string", "line 1\nline 2").render(simplyTypedAlwaysCompressingSettings) shouldBe "!Array [ !String \"string\", !String \"line 1\\nline 2\" ]"
+        listOf("string", "line 1\nline 2").render(simplyTypedAlwaysCompressingSettings) shouldBe "!List [ !String \"string\", !String \"line 1\\nline 2\" ]"
+        mapOf(
+            "foo" to "string",
+            "bar" to "line 1\nline 2"
+        ).render(simplyTypedAlwaysCompressingSettings) shouldBe "!Map { foo: !String \"string\", bar: !String \"line 1\\nline 2\" }"
+        mapOf(
+            DataClass() to "foo",
+            null to "bar"
+        ).render(simplyTypedAlwaysCompressingSettings) shouldBe "!Map { !DataClass DataClass(dataProperty=data-property, openBaseProperty=37): !String \"foo\", null: !String \"bar\" }"
+        ClassWithDefaultToString(ClassWithDefaultToString()).render(simplyTypedAlwaysCompressingSettings) shouldBe "!ClassWithDefaultToString { foo: !ClassWithDefaultToString { foo: null, bar: !String \"baz\" }, bar: !String \"baz\" }"
+
+        val simplyTypedNeverCompressingSettings = RenderingSettings.build { typing = SimplyTyped; compression = Never }
+        null.render(simplyTypedNeverCompressingSettings) shouldBe "null"
+        "line 1\nline 2".render(simplyTypedNeverCompressingSettings) shouldBe """
+            !String "${"\""}"
             line 1
             line 2
+            "${"\""}"
         """.trimIndent()
-        PrimitiveTypes.double.render(typing = SimplyTyped, compression = Never) shouldBe "!Double 42.12"
-        PrimitiveTypes.doubleArray.render(typing = SimplyTyped, compression = Never) shouldBe "!DoubleArray [0x61, 0x72, 0x72, 0x61, 0x79]"
-        arrayOf("string", "line 1\nline 2").render(typing = SimplyTyped, compression = Never) shouldBe """
+        PrimitiveTypes.double.render(simplyTypedNeverCompressingSettings) shouldBe "!Double 42.12"
+        PrimitiveTypes.doubleArray.render(simplyTypedNeverCompressingSettings) shouldBe "!DoubleArray [0x61, 0x72, 0x72, 0x61, 0x79]"
+        arrayOf("string", "line 1\nline 2").render(simplyTypedNeverCompressingSettings) shouldBe """
             !Array [
-                !String 
-                string,
-                !String 
+                !String "string",
+                !String "${"\""}"
                 line 1
                 line 2
+                "${"\""}"
             ]
         """.trimIndent()
-        listOf("string", "line 1\nline 2").render(typing = SimplyTyped, compression = Never) shouldBe """
+        listOf("string", "line 1\nline 2").render(simplyTypedNeverCompressingSettings) shouldBe """
             !List [
-                !String 
-                string,
-                !String 
+                !String "string",
+                !String "${"\""}"
                 line 1
                 line 2
+                "${"\""}"
             ]
         """.trimIndent()
-        mapOf("foo" to "string", "bar" to "line 1\nline 2").render(typing = SimplyTyped, compression = Never) shouldBe """
+        mapOf("foo" to "string", "bar" to "line 1\nline 2").render(simplyTypedNeverCompressingSettings) shouldBe """
             !Map {
-                foo: !String 
-                     string,
-                bar: !String 
+                foo: !String "string",
+                bar: !String "${"\""}"
                      line 1
                      line 2
+                     "${"\""}"
             }
         """.trimIndent()
-        mapOf(DataClass() to "foo", null to "bar").render(typing = SimplyTyped, compression = Never) shouldBe """
+        mapOf(DataClass() to "foo", null to "bar").render(simplyTypedNeverCompressingSettings) shouldBe """
             !Map {
-                !DataClass DataClass(dataProperty=data-property, openBaseProperty=37): !String 
-                                                                                       foo,
-                null: !String 
-                      bar
+                !DataClass DataClass(dataProperty=data-property, openBaseProperty=37): !String "foo",
+                null: !String "bar"
             }
         """.trimIndent()
-        ClassWithDefaultToString(ClassWithDefaultToString()).render(typing = SimplyTyped, compression = Never) shouldBe """
+        ClassWithDefaultToString(ClassWithDefaultToString()).render(simplyTypedNeverCompressingSettings) shouldBe """
             !ClassWithDefaultToString {
                 foo: !ClassWithDefaultToString {
                          foo: null,
-                         bar: !String 
-                              baz
+                         bar: !String "baz"
                      },
-                bar: !String 
-                     baz
+                bar: !String "baz"
             }
         """.trimIndent()
 
-        null.render(typing = Untyped, compression = Always) shouldBe "null"
-        "line 1\nline 2".render(typing = Untyped, compression = Always) shouldBe "\"line 1\\nline 2\""
-        PrimitiveTypes.double.render(typing = Untyped, compression = Always) shouldBe "42.12"
-        PrimitiveTypes.doubleArray.render(typing = Untyped, compression = Always) shouldBe "[0x61, 0x72, 0x72, 0x61, 0x79]"
-        arrayOf("string", "line 1\nline 2").render(typing = Untyped, compression = Always) shouldBe "[ \"string\", \"line 1\\nline 2\" ]"
-        listOf("string", "line 1\nline 2").render(typing = Untyped, compression = Always) shouldBe "[ \"string\", \"line 1\\nline 2\" ]"
-        mapOf("foo" to "string", "bar" to "line 1\nline 2").render(
-            typing = Untyped,
-            compression = Always
-        ) shouldBe "{ foo: \"string\", bar: \"line 1\\nline 2\" }"
-        mapOf(DataClass() to "foo", null to "bar").render(typing = Untyped, compression = Always) shouldBe """
+        val untypedAlwaysCompressingSettings = RenderingSettings.build { typing = Untyped; compression = Always }
+        null.render(untypedAlwaysCompressingSettings) shouldBe "null"
+        "line 1\nline 2".render(untypedAlwaysCompressingSettings) shouldBe "\"line 1\\nline 2\""
+        PrimitiveTypes.double.render(untypedAlwaysCompressingSettings) shouldBe "42.12"
+        PrimitiveTypes.doubleArray.render(untypedAlwaysCompressingSettings) shouldBe "[0x61, 0x72, 0x72, 0x61, 0x79]"
+        arrayOf("string", "line 1\nline 2").render(untypedAlwaysCompressingSettings) shouldBe "[ \"string\", \"line 1\\nline 2\" ]"
+        listOf("string", "line 1\nline 2").render(untypedAlwaysCompressingSettings) shouldBe "[ \"string\", \"line 1\\nline 2\" ]"
+        mapOf("foo" to "string", "bar" to "line 1\nline 2").render(untypedAlwaysCompressingSettings) shouldBe "{ foo: \"string\", bar: \"line 1\\nline 2\" }"
+        mapOf(DataClass() to "foo", null to "bar").render(untypedAlwaysCompressingSettings) shouldBe """
             { DataClass(dataProperty=data-property, openBaseProperty=37): "foo", null: "bar" }
         """.trimIndent()
-        ClassWithDefaultToString(ClassWithDefaultToString()).render(
-            typing = Untyped,
-            compression = Always
-        ) shouldBe "{ foo: { foo: null, bar: \"baz\" }, bar: \"baz\" }"
+        ClassWithDefaultToString(ClassWithDefaultToString()).render(untypedAlwaysCompressingSettings) shouldBe "{ foo: { foo: null, bar: \"baz\" }, bar: \"baz\" }"
 
-        null.render(typing = Untyped, compression = Never) shouldBe "null"
-        "line 1\nline 2".render(typing = Untyped, compression = Never) shouldBe """
+        val untypedNeverCompressingSettings = RenderingSettings.build { typing = Untyped; compression = Never }
+        null.render(untypedNeverCompressingSettings) shouldBe "null"
+        "line 1\nline 2".render(untypedNeverCompressingSettings) shouldBe """
+            "${"\""}"
             line 1
             line 2
+            "${"\""}"
         """.trimIndent()
-        PrimitiveTypes.double.render(typing = Untyped, compression = Never) shouldBe "42.12"
-        PrimitiveTypes.doubleArray.render(typing = Untyped, compression = Never) shouldBe "[0x61, 0x72, 0x72, 0x61, 0x79]"
-        arrayOf("string", "line 1\nline 2").render(typing = Untyped, compression = Never) shouldBe """
+        PrimitiveTypes.double.render(untypedNeverCompressingSettings) shouldBe "42.12"
+        PrimitiveTypes.doubleArray.render(untypedNeverCompressingSettings) shouldBe "[0x61, 0x72, 0x72, 0x61, 0x79]"
+        arrayOf("string", "line 1\nline 2").render(untypedNeverCompressingSettings) shouldBe """
             [
-                string,
+                "string",
+                "${"\""}"
                 line 1
                 line 2
+                "${"\""}"
             ]
         """.trimIndent()
-        listOf("string", "line 1\nline 2").render(typing = Untyped, compression = Never) shouldBe """
+        listOf("string", "line 1\nline 2").render(untypedNeverCompressingSettings) shouldBe """
             [
-                string,
+                "string",
+                "${"\""}"
                 line 1
                 line 2
+                "${"\""}"
             ]
         """.trimIndent()
-        mapOf("foo" to "string", "bar" to "line 1\nline 2").render(typing = Untyped, compression = Never) shouldBe """
+        mapOf("foo" to "string", "bar" to "line 1\nline 2").render(untypedNeverCompressingSettings) shouldBe """
             {
-                foo: string,
-                bar: line 1
+                foo: "string",
+                bar: "${"\""}"
+                     line 1
                      line 2
+                     "${"\""}"
             }
         """.trimIndent()
-        mapOf(DataClass() to "foo", null to "bar").render(typing = Untyped, compression = Never) shouldBe """
+        mapOf(DataClass() to "foo", null to "bar").render(untypedNeverCompressingSettings) shouldBe """
             {
-                DataClass(dataProperty=data-property, openBaseProperty=37): foo,
-                null: bar
+                DataClass(dataProperty=data-property, openBaseProperty=37): "foo",
+                null: "bar"
             }
         """.trimIndent()
-        ClassWithDefaultToString(ClassWithDefaultToString()).render(typing = Untyped, compression = Never) shouldBe """
+        ClassWithDefaultToString(ClassWithDefaultToString()).render(untypedNeverCompressingSettings) shouldBe """
             {
                 foo: {
                          foo: null,
-                         bar: baz
+                         bar: "baz"
                      },
-                bar: baz
+                bar: "baz"
             }
         """.trimIndent()
 
         null.render() shouldBe "null"
         "line 1\nline 2".render() shouldBe """
+            "${"\""}"
             line 1
             line 2
+            "${"\""}"
         """.trimIndent()
         PrimitiveTypes.double.render() shouldBe "42.12"
         PrimitiveTypes.doubleArray.render() shouldBe "[0x61, 0x72, 0x72, 0x61, 0x79]"
@@ -480,8 +491,8 @@ class RenderTest {
         mapOf("foo" to "string", "bar" to "line 1\nline 2").render() shouldBe "{ foo: \"string\", bar: \"line 1\\nline 2\" }"
         mapOf(DataClass() to "foo", null to "bar").render() shouldBe """
             {
-                DataClass(dataProperty=data-property, openBaseProperty=37): foo,
-                null: bar
+                DataClass(dataProperty=data-property, openBaseProperty=37): "foo",
+                null: "bar"
             }
         """.trimIndent()
         ClassWithDefaultToString(ClassWithDefaultToString()).render() shouldBe "{ foo: { foo: null, bar: \"baz\" }, bar: \"baz\" }"
@@ -492,25 +503,28 @@ class RenderTest {
     }
 
     @Test fun render_option_custom_to_string() = tests {
-        CollectionTypes.list.render(customToString = IgnoreForPlainCollectionsAndMaps) shouldBe CollectionTypes.list.render(customToString = Ignore)
-        ListImplementingSingleton.render(customToString = IgnoreForPlainCollectionsAndMaps) shouldBe ListImplementingSingleton.render(customToString = Ignore)
-        ClassTypes.map.render(customToString = IgnoreForPlainCollectionsAndMaps) shouldBe ClassTypes.map.render(customToString = Ignore)
-        MapImplementingSingleton.render(customToString = IgnoreForPlainCollectionsAndMaps) shouldBe MapImplementingSingleton.render(customToString = Ignore)
+        val plainCollectionsAndMapsToStringIgnoringSettings = RenderingSettings.build { customToString = IgnoreForPlainCollectionsAndMaps }
+        val toStringIgnoringSettings = RenderingSettings.build { customToString = Ignore }
 
-        ClassWithDefaultToString().render(customToString = IgnoreForPlainCollectionsAndMaps) shouldBe ClassWithDefaultToString().render(customToString = Ignore)
+        CollectionTypes.list.render(plainCollectionsAndMapsToStringIgnoringSettings) shouldBe CollectionTypes.list.render(toStringIgnoringSettings)
+        ListImplementingSingleton.render(plainCollectionsAndMapsToStringIgnoringSettings) shouldBe ListImplementingSingleton.render(toStringIgnoringSettings)
+        ClassTypes.map.render(plainCollectionsAndMapsToStringIgnoringSettings) shouldBe ClassTypes.map.render(toStringIgnoringSettings)
+        MapImplementingSingleton.render(plainCollectionsAndMapsToStringIgnoringSettings) shouldBe MapImplementingSingleton.render(toStringIgnoringSettings)
 
-        ClassWithCustomToString().render(customToString = IgnoreForPlainCollectionsAndMaps) shouldBe "custom toString"
-        ClassWithCustomToString().render(customToString = Ignore) shouldBe "{ foo: null }"
+        ClassWithDefaultToString().render(plainCollectionsAndMapsToStringIgnoringSettings) shouldBe ClassWithDefaultToString().render(toStringIgnoringSettings)
+
+        ClassWithCustomToString().render(plainCollectionsAndMapsToStringIgnoringSettings) shouldBe "custom toString"
+        ClassWithCustomToString().render(toStringIgnoringSettings) shouldBe "{ foo: null }"
     }
 
     @Test fun render_with_filter() = tests {
         ClassWithDefaultToString(ClassTypes.triple).render() shouldBe """
             { foo: (39, 40, 41), bar: "baz" }
         """.trimIndent()
-        ClassWithDefaultToString(ClassTypes.triple).render { obj, _ -> obj != ClassTypes.triple } shouldBe """
-            { foo: , bar: "baz" }
+        ClassWithDefaultToString(ClassTypes.triple).render { filterProperties { obj, _ -> obj != ClassTypes.triple } } shouldBe """
+            { bar: "baz" }
         """.trimIndent()
-        ClassWithDefaultToString(ClassTypes.triple).render { _, prop -> prop != "bar" } shouldBe """
+        ClassWithDefaultToString(ClassTypes.triple).render { filterProperties { _, prop -> prop != "bar" } } shouldBe """
             { foo: (39, 40, 41) }
         """.trimIndent()
     }

@@ -6,6 +6,7 @@ import com.bkahlert.kommons.debug.Compression.Auto
 import com.bkahlert.kommons.debug.Compression.Never
 import com.bkahlert.kommons.debug.CustomToString.Ignore
 import com.bkahlert.kommons.debug.CustomToString.IgnoreForPlainCollectionsAndMaps
+import com.bkahlert.kommons.debug.RenderingSettings.Companion
 import com.bkahlert.kommons.debug.Typing.FullyTyped
 import com.bkahlert.kommons.debug.Typing.SimplyTyped
 import com.bkahlert.kommons.debug.Typing.Untyped
@@ -25,7 +26,7 @@ public sealed class Typing {
     public object FullyTyped : Typing()
 }
 
-/** Serialization option that specifies if and how the output is compressed. */
+/** Serialization option that specifies if and how to compress the output. */
 public sealed class Compression {
     /** Always compress output */
     public object Always : Compression()
@@ -49,20 +50,13 @@ public sealed class CustomToString {
     public object Ignore : CustomToString()
 }
 
-/**
- * Renders this object depending on whether its `toString()` is overridden:
- * - If there is a custom `toString()` it is simply used.
- * - If there is *no custom* `toString()` the object is serialized structurally.
- *   The serialization can include [typing] information (default: [Typing.Untyped]),
- *   apply [compression] (default: [Compression.Auto]).
- */
-public fun Any?.render(
-    typing: Typing = Untyped,
-    compression: Compression = Auto(),
-    customToString: CustomToString = IgnoreForPlainCollectionsAndMaps,
-    rendered: MutableSet<Any> = mutableSetOf(),
-    include: (Any?, String?) -> Boolean = { _, _ -> true },
-): String = buildString { this@render.renderTo(this, typing, compression, customToString, rendered, include) }
+/** Renders this object using the optionally specified [settings]. */
+public fun Any?.render(settings: RenderingSettings = RenderingSettings.Default): String =
+    buildString { RenderingContext(settings).renderTo2(this, this@render) }
+
+/** Renders this object using the [RenderingSettings] built with the specified [template] and [init]. */
+public fun Any?.render(template: RenderingSettings = RenderingSettings.Default, init: RenderingSettingsBuilder.() -> Unit): String =
+    render(Companion.build(template, init))
 
 /**
  * Renders this object to the specified [out].
@@ -74,62 +68,154 @@ public fun Any?.renderTo(
     compression: Compression = Auto(),
     customToString: CustomToString = IgnoreForPlainCollectionsAndMaps,
     rendered: MutableSet<Any> = mutableSetOf(),
-    include: (Any?, String?) -> Boolean = { _, _ -> true },
-) {
-    if (!include(this, null)) return
-    if (this == null) {
+    filterProperties: PropertyFilter = { _, _ -> true },
+): Unit {
+    RenderingContext(typing, compression, customToString, rendered, filterProperties).apply { renderTo2(out, this@renderTo) }
+}
+
+/** Settings used to specify how rendering an object takes place. */
+public interface RenderingSettings {
+    /** If and how type information should be included. */
+    public val typing: Typing
+
+    /** If and how to compress the output. */
+    public val compression: Compression
+
+    /** How to handle overridden [Any.toString] implementations. */
+    public val customToString: CustomToString
+
+    /** Which object-property pairs to render. */
+    public val filterProperties: PropertyFilter
+
+    public companion object {
+        /** Default [RenderingSettings] */
+        public val Default: RenderingSettings = object : RenderingSettings {
+            override var typing: Typing = Untyped
+            override var compression: Compression = Auto()
+            override var customToString: CustomToString = IgnoreForPlainCollectionsAndMaps
+            override var filterProperties: PropertyFilter = { _: Any?, _: String? -> true }
+        }
+
+        /** Builds a [RenderingSettings] using the specified [init] and optional [template]. */
+        public fun build(template: RenderingSettings = Default, init: RenderingSettingsBuilder.() -> Unit = {}): RenderingSettings =
+            (object : RenderingSettingsBuilder {
+                val settings: MutableMap<String, Any?> = mutableMapOf()
+                override var typing: Typing by settings.withDefault { template.typing }
+                override var compression: Compression by settings.withDefault { template.compression }
+                override var customToString: CustomToString by settings.withDefault { template.customToString }
+                override var filterProperties: PropertyFilter by settings.withDefault { template.filterProperties }
+                override fun filterProperties(predicate: PropertyFilter) {
+                    filterProperties = predicate
+                }
+            }).apply(init)
+    }
+}
+
+/** Filter that specifies which object-property pairs to render. */
+public typealias PropertyFilter = (receiver: Any?, property: String?) -> Boolean
+
+/** Builder for [RenderingSettings] */
+public interface RenderingSettingsBuilder : RenderingSettings {
+    public override var typing: Typing
+    public override var compression: Compression
+    public override var customToString: CustomToString
+    public override var filterProperties: PropertyFilter
+
+    /** @see [RenderingSettings.filterProperties] */
+    public fun filterProperties(predicate: PropertyFilter)
+}
+
+internal data class RenderingContext(
+    val settings: RenderingSettings,
+    val rendered: MutableSet<Any> = mutableSetOf(),
+) : RenderingSettings by settings {
+    internal constructor(
+        typing: Typing = Untyped,
+        compression: Compression = Auto(),
+        customToString: CustomToString = IgnoreForPlainCollectionsAndMaps,
+        rendered: MutableSet<Any> = mutableSetOf(),
+        filterProperties: PropertyFilter = { _, _ -> true },
+    ) : this(RenderingSettings.build {
+        this.typing = typing
+        this.compression = compression
+        this.customToString = customToString
+        this.filterProperties = filterProperties
+    }, rendered)
+
+    val CharSequence.needsCompression: Boolean
+        get() = when (val compression = settings.compression) {
+            is Auto -> length > compression.maxLength
+            else -> false
+        }
+
+    fun render(
+        init: RenderingSettingsBuilder.() -> Unit = {},
+        isolated: Boolean = false,
+        block: RenderingContext.(StringBuilder) -> Unit
+    ): String = buildString {
+        copy(
+            settings = RenderingSettings.build(settings, init),
+            rendered = if (isolated) rendered.toMutableSet() else rendered,
+        ).block(this)
+    }
+}
+
+
+internal fun RenderingContext.renderTo2(out: StringBuilder, obj: Any?) {
+    if (!filterProperties(obj, null)) return
+    if (obj == null) {
         out.append("null")
     } else {
         when (typing) {
             Untyped -> {}
             SimplyTyped -> {
                 out.append("!")
-                renderTypeTo(out, simplified = true)
+                obj.renderTypeTo(out, simplified = true)
                 out.append(" ")
             }
             FullyTyped -> {
                 out.append("!")
-                renderTypeTo(out, simplified = false)
+                obj.renderTypeTo(out, simplified = false)
                 out.append(" ")
             }
         }
-        when (this) {
-            is CharSequence -> renderStringTo(out, typing, compression, this)
+        when (obj) {
+            is CharSequence -> renderStringTo(out, obj)
 
             is Boolean, is Char, is Float, is Double,
             is UByte, is UShort, is UInt, is ULong,
-            is Byte, is Short, is Int, is Long -> renderPrimitiveTo(out, this)
+            is Byte, is Short, is Int, is Long -> renderPrimitiveTo(out, obj)
 
             is BooleanArray, is CharArray, is FloatArray, is DoubleArray,
             is UByteArray, is UShortArray, is UIntArray, is ULongArray,
-            is ByteArray, is ShortArray, is IntArray, is LongArray -> renderPrimitiveArrayTo(out, this)
+            is ByteArray, is ShortArray, is IntArray, is LongArray -> renderPrimitiveArrayTo(out, obj)
 
-            is Array<*> -> renderArrayTo(out, this, typing, compression, customToString, rendered, include)
+            is Array<*> -> renderArrayTo(out, obj)
 
             else -> {
-                if (rendered.contains(this)) {
+                if (rendered.contains(obj)) {
                     out.append("<")
-                    renderTypeTo(out)
+                    obj.renderTypeTo(out)
                     out.append("@")
-                    out.append(hashCode())
+                    out.append(obj.hashCode())
                     out.append(">")
                 } else {
-                    rendered.add(this)
+                    rendered.add(obj)
 
                     when {
-                        this is Collection<*> && this.isPlain -> renderCollectionTo(out, this, typing, compression, customToString, rendered, include)
-                        this is Map<*, *> && this.isPlain -> renderObjectTo(out, this, typing, compression, customToString, rendered, include)
+                        obj is Collection<*> && obj.isPlain -> renderCollectionTo(out, obj)
+                        obj is Map<*, *> && obj.isPlain -> renderObjectTo(out, obj)
                         else -> {
                             val likelyRenderInvokingToString =
-                                StackTrace.get().findByLastKnownCallsOrNull(Any::render, Any::renderTo)?.function == "toString"
+                                StackTrace.get().findByLastKnownCallsOrNull("render", "renderTo")?.function == "toString"
 
                             when (customToString) {
-                                IgnoreForPlainCollectionsAndMaps -> if (likelyRenderInvokingToString) null else toCustomStringOrNull()
+                                IgnoreForPlainCollectionsAndMaps -> if (likelyRenderInvokingToString) null else obj.toCustomStringOrNull()
                                 Ignore -> null
                             }
                                 ?.also { out.append(it) }
-                                ?: kotlin.runCatching { renderObjectTo(out, this, typing, compression, customToString, rendered, include) }
-                                    .recoverCatching { out.append("<$this>") }
+                                ?: kotlin.runCatching { renderObjectTo(out, obj) }
+                                    .recoverCatching { out.append("<$obj>") }
                                     .recoverCatching { out.append("<unsupported:$it>") }
                         }
                     }
@@ -143,26 +229,18 @@ internal fun renderString(
     string: CharSequence,
     typing: Typing = Untyped,
     compression: Compression = Auto(),
-): String = buildString { renderStringTo(this, typing, compression, string) }
+): String = buildString { RenderingContext(typing = typing, compression = compression).renderStringTo(this, string) }
 
-internal fun renderStringTo(
-    out: StringBuilder,
-    typing: Typing,
-    compression: Compression,
-    string: CharSequence,
-) {
+internal fun RenderingContext.renderStringTo(out: StringBuilder, string: CharSequence) {
     when (compression) {
         Always -> {
             out.append(string.quoted)
         }
-        Never -> {
-            if (typing != Untyped) out.append("\n")
-            out.append(string.toString())
-        }
-        is Auto -> {
+        Never, is Auto -> {
             if (string.isMultiline) {
-                if (typing != Untyped) out.append("\n")
+                out.append("\"\"\"\n")
                 out.append(string.toString())
+                out.append("\n\"\"\"")
             } else {
                 out.append(string.quoted)
             }
@@ -170,14 +248,10 @@ internal fun renderStringTo(
     }
 }
 
-internal fun renderPrimitive(
-    primitive: Any,
-): String = buildString { renderPrimitiveTo(this, primitive) }
+internal fun renderPrimitive(primitive: Any): String =
+    buildString { RenderingContext().renderPrimitiveTo(this, primitive) }
 
-internal fun renderPrimitiveTo(
-    out: StringBuilder,
-    primitive: Any,
-) {
+internal fun RenderingContext.renderPrimitiveTo(out: StringBuilder, primitive: Any) {
     when (primitive) {
         is Boolean -> out.append(primitive)
         is Char -> out.append(primitive)
@@ -199,14 +273,10 @@ internal fun renderPrimitiveTo(
     }
 }
 
-internal fun renderPrimitiveArray(
-    primitiveArray: Any,
-): String = buildString { renderPrimitiveArrayTo(this, primitiveArray) }
+internal fun renderPrimitiveArray(primitiveArray: Any): String =
+    buildString { RenderingContext().renderPrimitiveArrayTo(this, primitiveArray) }
 
-internal fun renderPrimitiveArrayTo(
-    out: StringBuilder,
-    primitiveArray: Any,
-) {
+internal fun RenderingContext.renderPrimitiveArrayTo(out: StringBuilder, primitiveArray: Any) {
     when (primitiveArray) {
         is BooleanArray -> renderPrimitivesTo(out, primitiveArray.iterator())
         is CharArray -> renderPrimitivesTo(out, primitiveArray.iterator())
@@ -226,10 +296,7 @@ internal fun renderPrimitiveArrayTo(
     }
 }
 
-private fun renderPrimitivesTo(
-    out: StringBuilder,
-    primitives: Iterator<*>,
-) {
+private fun RenderingContext.renderPrimitivesTo(out: StringBuilder, primitives: Iterator<*>) {
     out.append('[')
     primitives.withIndex().forEach { (index, value) ->
         if (index != 0) out.append(", ")
@@ -244,18 +311,19 @@ internal fun renderArray(
     compression: Compression = Auto(),
     customToString: CustomToString = IgnoreForPlainCollectionsAndMaps,
     rendered: MutableSet<Any> = mutableSetOf(),
-    include: (Any?, String?) -> Boolean = { _, _ -> true },
-): String = buildString { renderArrayTo(this, array, typing, compression, customToString, rendered, include) }
+    filterProperties: PropertyFilter = { _, _ -> true },
+): String = buildString {
+    RenderingContext(
+        typing = typing,
+        compression = compression,
+        customToString = customToString,
+        rendered = rendered,
+        filterProperties = filterProperties
+    ).renderArrayTo(this, array)
+}
 
-internal fun renderArrayTo(
-    out: StringBuilder,
-    array: Array<*>,
-    typing: Typing,
-    compression: Compression,
-    customToString: CustomToString,
-    rendered: MutableSet<Any>,
-    include: (Any?, String?) -> Boolean,
-) = renderObjectsTo(out, array.asList(), typing, compression, customToString, rendered, include)
+internal fun RenderingContext.renderArrayTo(out: StringBuilder, array: Array<*>) =
+    renderObjectsTo(out, array.asList())
 
 
 internal fun renderCollection(
@@ -264,76 +332,59 @@ internal fun renderCollection(
     compression: Compression = Auto(),
     customToString: CustomToString = IgnoreForPlainCollectionsAndMaps,
     rendered: MutableSet<Any> = mutableSetOf(),
-    include: (Any?, String?) -> Boolean = { _, _ -> true },
-): String = buildString { renderCollectionTo(this, collection, typing, compression, customToString, rendered, include) }
+    filterProperties: PropertyFilter = { _, _ -> true },
+): String = buildString {
+    RenderingContext(
+        typing = typing,
+        compression = compression,
+        customToString = customToString,
+        rendered = rendered,
+        filterProperties = filterProperties
+    ).renderCollectionTo(this, collection)
+}
 
-internal fun renderCollectionTo(
-    out: StringBuilder,
-    collection: Collection<*>,
-    typing: Typing,
-    compression: Compression,
-    customToString: CustomToString,
-    rendered: MutableSet<Any>,
-    include: (Any?, String?) -> Boolean,
-) = renderObjectsTo(out, collection.toList(), typing, compression, customToString, rendered, include)
+internal fun RenderingContext.renderCollectionTo(out: StringBuilder, collection: Collection<*>) =
+    renderObjectsTo(out, collection.toList())
 
 
-private fun renderObjectsTo(
-    out: StringBuilder,
-    objects: List<*>,
-    typing: Typing,
-    compression: Compression,
-    customToString: CustomToString,
-    rendered: MutableSet<Any>,
-    include: (Any?, String?) -> Boolean,
-) {
+private fun RenderingContext.renderObjectsTo(out: StringBuilder, objects: List<*>) {
     when (compression) {
-        Always -> renderCompressedObjectsTo(out, objects, typing, customToString, rendered, include)
-        Never -> renderNonCompressedObjectsTo(out, objects, typing, customToString, rendered, include)
+        Always -> renderCompressedObjectsTo(out, objects)
+        Never -> renderNonCompressedObjectsTo(out, objects)
         is Auto -> {
-            buildString { renderCompressedObjectsTo(this, objects, typing, customToString, rendered.toMutableSet(), include) }
-                .takeUnless { it.length > compression.maxLength }
+            render(isolated = true) { renderCompressedObjectsTo(it, objects) }
+                .takeUnless { it.needsCompression }
                 ?.also { out.append(it); rendered.addAll(objects.filterNotNull()) }
-                ?: renderNonCompressedObjectsTo(out, objects, typing, customToString, rendered, include)
+                ?: renderNonCompressedObjectsTo(out, objects)
         }
     }
 }
 
-private fun renderCompressedObjectsTo(
-    out: StringBuilder,
-    objects: List<*>,
-    typing: Typing,
-    customToString: CustomToString,
-    rendered: MutableSet<Any>,
-    include: (Any?, String?) -> Boolean,
-) {
+private fun RenderingContext.renderCompressedObjectsTo(out: StringBuilder, objects: List<*>) {
     out.append("[")
-    val filteredObjects = objects.filterIndexed { index, _ -> include(objects, "$index") }
+    val filteredObjects = objects
+        .filterIndexed { index, _ -> filterProperties(objects, "$index") }
+        .filter { filterProperties(it, null) }
     if (filteredObjects.isNotEmpty()) out.append(" ")
     filteredObjects.forEachIndexed { index, value ->
         if (index > 0) out.append(", ")
-        value.renderTo(out, typing, Always, customToString, rendered, include)
+        value.renderTo(out, typing, Always, customToString, rendered, filterProperties)
     }
     if (filteredObjects.isNotEmpty()) out.append(" ")
     out.append("]")
 }
 
-private fun renderNonCompressedObjectsTo(
-    out: StringBuilder,
-    objects: List<*>,
-    typing: Typing,
-    customToString: CustomToString,
-    rendered: MutableSet<Any>,
-    include: (Any?, String?) -> Boolean,
-) {
+private fun RenderingContext.renderNonCompressedObjectsTo(out: StringBuilder, objects: List<*>) {
     val indent = "    "
     out.append("[")
-    val filteredObjects = objects.filterIndexed { index, _ -> include(objects, "$index") }
+    val filteredObjects = objects
+        .filterIndexed { index, _ -> filterProperties(objects, "$index") }
+        .filter { filterProperties(it, null) }
     if (filteredObjects.isNotEmpty()) out.append("\n")
     filteredObjects.forEachIndexed { index, value ->
         if (index > 0) out.append(",\n")
         out.append(indent)
-        val renderedElement = value.render(typing, Never, customToString, rendered, include).prependIndent(indent)
+        val renderedElement = render({ compression = Never }, isolated = false) { renderTo2(it, value) }.prependIndent(indent)
         out.append(renderedElement, indent.length, renderedElement.length)
     }
     if (filteredObjects.isNotEmpty()) out.append("\n")
@@ -346,44 +397,41 @@ internal fun renderObject(
     compression: Compression = Auto(),
     customToString: CustomToString = IgnoreForPlainCollectionsAndMaps,
     rendered: MutableSet<Any> = mutableSetOf(),
-    include: (Any?, String?) -> Boolean = { _, _ -> true },
-): String = buildString { renderObjectTo(this, obj, typing, compression, customToString, rendered, include) }
+    filterProperties: PropertyFilter = { _, _ -> true },
+): String = buildString {
+    RenderingContext(
+        typing = typing,
+        compression = compression,
+        customToString = customToString,
+        rendered = rendered,
+        filterProperties = filterProperties
+    ).renderObjectTo(this, obj)
+}
 
-internal fun renderObjectTo(
-    out: StringBuilder,
-    obj: Any,
-    typing: Typing,
-    compression: Compression,
-    customToString: CustomToString,
-    rendered: MutableSet<Any>,
-    include: (Any?, String?) -> Boolean,
-) {
+internal fun RenderingContext.renderObjectTo(out: StringBuilder, obj: Any) {
     when (compression) {
-        Always -> renderCompressedObjectTo(out, obj, typing, customToString, rendered, include)
-        Never -> renderNonCompressedObjectTo(out, obj, typing, customToString, rendered, include)
+        Always -> renderCompressedObjectTo(out, obj)
+        Never -> renderNonCompressedObjectTo(out, obj)
         is Auto -> {
-            buildString { renderCompressedObjectTo(this, obj, typing, customToString, rendered.toMutableSet(), include) }
-                .takeUnless { it.length > compression.maxLength }
+            render(isolated = true) { renderCompressedObjectTo(it, obj) }
+                .takeUnless { it.needsCompression }
                 ?.also { out.append(it); rendered.add(obj) }
-                ?: renderNonCompressedObjectTo(out, obj, typing, customToString, rendered, include)
+                ?: renderNonCompressedObjectTo(out, obj)
         }
     }
 }
 
-private fun renderCompressedObjectTo(
-    out: StringBuilder,
-    obj: Any,
-    typing: Typing,
-    customToString: CustomToString,
-    rendered: MutableSet<Any>,
-    include: (Any?, String?) -> Boolean,
-) {
+private fun RenderingContext.renderCompressedObjectTo(out: StringBuilder, obj: Any) {
     out.append("{")
     val entries = (if (obj is Map<*, *>) obj.entries else obj.properties.entries)
         .map { (key, value) ->
-            val renderedKey = if (key is CharSequence) key.quoted.removeSurrounding("\"") else key.render(typing, Always, customToString, rendered, include)
+            val renderedKey =
+                if (key is CharSequence) key.quoted.removeSurrounding("\"")
+                else render({ compression = Always }) { renderTo2(it, key) }
             renderedKey to value
-        }.filter { (key, _) -> include(obj, key) }
+        }
+        .filter { (key, _) -> filterProperties(obj, key) }
+        .filter { (_, value) -> filterProperties(value, null) }
     if (entries.isNotEmpty()) out.append(" ")
     entries.forEachIndexed { index, (key, value) ->
         if (index > 0) out.append(", ")
@@ -391,27 +439,25 @@ private fun renderCompressedObjectTo(
         out.append(key)
         out.append(": ")
 
-        value.renderTo(out, typing, Always, customToString, rendered, include)
+        val renderedValue = render({ compression = Always }) { renderTo2(it, value) }
+        out.append(renderedValue)
     }
     if (entries.isNotEmpty()) out.append(" ")
     out.append("}")
 }
 
-private fun renderNonCompressedObjectTo(
-    out: StringBuilder,
-    obj: Any,
-    typing: Typing,
-    customToString: CustomToString,
-    rendered: MutableSet<Any>,
-    include: (Any?, String?) -> Boolean,
-) {
+private fun RenderingContext.renderNonCompressedObjectTo(out: StringBuilder, obj: Any) {
     val keyIndent = "    "
     out.append("{")
     val entries = (if (obj is Map<*, *>) obj.entries else obj.properties.entries)
         .map { (key, value) ->
-            val renderedKey = if (key is CharSequence) key.quoted.removeSurrounding("\"") else key.render(typing, Always, customToString, rendered, include)
+            val renderedKey =
+                if (key is CharSequence) key.quoted.removeSurrounding("\"")
+                else render({ compression = Always }) { renderTo2(it, key) }
             renderedKey to value
-        }.filter { (key, _) -> include(obj, key) }
+        }
+        .filter { (key, _) -> filterProperties(obj, key) }
+        .filter { (_, value) -> filterProperties(value, null) }
     if (entries.isNotEmpty()) out.append("\n")
     entries.forEachIndexed { index, (key, value) ->
         if (index > 0) out.append(",\n")
@@ -421,7 +467,7 @@ private fun renderNonCompressedObjectTo(
         out.append(": ")
 
         val valueIndent = " ".repeat(keyIndent.length + key.length + 2)
-        val renderedValue = value.render(typing, Never, customToString, rendered, include).prependIndent(valueIndent)
+        val renderedValue = render({ compression = Never }) { renderTo2(it, value) }.prependIndent(valueIndent)
         out.append(renderedValue, valueIndent.length, renderedValue.length)
     }
     if (entries.isNotEmpty()) out.append("\n")

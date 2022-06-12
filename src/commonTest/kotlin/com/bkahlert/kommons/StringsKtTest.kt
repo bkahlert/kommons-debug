@@ -11,7 +11,7 @@ import io.kotest.matchers.string.shouldStartWith
 import io.kotest.matchers.throwable.shouldHaveMessage
 import kotlin.test.Test
 
-class StringsTest {
+class StringsKtTest {
 
     @Test fun contains_any() = tests {
         "foo bar".containsAny("baz", "o b", "abc") shouldBe true

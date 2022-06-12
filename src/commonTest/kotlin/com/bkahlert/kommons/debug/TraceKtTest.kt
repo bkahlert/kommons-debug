@@ -92,8 +92,10 @@ class TraceTest {
             )
         } shouldBe """
             ⟨
+            "${"\""}"
             subject 1
             subject 2
+            "${"\""}"
             ⟩
         """.trimIndent()
 
@@ -106,8 +108,10 @@ class TraceTest {
             )
         } shouldBe """
             caption ⟨
+            "${"\""}"
             subject 1
             subject 2
+            "${"\""}"
             ⟩
         """.trimIndent()
 
@@ -120,8 +124,10 @@ class TraceTest {
             ) { "inspect" }
         } shouldBe """
             caption ⟨
+            "${"\""}"
             subject 1
             subject 2
+            "${"\""}"
             ⟩ { "inspect" }
         """.trimIndent()
 
@@ -134,8 +140,10 @@ class TraceTest {
             ) { "inspect 1\ninspect 2" }
         } shouldBe """
             caption ⟨ "subject" ⟩ {
+            "${"\""}"
             inspect 1
             inspect 2
+            "${"\""}"
             }
         """.trimIndent()
 
@@ -148,11 +156,15 @@ class TraceTest {
             ) { "inspect 1\ninspect 2" }
         } shouldBe """
             caption ⟨
+            "${"\""}"
             subject 1
             subject 2
+            "${"\""}"
             ⟩ {
+            "${"\""}"
             inspect 1
             inspect 2
+            "${"\""}"
             }
         """.trimIndent()
     }
@@ -168,7 +180,7 @@ class TraceTest {
             "subject".trace(
                 highlight = false,
                 includeCallSite = false,
-                render = { it.render(typing = SimplyTyped, customToString = Ignore) },
+                render = { it.render { typing = SimplyTyped; customToString = Ignore } },
                 out = this::append
             ) { length.toString() }
         }
@@ -182,7 +194,7 @@ class TraceTest {
             when (Platform.Current) {
                 JS -> it shouldMatch ".ͭ \\(.*/commons\\.js.*\\) ⟨ !String \"subject\" ⟩".toRegex()
                 JVM -> it shouldBe """
-                    .ͭ (TraceKtTest.kt:179) ⟨ !String "subject" ⟩
+                    .ͭ (TraceKtTest.kt:191) ⟨ !String "subject" ⟩
                 """.trimIndent()
             }
         }
