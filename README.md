@@ -13,14 +13,14 @@
 
 Kommons Debug is hosted on GitHub with releases provided on Maven Central.
 
-* **Gradle** `implementation("com.bkahlert.kommons:kommons-debug:0.4.0")`
+* **Gradle** `implementation("com.bkahlert.kommons:kommons-debug:0.5.0")`
 
 * **Maven**
   ```xml
   <dependency>
       <groupId>com.bkahlert.kommons</groupId>
       <artifactId>kommons-debug</artifactId>
-      <version>0.4.0</version>
+      <version>0.5.0</version>
   </dependency>
   ```
 
@@ -81,7 +81,7 @@ val lambda: (String) -> Unit = {}
 lambda.renderType()                 // (String)->Unit
 ```
 
-### Any?.render()
+### Any?.render() / Any.asString()
 
 Renders any object depending on whether its `toString()` is overridden:
 
@@ -91,11 +91,15 @@ Renders any object depending on whether its `toString()` is overridden:
 #### Examples
 
 ```kotlin
-"string".render()               // string
+"string".render()                            // string
 
 class Foo(val bar: Any = "baz")
-foo().render()                  // { bar: "baz" }
-foo(foo()).render(typed = true)   // Foo { bar: Foo { bar: "baz" } }
+
+foo().render()                               // { bar: "baz" }
+foo(foo()).render(typed = true)              // Foo { bar: Foo { bar: "baz" } }
+
+foo().asString()                             // { bar: "baz" }
+foo(null).asString(excludeNullValues = false)  // { }
 ```
 
 ### Any.properties

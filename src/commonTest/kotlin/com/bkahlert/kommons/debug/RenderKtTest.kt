@@ -21,15 +21,15 @@ class RenderTest {
 
     @Suppress("SpellCheckingInspection")
     @Test fun render_string() = tests {
-        renderString("", compression = Always) shouldBe "\"\""
-        renderString(" ", compression = Always) shouldBe "\" \""
-        renderString("string", compression = Always) shouldBe "\"string\""
-        renderString("line 1\nline 2", compression = Always) shouldBe "\"line 1\\nline 2\""
+        renderString("") { compression = Always } shouldBe "\"\""
+        renderString(" ") { compression = Always } shouldBe "\" \""
+        renderString("string") { compression = Always } shouldBe "\"string\""
+        renderString("line 1\nline 2") { compression = Always } shouldBe "\"line 1\\nline 2\""
 
-        renderString("", compression = Never) shouldBe "\"\""
-        renderString(" ", compression = Never) shouldBe "\" \""
-        renderString("string", compression = Never) shouldBe "\"string\""
-        renderString("line 1\nline 2", compression = Never) shouldBe """
+        renderString("") { compression = Never } shouldBe "\"\""
+        renderString(" ") { compression = Never } shouldBe "\" \""
+        renderString("string") { compression = Never } shouldBe "\"string\""
+        renderString("line 1\nline 2") { compression = Never } shouldBe """
             "${"\""}"
             line 1
             line 2
@@ -85,24 +85,24 @@ class RenderTest {
 
     @Suppress("SpellCheckingInspection")
     @Test fun render_array() = tests {
-        renderArray(arrayOf<String>(), compression = Always) shouldBe "[]"
-        renderArray(arrayOf("string"), compression = Always) shouldBe "[ \"string\" ]"
-        renderArray(arrayOf("string", null), compression = Always) shouldBe "[ \"string\", null ]"
-        renderArray(arrayOf("string", "line 1\nline 2"), compression = Always) shouldBe "[ \"string\", \"line 1\\nline 2\" ]"
+        renderArray(arrayOf<String>()) { compression = Always } shouldBe "[]"
+        renderArray(arrayOf("string")) { compression = Always } shouldBe "[ \"string\" ]"
+        renderArray(arrayOf("string", null)) { compression = Always } shouldBe "[ \"string\", null ]"
+        renderArray(arrayOf("string", "line 1\nline 2")) { compression = Always } shouldBe "[ \"string\", \"line 1\\nline 2\" ]"
 
-        renderArray(arrayOf<String>(), compression = Never) shouldBe "[]"
-        renderArray(arrayOf("string"), compression = Never) shouldBe """
+        renderArray(arrayOf<String>()) { compression = Never } shouldBe "[]"
+        renderArray(arrayOf("string")) { compression = Never } shouldBe """
             [
                 "string"
             ]
         """.trimIndent()
-        renderArray(arrayOf("string", null), compression = Never) shouldBe """
+        renderArray(arrayOf("string", null)) { compression = Never } shouldBe """
             [
                 "string",
                 null
             ]
         """.trimIndent()
-        renderArray(arrayOf("string", "line 1\nline 2"), compression = Never) shouldBe """
+        renderArray(arrayOf("string", "line 1\nline 2")) { compression = Never } shouldBe """
             [
                 "string",
                 "${"\""}"
@@ -125,7 +125,7 @@ class RenderTest {
             ]
         """.trimIndent()
 
-        renderArray(arrayOf(ClassWithDefaultToString()), typing = SimplyTyped) shouldBe """
+        renderArray(arrayOf(ClassWithDefaultToString())) { typing = SimplyTyped } shouldBe """
             [
                 !ClassWithDefaultToString {
                     foo: null,
@@ -137,24 +137,24 @@ class RenderTest {
 
     @Suppress("SpellCheckingInspection")
     @Test fun render_collection() = tests {
-        renderCollection(listOf<String>(), compression = Always) shouldBe "[]"
-        renderCollection(listOf("string"), compression = Always) shouldBe "[ \"string\" ]"
-        renderCollection(listOf("string", null), compression = Always) shouldBe "[ \"string\", null ]"
-        renderCollection(listOf("string", "line 1\nline 2"), compression = Always) shouldBe "[ \"string\", \"line 1\\nline 2\" ]"
+        renderCollection(listOf<String>()) { compression = Always } shouldBe "[]"
+        renderCollection(listOf("string")) { compression = Always } shouldBe "[ \"string\" ]"
+        renderCollection(listOf("string", null)) { compression = Always } shouldBe "[ \"string\", null ]"
+        renderCollection(listOf("string", "line 1\nline 2")) { compression = Always } shouldBe "[ \"string\", \"line 1\\nline 2\" ]"
 
-        renderCollection(listOf<String>(), compression = Never) shouldBe "[]"
-        renderCollection(listOf("string"), compression = Never) shouldBe """
+        renderCollection(listOf<String>()) { compression = Never } shouldBe "[]"
+        renderCollection(listOf("string")) { compression = Never } shouldBe """
             [
                 "string"
             ]
         """.trimIndent()
-        renderCollection(listOf("string", null), compression = Never) shouldBe """
+        renderCollection(listOf("string", null)) { compression = Never } shouldBe """
             [
                 "string",
                 null
             ]
         """.trimIndent()
-        renderCollection(listOf("string", "line 1\nline 2"), compression = Never) shouldBe """
+        renderCollection(listOf("string", "line 1\nline 2")) { compression = Never } shouldBe """
             [
                 "string",
                 "${"\""}"
@@ -177,7 +177,7 @@ class RenderTest {
             ]
         """.trimIndent()
 
-        renderCollection(listOf(ClassWithDefaultToString()), typing = SimplyTyped) shouldBe """
+        renderCollection(listOf(ClassWithDefaultToString())) { typing = SimplyTyped } shouldBe """
             [
                 !ClassWithDefaultToString {
                     foo: null,
@@ -189,24 +189,24 @@ class RenderTest {
 
     @Suppress("SpellCheckingInspection")
     @Test fun render_map() = tests {
-        renderObject(emptyMap<String, Any?>(), compression = Always) shouldBe "{}"
-        renderObject(mapOf("foo" to "string"), compression = Always) shouldBe "{ foo: \"string\" }"
-        renderObject(mapOf("foo" to "string", "bar" to null), compression = Always) shouldBe "{ foo: \"string\", bar: null }"
-        renderObject(mapOf("foo" to "string", "bar" to "line 1\nline 2"), compression = Always) shouldBe "{ foo: \"string\", bar: \"line 1\\nline 2\" }"
+        renderObject(emptyMap<String, Any?>()) { compression = Always } shouldBe "{}"
+        renderObject(mapOf("foo" to "string")) { compression = Always } shouldBe "{ foo: \"string\" }"
+        renderObject(mapOf("foo" to "string", "bar" to null)) { compression = Always } shouldBe "{ foo: \"string\", bar: null }"
+        renderObject(mapOf("foo" to "string", "bar" to "line 1\nline 2")) { compression = Always } shouldBe "{ foo: \"string\", bar: \"line 1\\nline 2\" }"
 
-        renderObject(emptyMap<String, Any?>(), compression = Never) shouldBe "{}"
-        renderObject(mapOf("foo" to "string"), compression = Never) shouldBe """
+        renderObject(emptyMap<String, Any?>()) { compression = Never } shouldBe "{}"
+        renderObject(mapOf("foo" to "string")) { compression = Never } shouldBe """
             {
                 foo: "string"
             }
         """.trimIndent()
-        renderObject(mapOf("foo" to "string", "bar" to null), compression = Never) shouldBe """
+        renderObject(mapOf("foo" to "string", "bar" to null)) { compression = Never } shouldBe """
             {
                 foo: "string",
                 bar: null
             }
         """.trimIndent()
-        renderObject(mapOf("foo" to "string", "bar" to "line 1\nline 2"), compression = Never) shouldBe """
+        renderObject(mapOf("foo" to "string", "bar" to "line 1\nline 2")) { compression = Never } shouldBe """
             {
                 foo: "string",
                 bar: "${"\""}"
@@ -229,7 +229,7 @@ class RenderTest {
             }
         """.trimIndent()
 
-        renderObject(mapOf("foo" to ClassWithDefaultToString()), typing = SimplyTyped) shouldBe """
+        renderObject(mapOf("foo" to ClassWithDefaultToString())) { typing = SimplyTyped } shouldBe """
             {
                 foo: !ClassWithDefaultToString {
                          foo: null,
@@ -240,10 +240,10 @@ class RenderTest {
     }
 
     @Test fun render_map_with_any_key() = tests {
-        renderObject(mapOf(DataClass() to "foo", null to "bar"), compression = Always) shouldBe """
+        renderObject(mapOf(DataClass() to "foo", null to "bar")) { compression = Always } shouldBe """
             { DataClass(dataProperty=data-property, openBaseProperty=37): "foo", null: "bar" }
         """.trimIndent()
-        renderObject(mapOf(DataClass() to "foo", null to "bar"), compression = Never) shouldBe """
+        renderObject(mapOf(DataClass() to "foo", null to "bar")) { compression = Never } shouldBe """
             {
                 DataClass(dataProperty=data-property, openBaseProperty=37): "foo",
                 null: "bar"
@@ -256,7 +256,7 @@ class RenderTest {
             }
         """.trimIndent()
 
-        renderObject(mapOf(ClassWithDefaultToString() to "foo"), typing = SimplyTyped) shouldBe """
+        renderObject(mapOf(ClassWithDefaultToString() to "foo")) { typing = SimplyTyped } shouldBe """
             {
                 !ClassWithDefaultToString { foo: null, bar: !String "baz" }: !String "foo"
             }
@@ -265,25 +265,27 @@ class RenderTest {
 
     @Suppress("SpellCheckingInspection")
     @Test fun render_object() = tests {
-        renderObject(ClassWithDefaultToString(), compression = Always) shouldBe "{ foo: null, bar: \"baz\" }"
-        renderObject(ClassWithDefaultToString("string"), compression = Always) shouldBe "{ foo: \"string\", bar: \"baz\" }"
-        renderObject(ClassWithDefaultToString("line 1\nline 2"), compression = Always) shouldBe "{ foo: \"line 1\\nline 2\", bar: \"baz\" }"
-        renderObject(ClassWithDefaultToString(listOf("string", null)), compression = Always) shouldBe "{ foo: [ \"string\", null ], bar: \"baz\" }"
-        renderObject(ClassWithDefaultToString(ClassWithDefaultToString()), compression = Always) shouldBe "{ foo: { foo: null, bar: \"baz\" }, bar: \"baz\" }"
+        renderObject(ClassWithDefaultToString()) { compression = Always } shouldBe "{ foo: null, bar: \"baz\" }"
+        renderObject(ClassWithDefaultToString("string")) { compression = Always } shouldBe "{ foo: \"string\", bar: \"baz\" }"
+        renderObject(ClassWithDefaultToString("line 1\nline 2")) { compression = Always } shouldBe "{ foo: \"line 1\\nline 2\", bar: \"baz\" }"
+        renderObject(ClassWithDefaultToString(listOf("string", null))) { compression = Always } shouldBe "{ foo: [ \"string\", null ], bar: \"baz\" }"
+        renderObject(ClassWithDefaultToString(ClassWithDefaultToString())) {
+            compression = Always
+        } shouldBe "{ foo: { foo: null, bar: \"baz\" }, bar: \"baz\" }"
 
-        renderObject(ClassWithDefaultToString(), compression = Never) shouldBe """
+        renderObject(ClassWithDefaultToString()) { compression = Never } shouldBe """
             {
                 foo: null,
                 bar: "baz"
             }
         """.trimIndent()
-        renderObject(ClassWithDefaultToString("string"), compression = Never) shouldBe """
+        renderObject(ClassWithDefaultToString("string")) { compression = Never } shouldBe """
             {
                 foo: "string",
                 bar: "baz"
             }
         """.trimIndent()
-        renderObject(ClassWithDefaultToString("line 1\nline 2"), compression = Never) shouldBe """
+        renderObject(ClassWithDefaultToString("line 1\nline 2")) { compression = Never } shouldBe """
             {
                 foo: "${"\""}"
                      line 1
@@ -292,7 +294,7 @@ class RenderTest {
                 bar: "baz"
             }
         """.trimIndent()
-        renderObject(ClassWithDefaultToString(listOf("string", null)), compression = Never) shouldBe """
+        renderObject(ClassWithDefaultToString(listOf("string", null))) { compression = Never } shouldBe """
             {
                 foo: [
                          "string",
@@ -301,7 +303,7 @@ class RenderTest {
                 bar: "baz"
             }
         """.trimIndent()
-        renderObject(ClassWithDefaultToString(ClassWithDefaultToString()), compression = Never) shouldBe """
+        renderObject(ClassWithDefaultToString(ClassWithDefaultToString())) { compression = Never } shouldBe """
             {
                 foo: {
                          foo: null,
@@ -325,7 +327,7 @@ class RenderTest {
         renderObject(ClassWithDefaultToString(listOf("string", null))) shouldBe "{ foo: [ \"string\", null ], bar: \"baz\" }"
         renderObject(ClassWithDefaultToString(ClassWithDefaultToString())) shouldBe "{ foo: { foo: null, bar: \"baz\" }, bar: \"baz\" }"
 
-        renderObject(ClassWithDefaultToString(ClassWithDefaultToString()), typing = SimplyTyped) shouldBe """
+        renderObject(ClassWithDefaultToString(ClassWithDefaultToString())) { typing = SimplyTyped } shouldBe """
             {
                 foo: !ClassWithDefaultToString {
                          foo: null,

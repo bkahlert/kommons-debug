@@ -1,5 +1,10 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.Platform.JS
+import com.bkahlert.kommons.debug.ClassWithCustomToString
+import com.bkahlert.kommons.debug.ClassWithDefaultToString
+import com.bkahlert.kommons.debug.OrdinaryClass
+import com.bkahlert.kommons.debug.ThrowingClass
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.collections.shouldContain
@@ -182,6 +187,73 @@ class StringsKtTest {
         randomString(100).forAll { allowedByDefault shouldContain it }
 
         randomString(100, 'A', 'B').forAll { listOf('A', 'B') shouldContain it }
+    }
+
+    @Test fun as_string() = tests {
+        OrdinaryClass().asString() shouldBe when (Platform.Current) {
+            JS -> """
+                OrdinaryClass {
+                    baseProperty: "base-property",
+                    openBaseProperty: 0x2a,
+                    protectedOpenBaseProperty: "protected-open-base-property",
+                    privateBaseProperty: "private-base-property",
+                    ordinaryProperty: "ordinary-property",
+                    privateOrdinaryProperty: "private-ordinary-property"
+                }
+            """.trimIndent()
+            else -> """
+                OrdinaryClass {
+                    protectedOpenBaseProperty: "protected-open-base-property",
+                    openBaseProperty: 0x2a,
+                    baseProperty: "base-property",
+                    privateOrdinaryProperty: "private-ordinary-property",
+                    ordinaryProperty: "ordinary-property"
+                }
+            """.trimIndent()
+        }
+        if (Platform.Current != JS) {
+            ThrowingClass().asString() shouldBe """
+            ThrowingClass {
+                throwingProperty: <error:java.lang.RuntimeException: error reading property>,
+                privateThrowingProperty: <error:java.lang.RuntimeException: error reading private property>
+            }
+        """.trimIndent()
+        }
+
+        OrdinaryClass().asString(OrdinaryClass::ordinaryProperty) shouldBe """
+            OrdinaryClass { ordinaryProperty: "ordinary-property" }
+        """.trimIndent()
+
+        OrdinaryClass().asString(exclude = listOf(OrdinaryClass::ordinaryProperty)) shouldBe when (Platform.Current) {
+            JS -> """
+                OrdinaryClass {
+                    baseProperty: "base-property",
+                    openBaseProperty: 0x2a,
+                    protectedOpenBaseProperty: "protected-open-base-property",
+                    privateBaseProperty: "private-base-property",
+                    privateOrdinaryProperty: "private-ordinary-property"
+                }
+            """.trimIndent()
+            else -> """
+                OrdinaryClass {
+                    protectedOpenBaseProperty: "protected-open-base-property",
+                    openBaseProperty: 0x2a,
+                    baseProperty: "base-property",
+                    privateOrdinaryProperty: "private-ordinary-property"
+                }
+            """.trimIndent()
+        }
+
+        ClassWithDefaultToString().asString() shouldBe """ClassWithDefaultToString { bar: "baz" }"""
+        ClassWithDefaultToString().asString(excludeNullValues = true) shouldBe """ClassWithDefaultToString { bar: "baz" }"""
+        ClassWithDefaultToString().asString(excludeNullValues = false) shouldBe """ClassWithDefaultToString { foo: null, bar: "baz" }"""
+
+        ClassWithDefaultToString().let {
+            it.asString {
+                put(it::bar, "baz")
+                put("baz", ClassWithCustomToString())
+            }
+        } shouldBe """ClassWithDefaultToString { bar: "baz", baz: custom toString }"""
     }
 }
 
