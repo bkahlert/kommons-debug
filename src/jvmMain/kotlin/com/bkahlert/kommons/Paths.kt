@@ -9,9 +9,13 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.OutputStream
 import java.io.Writer
+import java.net.URI
+import java.net.URL
 import java.nio.charset.Charset
 import java.nio.file.DirectoryNotEmptyException
 import java.nio.file.FileSystem
+import java.nio.file.FileSystemNotFoundException
+import java.nio.file.FileSystems
 import java.nio.file.FileVisitOption.FOLLOW_LINKS
 import java.nio.file.Files
 import java.nio.file.LinkOption
@@ -19,6 +23,7 @@ import java.nio.file.NotDirectoryException
 import java.nio.file.OpenOption
 import java.nio.file.Path
 import java.nio.file.PathMatcher
+import java.nio.file.Paths
 import java.nio.file.StandardOpenOption.CREATE
 import java.nio.file.StandardOpenOption.READ
 import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
@@ -27,8 +32,10 @@ import java.nio.file.attribute.BasicFileAttributeView
 import java.nio.file.attribute.FileTime
 import java.security.DigestInputStream
 import java.security.MessageDigest
+import java.util.concurrent.locks.ReentrantLock
 import java.util.stream.Stream
 import kotlin.concurrent.thread
+import kotlin.concurrent.withLock
 import kotlin.io.path.bufferedReader
 import kotlin.io.path.bufferedWriter
 import kotlin.io.path.createDirectories
@@ -181,6 +188,26 @@ public fun Path.computeSha1Checksum(): String = computeChecksum(MessageDigestPro
  */
 public fun Path.computeSha256Checksum(): String = computeChecksum(MessageDigestProvider.`SHA-256`)
 
+/**
+ * Resolves the specified [path] against this path
+ * whereas [path] may be of a different [FileSystem] than
+ * the one of this path.
+ *
+ * If the [FileSystem] is the same, [Path.resolve] is used.
+ * Otherwise, this [FileSystem] is used—unless [path] is [absolute][Path.isAbsolute].
+ *
+ * In other words: [path] is resolved against this path's file system.
+ * So the resolved path will reside in this path's file system, too.
+ * The only exception is if [path] is absolute. Since
+ * an absolute path is already "fully-qualified" it is
+ * the resolved result *(and its file system the resulting file system)*.
+ */
+public fun Path.resolveBetweenFileSystems(path: Path): Path =
+    when {
+        fileSystem == path.fileSystem -> resolve(path)
+        path.isAbsolute -> path
+        else -> path.fold(this) { acc, segment -> acc.resolve("$segment") }
+    }
 
 /**
  * Returns a path based on the following rules:
@@ -333,6 +360,53 @@ public fun Path.deleteOnExit(recursively: Boolean = true): Path {
     })
     return this
 }
+
+
+/** Lock used to synchronize the creation of file systems by [usePath]. */
+private val usePathLock = ReentrantLock()
+
+/**
+ * Calls the specified [block] callback
+ * giving it the [Path] this [URI] points to
+ * and returns the result.
+ *
+ * In contrast to [Paths.get] this function does not
+ * only check the default file system but also loads the needed one if necessary
+ * (and closes it afterwards).
+ *
+ * @see FileSystems.getDefault
+ * @see FileSystems.newFileSystem
+ */
+public fun <R> URI.usePath(block: (Path) -> R): R =
+    usePathLock.withLock {
+        runCatching {
+            block(Paths.get(this))
+        }.recoverCatching { ex ->
+            when (ex) {
+                is FileSystemNotFoundException -> {
+                    val fileSystem = FileSystems.newFileSystem(this, emptyMap<String, Any>())
+                    fileSystem.use { block(it.provider().getPath(this)) }
+                }
+                else -> throw ex
+            }
+        }.getOrThrow()
+    }
+
+/**
+ * Calls the specified [block] callback
+ * giving it the [Path] this [URI] points to
+ * and returns the result.
+ *
+ * In contrast to [Paths.get] this function does not
+ * only check the default file system but also loads the needed one if necessary
+ * (and closes it afterwards).
+ *
+ * @see FileSystems.getDefault
+ * @see FileSystems.newFileSystem
+ */
+@Suppress("NOTHING_TO_INLINE")
+public inline fun <R> URL.usePath(noinline block: (Path) -> R): R =
+    toURI().usePath(block)
 
 
 /**

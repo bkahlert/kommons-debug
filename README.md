@@ -191,11 +191,20 @@ Easily access your working directory with `Locations.Default.Work`,
 your home directory with `Locations.Default.Home` and your system's
 temporary directory with `Locations.Default.Temp`.
 
-Safely read files with 
+Safely read files with
 `useInputStream`, `useBufferedInputStream`, `useReader`, and `useBufferedReader`,
 and write files with
 `useOutputStream`, `useBufferedOutputStream`, `useWriter`, and `useBufferedWriter`.
 
+Map URIs and URLs to a Path with `usePath`, which also works for class path resource.
+
+#### Example
+
+```kotlin
+standardLibraryClassPath.usePath { 
+  it.pathString 
+} // ����   2� kotlin/text/Regex  java/lang/Object ...
+```
 
 ### Unicode
 

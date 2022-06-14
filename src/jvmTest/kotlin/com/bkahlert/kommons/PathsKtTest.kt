@@ -1,6 +1,7 @@
 package com.bkahlert.kommons
 
 import com.bkahlert.kommons.DeleteOnExecTestHelper.Variant
+import com.bkahlert.kommons.debug.trace
 import io.kotest.assertions.asClue
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -17,19 +18,26 @@ import io.kotest.matchers.paths.shouldNotBeEmptyDirectory
 import io.kotest.matchers.paths.shouldNotExist
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.IOException
+import java.net.URI
+import java.net.URL
 import java.nio.file.DirectoryNotEmptyException
+import java.nio.file.FileSystem
+import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.LinkOption.NOFOLLOW_LINKS
 import java.nio.file.NoSuchFileException
 import java.nio.file.NotDirectoryException
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.ProviderNotFoundException
 import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
 import java.nio.file.attribute.FileTime
+import java.util.jar.JarOutputStream
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createFile
@@ -37,7 +45,9 @@ import kotlin.io.path.div
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.outputStream
 import kotlin.io.path.pathString
+import kotlin.io.path.readBytes
 import kotlin.io.path.readText
 import kotlin.io.path.writeBytes
 import kotlin.system.exitProcess
@@ -276,6 +286,74 @@ class PathsKtTest {
         }
     }
 
+
+    @Test fun resolve_between_file_systems(@TempDir tempDir: Path) {
+        // same filesystem
+        tempDir.tempJarFileSystem().use { jarFileSystem ->
+            val receiverJarPath: Path = jarFileSystem.rootDirectories.first().randomDirectory().randomDirectory()
+            val relativeJarPath: Path = receiverJarPath.parent.relativize(receiverJarPath)
+            receiverJarPath.resolveBetweenFileSystems(relativeJarPath)
+                .shouldBe(receiverJarPath.resolve(receiverJarPath.last()))
+        }
+        // same filesystem
+        with(tempDir.randomDirectory()) {
+            val receiverFilePath = randomDirectory()
+            val relativeFilePath: Path = receiverFilePath.parent.relativize(receiverFilePath)
+            receiverFilePath.resolveBetweenFileSystems(relativeFilePath)
+                .shouldBe(receiverFilePath.resolve(receiverFilePath.last()))
+        }
+
+        // absolute other path
+        tempDir.tempJarFileSystem().use { jarFileSystem ->
+            val receiverJarPath: Path = jarFileSystem.rootDirectories.first().randomDirectory().randomFile()
+            val absoluteJarPath: Path = jarFileSystem.rootDirectories.first()
+            receiverJarPath.resolveBetweenFileSystems(absoluteJarPath)
+                .shouldBe(absoluteJarPath)
+        }
+// absolute other path
+        tempDir.tempJarFileSystem().use { jarFileSystem ->
+            val receiverFilePath_: Path = tempDir.randomDirectory().randomFile()
+            val absoluteJarPath: Path = jarFileSystem.rootDirectories.first()
+            receiverFilePath_.resolveBetweenFileSystems(absoluteJarPath)
+                .shouldBe(absoluteJarPath)
+        }
+// absolute other path
+        tempDir.tempJarFileSystem().use { jarFileSystem ->
+            val receiverJarPath: Path = jarFileSystem.rootDirectories.first().randomDirectory().randomFile()
+            val otherFileAbsPath: Path = tempDir.randomDirectory()
+            receiverJarPath.resolveBetweenFileSystems(otherFileAbsPath)
+                .shouldBe(otherFileAbsPath)
+        }
+// absolute other path
+        with(tempDir) {
+            val receiverFilePath = randomDirectory().randomFile()
+            val otherFileAbsPath: Path = randomDirectory()
+            receiverFilePath.resolveBetweenFileSystems(otherFileAbsPath)
+                .shouldBe(otherFileAbsPath)
+        }
+
+// relative other path
+        with(tempDir) {
+            val receiverFilePath: Path = randomDirectory().randomFile()
+            tempJarFileSystem().use { jarFileSystem ->
+                val relativeJarPath: Path = jarFileSystem.rootDirectories.first().randomDirectory().randomFile()
+                    .let { absPath -> absPath.parent.relativize(absPath) }
+                receiverFilePath.resolveBetweenFileSystems(relativeJarPath)
+                    .shouldBe(receiverFilePath.resolve(relativeJarPath.first().toString()))
+            }
+        }
+// relative other path
+        with(tempDir) {
+            val relativeFilePath: Path = randomDirectory().randomFile()
+                .let { absPath -> absPath.parent.relativize(absPath) }
+            tempJarFileSystem().use { jarFileSystem ->
+                val receiverJarPath: Path = jarFileSystem.rootDirectories.first().randomDirectory().randomFile()
+                receiverJarPath.resolveBetweenFileSystems(relativeFilePath)
+                    .shouldBe(receiverJarPath.resolve(relativeFilePath.first().toString()))
+            }
+        }
+    }
+
     @Test
     fun resolve_file(@TempDir tempDir: Path) = tests {
         tempDir.resolveFile { Path.of("dir", "file") } shouldBe tempDir / "dir" / "file"
@@ -503,6 +581,28 @@ class PathsKtTest {
         }
     }
 
+    @Test fun use_path(@TempDir tempDir: Path) = tests {
+        val regularFile = tempDir.singleFile(content = "foo")
+        regularFile.toUri().usePath { it.readText() } shouldBe "foo"
+        regularFile.toUri().toURL().usePath { it.readText() } shouldBe "foo"
+
+        val standardLibraryClassPath = checkNotNull(Regex::class.java.getResource("Regex.class"))
+        standardLibraryClassPath.usePath { it.readText() }.trace
+        standardLibraryClassPath.toURI().usePath { it.readText() }.shouldContain("Matcher").shouldContain(Unicode.START_OF_HEADING.toString())
+        standardLibraryClassPath.usePath { it.readText() }.shouldContain("Matcher").shouldContain(Unicode.START_OF_HEADING.toString())
+
+        val bytes = ubyteArrayOf(
+            0x61u, 0xC2u, 0x85u, 0xF0u, 0x9Du, 0x95u, 0x93u, 0x0Du, 0x0Au,
+            0xE2u, 0x98u, 0xB0u, 0x0Au, 0xF0u, 0x9Fu, 0x91u, 0x8Bu, 0x0Au
+        ).toByteArray()
+        val ownClassPath = checkNotNull(Platform.contextClassLoader.getResource("61C285F09D95930D0AE298B00AF09F918B0A.txt"))
+        ownClassPath.toURI().usePath { it.readBytes() }.contentEquals(bytes)
+        ownClassPath.usePath { it.readBytes() }.contentEquals(bytes)
+
+        shouldThrow<ProviderNotFoundException> { URI("https://example.com").usePath { } }
+        shouldThrow<ProviderNotFoundException> { URL("https://example.com").usePath { } }
+    }
+
     @Test fun use_input_stream(@TempDir tempDir: Path) = tests {
         tempDir.singleFile(content = "abc").useInputStream { it.readBytes().decodeToString() } shouldBe "abc"
         shouldThrow<NoSuchFileException> { tempDir.randomPath().useInputStream {} }
@@ -599,3 +699,30 @@ internal fun Path.directoryWithTwoFiles(
     resolve("sub-dir").createDirectories().singleFile("config.txt")
     check(listDirectoryEntries().size == 2) { "Failed to provide directory with two files." }
 }
+
+/**
+ * Creates an empty `jar` file in the system's temp directory.
+ *
+ * @see asNewJarFileSystem
+ */
+public fun Path.tempJar(base: String = "", extension: String = ".jar"): Path =
+    tempFile(base, extension).apply {
+        JarOutputStream(outputStream().buffered()).use { }
+    }
+
+/**
+ * Attempts to create a [FileSystem] from an existing `jar` file.
+ *
+ * @see tempJar
+ */
+public fun Path.asNewJarFileSystem(vararg env: Pair<String, Any?>): FileSystem =
+    FileSystems.newFileSystem(URI.create("jar:${toUri()}"), env.toMap())
+
+/**
+ * Creates an empty `jar` file system the system's temp directory.
+ *
+ * @see tempJar
+ * @see asNewJarFileSystem
+ */
+public fun Path.tempJarFileSystem(base: String = "", extension: String = ".jar"): FileSystem =
+    tempJar(base, extension).asNewJarFileSystem()
