@@ -50,7 +50,7 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
-                implementation("io.kotest:kotest-assertions-core:5.3.0")
+                implementation("io.kotest:kotest-assertions-core:5.3.1")
             }
         }
         val jvmMain by getting {
