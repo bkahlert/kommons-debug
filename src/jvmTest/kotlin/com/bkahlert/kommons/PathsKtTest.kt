@@ -1,7 +1,6 @@
 package com.bkahlert.kommons
 
 import com.bkahlert.kommons.DeleteOnExecTestHelper.Variant
-import com.bkahlert.kommons.debug.trace
 import io.kotest.assertions.asClue
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -18,7 +17,6 @@ import io.kotest.matchers.paths.shouldNotBeEmptyDirectory
 import io.kotest.matchers.paths.shouldNotExist
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.string.shouldContain
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -310,21 +308,21 @@ class PathsKtTest {
             receiverJarPath.resolveBetweenFileSystems(absoluteJarPath)
                 .shouldBe(absoluteJarPath)
         }
-// absolute other path
+        // absolute other path
         tempDir.tempJarFileSystem().use { jarFileSystem ->
             val receiverFilePath_: Path = tempDir.randomDirectory().randomFile()
             val absoluteJarPath: Path = jarFileSystem.rootDirectories.first()
             receiverFilePath_.resolveBetweenFileSystems(absoluteJarPath)
                 .shouldBe(absoluteJarPath)
         }
-// absolute other path
+        // absolute other path
         tempDir.tempJarFileSystem().use { jarFileSystem ->
             val receiverJarPath: Path = jarFileSystem.rootDirectories.first().randomDirectory().randomFile()
             val otherFileAbsPath: Path = tempDir.randomDirectory()
             receiverJarPath.resolveBetweenFileSystems(otherFileAbsPath)
                 .shouldBe(otherFileAbsPath)
         }
-// absolute other path
+        // absolute other path
         with(tempDir) {
             val receiverFilePath = randomDirectory().randomFile()
             val otherFileAbsPath: Path = randomDirectory()
@@ -332,7 +330,7 @@ class PathsKtTest {
                 .shouldBe(otherFileAbsPath)
         }
 
-// relative other path
+        // relative other path
         with(tempDir) {
             val receiverFilePath: Path = randomDirectory().randomFile()
             tempJarFileSystem().use { jarFileSystem ->
@@ -342,7 +340,7 @@ class PathsKtTest {
                     .shouldBe(receiverFilePath.resolve(relativeJarPath.first().toString()))
             }
         }
-// relative other path
+        // relative other path
         with(tempDir) {
             val relativeFilePath: Path = randomDirectory().randomFile()
                 .let { absPath -> absPath.parent.relativize(absPath) }
@@ -586,18 +584,12 @@ class PathsKtTest {
         regularFile.toUri().usePath { it.readText() } shouldBe "foo"
         regularFile.toUri().toURL().usePath { it.readText() } shouldBe "foo"
 
-        val standardLibraryClassPath = checkNotNull(Regex::class.java.getResource("Regex.class"))
-        standardLibraryClassPath.usePath { it.readText() }.trace
-        standardLibraryClassPath.toURI().usePath { it.readText() }.shouldContain("Matcher").shouldContain(Unicode.START_OF_HEADING.toString())
-        standardLibraryClassPath.usePath { it.readText() }.shouldContain("Matcher").shouldContain(Unicode.START_OF_HEADING.toString())
+        standardLibraryClassPathClass.toURI().usePath { it.readBytes() } shouldBe standardLibraryClassPathClassBytes
+        standardLibraryClassPathClass.usePath { it.readBytes() } shouldBe standardLibraryClassPathClassBytes
 
-        val bytes = ubyteArrayOf(
-            0x61u, 0xC2u, 0x85u, 0xF0u, 0x9Du, 0x95u, 0x93u, 0x0Du, 0x0Au,
-            0xE2u, 0x98u, 0xB0u, 0x0Au, 0xF0u, 0x9Fu, 0x91u, 0x8Bu, 0x0Au
-        ).toByteArray()
-        val ownClassPath = checkNotNull(Platform.contextClassLoader.getResource("61C285F09D95930D0AE298B00AF09F918B0A.txt"))
-        ownClassPath.toURI().usePath { it.readBytes() }.contentEquals(bytes)
-        ownClassPath.usePath { it.readBytes() }.contentEquals(bytes)
+        val classPathTextPath = checkNotNull(Platform.contextClassLoader.getResource(classPathTextFile))
+        classPathTextPath.toURI().usePath { it.readBytes() } shouldBe classPathTextFileBytes
+        classPathTextPath.usePath { it.readBytes() } shouldBe classPathTextFileBytes
 
         shouldThrow<ProviderNotFoundException> { URI("https://example.com").usePath { } }
         shouldThrow<ProviderNotFoundException> { URL("https://example.com").usePath { } }

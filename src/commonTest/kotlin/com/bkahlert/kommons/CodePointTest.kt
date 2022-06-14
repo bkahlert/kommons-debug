@@ -34,19 +34,19 @@ class CodePointTest {
     @Test fun string() = tests {
         CodePoint(0x61).string should {
             it shouldBe "a"
-            it.encodeToByteArray() contentEquals ubyteArrayOf(0x61u).toByteArray()
+            it.encodeToByteArray() shouldBe ubyteArrayOf(0x61u).toByteArray()
         }
         CodePoint(0xB6).string should {
             it shouldBe "¶"
-            it.encodeToByteArray() contentEquals ubyteArrayOf(0xC2u, 0xB6u).toByteArray()
+            it.encodeToByteArray() shouldBe ubyteArrayOf(0xC2u, 0xB6u).toByteArray()
         }
         CodePoint(0x2630).string should {
             it shouldBe "☰"
-            it.encodeToByteArray() contentEquals ubyteArrayOf(0xE2u, 0x98u, 0xB0u).toByteArray()
+            it.encodeToByteArray() shouldBe ubyteArrayOf(0xE2u, 0x98u, 0xB0u).toByteArray()
         }
         CodePoint(0x1D553).string should {
             it shouldBe "𝕓"
-            it.encodeToByteArray() contentEquals ubyteArrayOf(0xF0u, 0x9Du, 0x95u, 0x93u).toByteArray()
+            it.encodeToByteArray() shouldBe ubyteArrayOf(0xF0u, 0x9Du, 0x95u, 0x93u).toByteArray()
         }
     }
 
