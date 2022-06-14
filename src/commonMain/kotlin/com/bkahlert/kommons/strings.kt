@@ -26,53 +26,55 @@ public fun <T : CharSequence> CharSequence.containsAny(vararg others: T, ignoreC
     others.any { contains(it, ignoreCase = ignoreCase) }
 
 
-/** Throws an [IllegalArgumentException] if this character sequence [isEmpty]. */
-public fun CharSequence.requireNotEmpty(): CharSequence = also { require(it.isNotEmpty()) }
+/** Throws an [IllegalArgumentException] if the specified [charSequence] [isEmpty]. */
+public fun requireNotEmpty(charSequence: CharSequence): CharSequence = charSequence.also { require(it.isNotEmpty()) }
 
-/** Throws an [IllegalArgumentException] if this string [isEmpty]. */
-public fun String.requireNotEmpty(): String = also { require(it.isNotEmpty()) }
+/** Throws an [IllegalArgumentException] if the specified [string] [isEmpty]. */
+public fun requireNotEmpty(string: String): String = string.also { require(it.isNotEmpty()) }
 
-/** Throws an [IllegalArgumentException] with the result of calling [lazyMessage] if this character sequence [isEmpty]. */
-public fun CharSequence.requireNotEmpty(lazyMessage: () -> Any): CharSequence = also { require(it.isNotEmpty(), lazyMessage) }
+/** Throws an [IllegalArgumentException] with the result of calling [lazyMessage] if the specified [charSequence] [isEmpty]. */
+public fun requireNotEmpty(charSequence: CharSequence, lazyMessage: () -> Any): CharSequence = charSequence.also { require(it.isNotEmpty(), lazyMessage) }
 
-/** Throws an [IllegalArgumentException] with the result of calling [lazyMessage] if this string [isEmpty]. */
-public fun String.requireNotEmpty(lazyMessage: () -> Any): String = also { require(it.isNotEmpty(), lazyMessage) }
+/** Throws an [IllegalArgumentException] with the result of calling [lazyMessage] if the specified [string] [isEmpty]. */
+public fun requireNotEmpty(string: String, lazyMessage: () -> Any): String = string.also { require(it.isNotEmpty(), lazyMessage) }
 
-/** Throws an [IllegalArgumentException] if this character sequence [isBlank]. */
-public fun CharSequence.requireNotBlank(): CharSequence = also { require(isNotBlank()) }
+/** Throws an [IllegalArgumentException] if the specified [charSequence] [isBlank]. */
+public fun requireNotBlank(charSequence: CharSequence): CharSequence = charSequence.also { require(charSequence.isNotBlank()) }
 
-/** Throws an [IllegalArgumentException] if this string [isBlank]. */
-public fun String.requireNotBlank(): String = also { require(isNotBlank()) }
+/** Throws an [IllegalArgumentException] if the specified [string] [isBlank]. */
+public fun requireNotBlank(string: String): String = string.also { require(string.isNotBlank()) }
 
-/** Throws an [IllegalArgumentException] with the result of calling [lazyMessage] if this character sequence [isBlank]. */
-public fun CharSequence.requireNotBlank(lazyMessage: () -> Any): CharSequence = also { require(it.isNotBlank(), lazyMessage) }
+/** Throws an [IllegalArgumentException] with the result of calling [lazyMessage] if the specified [charSequence] [isBlank]. */
+public fun requireNotBlank(charSequence: CharSequence, lazyMessage: () -> Any): CharSequence = charSequence.also { require(it.isNotBlank(), lazyMessage) }
 
-/** Throws an [IllegalArgumentException] with the result of calling [lazyMessage] if this string [isBlank]. */
-public fun String.requireNotBlank(lazyMessage: () -> Any): String = also { require(it.isNotBlank(), lazyMessage) }
+/** Throws an [IllegalArgumentException] with the result of calling [lazyMessage] if the specified [string] [isBlank]. */
+public fun requireNotBlank(string: String, lazyMessage: () -> Any): String = string.also { require(it.isNotBlank(), lazyMessage) }
 
-/** Throws an [IllegalStateException] if this character sequence [isEmpty]. */
-public fun CharSequence.checkNotEmpty(): CharSequence = also { check(it.isNotEmpty()) }
 
-/** Throws an [IllegalStateException] if this string [isEmpty]. */
-public fun String.checkNotEmpty(): String = also { check(it.isNotEmpty()) }
+/** Throws an [IllegalStateException] if the specified [charSequence] [isEmpty]. */
+public fun checkNotEmpty(charSequence: CharSequence): CharSequence = charSequence.also { check(it.isNotEmpty()) }
 
-/** Throws an [IllegalStateException] with the result of calling [lazyMessage] if this character sequence [isEmpty]. */
-public fun CharSequence.checkNotEmpty(lazyMessage: () -> Any): CharSequence = also { check(it.isNotEmpty(), lazyMessage) }
+/** Throws an [IllegalStateException] if the specified [string] [isEmpty]. */
+public fun checkNotEmpty(string: String): String = string.also { check(it.isNotEmpty()) }
 
-/** Throws an [IllegalStateException] with the result of calling [lazyMessage] if this string [isEmpty]. */
-public fun String.checkNotEmpty(lazyMessage: () -> Any): String = also { check(it.isNotEmpty(), lazyMessage) }
+/** Throws an [IllegalStateException] with the result of calling [lazyMessage] if the specified [charSequence] [isEmpty]. */
+public fun checkNotEmpty(charSequence: CharSequence, lazyMessage: () -> Any): CharSequence = charSequence.also { check(it.isNotEmpty(), lazyMessage) }
 
-/** Throws an [IllegalStateException] if this character sequence [isBlank]. */
-public fun CharSequence.checkNotBlank(): CharSequence = also { check(it.isNotBlank()) }
+/** Throws an [IllegalStateException] with the result of calling [lazyMessage] if the specified [string] [isEmpty]. */
+public fun checkNotEmpty(string: String, lazyMessage: () -> Any): String = string.also { check(it.isNotEmpty(), lazyMessage) }
 
-/** Throws an [IllegalStateException] if this string [isBlank]. */
-public fun String.checkNotBlank(): String = also { check(it.isNotBlank()) }
+/** Throws an [IllegalStateException] if the specified [charSequence] [isBlank]. */
+public fun checkNotBlank(charSequence: CharSequence): CharSequence = charSequence.also { check(it.isNotBlank()) }
 
-/** Throws an [IllegalStateException] with the result of calling [lazyMessage] if this character sequence [isBlank]. */
-public fun CharSequence.checkNotBlank(lazyMessage: () -> Any): CharSequence = also { check(it.isNotBlank(), lazyMessage) }
+/** Throws an [IllegalStateException] if the specified [string] [isBlank]. */
+public fun checkNotBlank(string: String): String = string.also { check(it.isNotBlank()) }
 
-/** Throws an [IllegalStateException] with the result of calling [lazyMessage] if this string [isBlank]. */
-public fun String.checkNotBlank(lazyMessage: () -> Any): String = also { check(it.isNotBlank(), lazyMessage) }
+/** Throws an [IllegalStateException] with the result of calling [lazyMessage] if the specified [charSequence] [isBlank]. */
+public fun checkNotBlank(charSequence: CharSequence, lazyMessage: () -> Any): CharSequence = charSequence.also { check(it.isNotBlank(), lazyMessage) }
+
+/** Throws an [IllegalStateException] with the result of calling [lazyMessage] if the specified [string] [isBlank]. */
+public fun checkNotBlank(string: String, lazyMessage: () -> Any): String = string.also { check(it.isNotBlank(), lazyMessage) }
+
 
 /** Returns this character sequence if it [isNotEmpty] or `null`, if it is. */
 public fun CharSequence.takeIfNotEmpty(): CharSequence? = takeIf { it.isNotEmpty() }

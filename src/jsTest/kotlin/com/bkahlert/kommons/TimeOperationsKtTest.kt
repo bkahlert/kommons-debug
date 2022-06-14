@@ -26,6 +26,53 @@ class TimeOperationsKtTest {
     }
 
     @Test
+    fun today() = tests {
+        Today should {
+            it.fullYear shouldBe Now.fullYear
+            it.month shouldBe Now.month
+            it.date shouldBe Now.date
+            it.hours shouldBe 0
+            it.minutes shouldBe 0
+            it.seconds shouldBe 0
+            it.milliseconds shouldBe 0
+        }
+    }
+
+    @Test
+    fun yesterday() = tests {
+        Yesterday should {
+            it.fullYear shouldBe Now.fullYear
+            it.month shouldBe Now.month
+            it.date shouldBe Now.date - 1
+            it.hours shouldBe 0
+            it.minutes shouldBe 0
+            it.seconds shouldBe 0
+            it.milliseconds shouldBe 0
+        }
+    }
+
+    @Test
+    fun tomorrow() = tests {
+        Tomorrow should {
+            it.fullYear shouldBe Now.fullYear
+            it.month shouldBe Now.month
+            it.date shouldBe Now.date + 1
+            it.hours shouldBe 0
+            it.minutes shouldBe 0
+            it.seconds shouldBe 0
+            it.milliseconds shouldBe 0
+        }
+    }
+
+    @Test
+    fun timestamp() = tests {
+        Timestamp should {
+            it shouldBeLessThanOrEqualTo Date().getTime()
+            it shouldBeGreaterThanOrEqualTo Date().getTime() - 1
+        }
+    }
+
+    @Test
     fun components() = tests {
         Date("August 19, 1975 23:15:30 GMT-11:00") should {
             it.time shouldBe it.getTime()

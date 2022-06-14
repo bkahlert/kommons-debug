@@ -201,9 +201,30 @@ Map URIs and URLs to a Path with `usePath`, which also works for class path reso
 #### Example
 
 ```kotlin
-standardLibraryClassPath.usePath { 
-  it.pathString 
+standardLibraryClassPath.usePath {
+    it.pathString
 } // ����   2� kotlin/text/Regex  java/lang/Object ...
+```
+
+Find the class directory, the source directory or the source file itself of a class.
+
+#### Example
+
+```kotlin
+Foo::class.findClassesDirectoryOrNull()  // /Users/john.doe/dev/project/build/classes/kotlin/jvm/test
+Foo::class.findSourceDirectoryOrNull()   // /Users/john.doe/dev/project/src/jvmTest/kotlin
+Foo::class.findSourceFileOrNull()        // /Users/john.doe/dev/project/src/jvmTest/kotlin/packages/source.kt
+```
+
+Access a class path resource like any other NIO 2 path using `ClassPath`.
+
+#### Example
+
+```kotlin
+ClassPath("dir/to/resource").readText()
+ClassPath("dir/to/resource").readBytes()
+ClassPath("dir/to/resource").copyToDirectory(Locations.Default.Temp)
+ClassPath("dir/to/resource").useBufferedReader { it.readLine() }
 ```
 
 ### Unicode
@@ -291,10 +312,10 @@ Easily check edge-case with a fluent interface as does `requireNotNull` does:
 #### Examples
 
 ```kotlin
-"abc".requireNotEmpty() // passes and returns "abc"
-"   ".requireNotBlank() // throws IllegalArgumentException
-"abc".checkNotEmpty()   // passes and returns "abc"
-"   ".checkNotBlank()   // throws IllegalStateException
+requireNotEmpty("abc")  // passes and returns "abc"
+requireNotBlank("   ")  // throws IllegalArgumentException
+checkNotEmpty("abc")    // passes and returns "abc"
+checkNotBlank("   ")    // throws IllegalStateException
 "abc".takeIfNotEmpty()  // returns "abc"
 "   ".takeIfNotBlank()  // returns null
 "abc".takeUnlessEmpty() // returns "abc"
@@ -304,10 +325,12 @@ Easily check edge-case with a fluent interface as does `requireNotNull` does:
 ### Time Operations
 
 ```kotlin
-Now + 2.seconds // 2 seconds in the future
-Now - 3.days    // 3 days in the past
+Now + 2.seconds     // 2 seconds in the future
+Today - 3.days      // 3 days in the past
+Yesterday - 2.days  // 3 days in the past
+Tomorrow + 1.days   // the day after tomorrow
 Instant.parse("1910-06-22T13:00:00Z") + 5.minutes // 1910-06-22T12:05:00Z
-Instant.parse("1910-06-22T13:00:00Z") - 2.hours   // 1910-06-22T10:00:00Z
+LocalDate.parse("1910-06-22") - 2.days            // 1910-06-20
 ```
 
 ## Contributing

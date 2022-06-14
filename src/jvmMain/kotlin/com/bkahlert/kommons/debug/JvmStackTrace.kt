@@ -28,6 +28,7 @@ private val generatedFunctionRegex = "\\\$.*".toRegex()
 public actual fun StackTrace.Companion.demangleFunction(function: String): String =
     function.replace(functionMangleRegex, "")
 
+
 /** The [Class] containing the execution point represented by this element. */
 public val java.lang.StackTraceElement.`class`: Class<*> get() = Class.forName(className)
 
@@ -40,7 +41,6 @@ public val StackTraceElement.`class`: Class<*> get() = Class.forName(receiver)
 /** The [KClass] containing the execution point represented by this element. */
 public val StackTraceElement.kClass: KClass<*> get() = `class`.kotlin
 
-/** The method containing the execution point represented by this element. */
 
 /** The method containing the execution point represented by this element. */
 public val StackTraceElement.method: Method get() = `class`.declaredMethods.single { it.name == function }

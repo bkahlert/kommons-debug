@@ -1,6 +1,7 @@
 package com.bkahlert.kommons
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.throwable.shouldHaveMessage
 import kotlin.test.Test
@@ -8,25 +9,25 @@ import kotlin.test.Test
 class CollectionsKtTest {
 
     @Test fun require_not_empty() = tests {
-        collection.requireNotEmpty() shouldBe collection
-        collection.requireNotEmpty { "error" } shouldBe collection
-        array.requireNotEmpty() shouldBe array
-        array.requireNotEmpty { "error" } shouldBe array
-        shouldThrow<IllegalArgumentException> { emptyCollection.requireNotEmpty() }
-        shouldThrow<IllegalArgumentException> { emptyCollection.requireNotEmpty { "error" } } shouldHaveMessage "error"
-        shouldThrow<IllegalArgumentException> { emptyArray.requireNotEmpty() }
-        shouldThrow<IllegalArgumentException> { emptyArray.requireNotEmpty { "error" } } shouldHaveMessage "error"
+        requireNotEmpty(collection) shouldBe collection
+        requireNotEmpty(collection) { "error" } shouldBe collection
+        requireNotEmpty(array) shouldBe array
+        requireNotEmpty(array) { "error" } shouldBe array
+        shouldThrow<IllegalArgumentException> { requireNotEmpty(emptyCollection) }
+        shouldThrow<IllegalArgumentException> { requireNotEmpty(emptyCollection) { "error" } } shouldHaveMessage "error"
+        shouldThrow<IllegalArgumentException> { requireNotEmpty(emptyArray) }
+        shouldThrow<IllegalArgumentException> { requireNotEmpty(emptyArray) { "error" } } shouldHaveMessage "error"
     }
 
     @Test fun check_not_empty() = tests {
-        collection.checkNotEmpty() shouldBe collection
-        collection.checkNotEmpty { "error" } shouldBe collection
-        array.checkNotEmpty() shouldBe array
-        array.checkNotEmpty { "error" } shouldBe array
-        shouldThrow<IllegalStateException> { emptyCollection.checkNotEmpty() }
-        shouldThrow<IllegalStateException> { emptyCollection.checkNotEmpty { "error" } } shouldHaveMessage "error"
-        shouldThrow<IllegalStateException> { emptyArray.checkNotEmpty() }
-        shouldThrow<IllegalStateException> { emptyArray.checkNotEmpty { "error" } } shouldHaveMessage "error"
+        checkNotEmpty(collection) shouldBe collection
+        checkNotEmpty(collection) { "error" } shouldBe collection
+        checkNotEmpty(array) shouldBe array
+        checkNotEmpty(array) { "error" } shouldBe array
+        shouldThrow<IllegalStateException> { checkNotEmpty(emptyCollection) }
+        shouldThrow<IllegalStateException> { checkNotEmpty(emptyCollection) { "error" } } shouldHaveMessage "error"
+        shouldThrow<IllegalStateException> { checkNotEmpty(emptyArray) }
+        shouldThrow<IllegalStateException> { checkNotEmpty(emptyArray) { "error" } } shouldHaveMessage "error"
     }
 
     @Test fun take_if_not_empty() = tests {
@@ -41,6 +42,22 @@ class CollectionsKtTest {
         array.takeUnlessEmpty() shouldBe array
         emptyCollection.takeUnlessEmpty() shouldBe null
         emptyArray.takeUnlessEmpty() shouldBe null
+    }
+
+    @Test fun head() = tests {
+        collection.head shouldBe "array"
+        shouldThrow<NoSuchElementException> { emptyCollection.head }
+    }
+
+    @Test fun head_or_null() = tests {
+        collection.headOrNull shouldBe "array"
+        emptyCollection.headOrNull.shouldBeNull()
+    }
+
+    @Test fun tail() = tests {
+        listOf("head", "tail").tail shouldBe listOf("tail")
+        collection.tail shouldBe emptyList()
+        emptyCollection.tail shouldBe emptyList()
     }
 }
 

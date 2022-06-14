@@ -26,63 +26,63 @@ class StringsKtTest {
     }
 
     @Test fun require_not_empty() = tests {
-        charSequence.requireNotEmpty() shouldBe charSequence
-        charSequence.requireNotEmpty { "error" } shouldBe charSequence
-        string.requireNotEmpty() shouldBe string
-        string.requireNotEmpty { "error" } shouldBe string
-        shouldThrow<IllegalArgumentException> { emptyCharSequence.requireNotEmpty() }
-        shouldThrow<IllegalArgumentException> { emptyCharSequence.requireNotEmpty { "error" } } shouldHaveMessage "error"
-        shouldThrow<IllegalArgumentException> { emptyString.requireNotEmpty() }
-        shouldThrow<IllegalArgumentException> { emptyString.requireNotEmpty { "error" } } shouldHaveMessage "error"
-        blankCharSequence.requireNotEmpty() shouldBe blankCharSequence
-        blankCharSequence.requireNotEmpty { "error" } shouldBe blankCharSequence
-        blankString.requireNotEmpty() shouldBe blankString
-        blankString.requireNotEmpty { "error" } shouldBe blankString
+        requireNotEmpty(charSequence) shouldBe charSequence
+        requireNotEmpty(charSequence) { "error" } shouldBe charSequence
+        requireNotEmpty(string) shouldBe string
+        requireNotEmpty(string) { "error" } shouldBe string
+        shouldThrow<IllegalArgumentException> { requireNotEmpty(emptyCharSequence) }
+        shouldThrow<IllegalArgumentException> { requireNotEmpty(emptyCharSequence) { "error" } } shouldHaveMessage "error"
+        shouldThrow<IllegalArgumentException> { requireNotEmpty(emptyString) }
+        shouldThrow<IllegalArgumentException> { requireNotEmpty(emptyString) { "error" } } shouldHaveMessage "error"
+        requireNotEmpty(blankCharSequence) shouldBe blankCharSequence
+        requireNotEmpty(blankCharSequence) { "error" } shouldBe blankCharSequence
+        requireNotEmpty(blankString) shouldBe blankString
+        requireNotEmpty(blankString) { "error" } shouldBe blankString
     }
 
     @Test fun require_not_blank() = tests {
-        charSequence.requireNotBlank() shouldBe charSequence
-        charSequence.requireNotBlank { "error" } shouldBe charSequence
-        string.requireNotBlank() shouldBe string
-        string.requireNotBlank { "error" } shouldBe string
-        shouldThrow<IllegalArgumentException> { emptyCharSequence.requireNotBlank() }
-        shouldThrow<IllegalArgumentException> { emptyCharSequence.requireNotBlank { "error" } } shouldHaveMessage "error"
-        shouldThrow<IllegalArgumentException> { emptyString.requireNotBlank() }
-        shouldThrow<IllegalArgumentException> { emptyString.requireNotBlank { "error" } } shouldHaveMessage "error"
-        shouldThrow<IllegalArgumentException> { blankCharSequence.requireNotBlank() }
-        shouldThrow<IllegalArgumentException> { blankCharSequence.requireNotBlank { "error" } } shouldHaveMessage "error"
-        shouldThrow<IllegalArgumentException> { blankString.requireNotBlank() }
-        shouldThrow<IllegalArgumentException> { blankString.requireNotBlank { "error" } } shouldHaveMessage "error"
+        requireNotBlank(charSequence) shouldBe charSequence
+        requireNotBlank(charSequence) { "error" } shouldBe charSequence
+        requireNotBlank(string) shouldBe string
+        requireNotBlank(string) { "error" } shouldBe string
+        shouldThrow<IllegalArgumentException> { requireNotBlank(emptyCharSequence) }
+        shouldThrow<IllegalArgumentException> { requireNotBlank(emptyCharSequence) { "error" } } shouldHaveMessage "error"
+        shouldThrow<IllegalArgumentException> { requireNotBlank(emptyString) }
+        shouldThrow<IllegalArgumentException> { requireNotBlank(emptyString) { "error" } } shouldHaveMessage "error"
+        shouldThrow<IllegalArgumentException> { requireNotBlank(blankCharSequence) }
+        shouldThrow<IllegalArgumentException> { requireNotBlank(blankCharSequence) { "error" } } shouldHaveMessage "error"
+        shouldThrow<IllegalArgumentException> { requireNotBlank(blankString) }
+        shouldThrow<IllegalArgumentException> { requireNotBlank(blankString) { "error" } } shouldHaveMessage "error"
     }
 
     @Test fun check_not_empty() = tests {
-        charSequence.checkNotEmpty() shouldBe charSequence
-        charSequence.checkNotEmpty { "error" } shouldBe charSequence
-        string.checkNotEmpty() shouldBe string
-        string.checkNotEmpty { "error" } shouldBe string
-        shouldThrow<IllegalStateException> { emptyCharSequence.checkNotEmpty() }
-        shouldThrow<IllegalStateException> { emptyCharSequence.checkNotEmpty { "error" } } shouldHaveMessage "error"
-        shouldThrow<IllegalStateException> { emptyString.checkNotEmpty() }
-        shouldThrow<IllegalStateException> { emptyString.checkNotEmpty { "error" } } shouldHaveMessage "error"
-        blankCharSequence.checkNotEmpty() shouldBe blankCharSequence
-        blankCharSequence.checkNotEmpty { "error" } shouldBe blankCharSequence
-        blankString.checkNotEmpty() shouldBe blankString
-        blankString.checkNotEmpty { "error" } shouldBe blankString
+        checkNotEmpty(charSequence) shouldBe charSequence
+        checkNotEmpty(charSequence) { "error" } shouldBe charSequence
+        checkNotEmpty(string) shouldBe string
+        checkNotEmpty(string) { "error" } shouldBe string
+        shouldThrow<IllegalStateException> { checkNotEmpty(emptyCharSequence) }
+        shouldThrow<IllegalStateException> { checkNotEmpty(emptyCharSequence) { "error" } } shouldHaveMessage "error"
+        shouldThrow<IllegalStateException> { checkNotEmpty(emptyString) }
+        shouldThrow<IllegalStateException> { checkNotEmpty(emptyString) { "error" } } shouldHaveMessage "error"
+        checkNotEmpty(blankCharSequence) shouldBe blankCharSequence
+        checkNotEmpty(blankCharSequence) { "error" } shouldBe blankCharSequence
+        checkNotEmpty(blankString) shouldBe blankString
+        checkNotEmpty(blankString) { "error" } shouldBe blankString
     }
 
     @Test fun check_not_blank() = tests {
-        charSequence.checkNotBlank() shouldBe charSequence
-        charSequence.checkNotBlank { "error" } shouldBe charSequence
-        string.checkNotBlank() shouldBe string
-        string.checkNotBlank { "error" } shouldBe string
-        shouldThrow<IllegalStateException> { emptyCharSequence.checkNotBlank() }
-        shouldThrow<IllegalStateException> { emptyCharSequence.checkNotBlank { "error" } } shouldHaveMessage "error"
-        shouldThrow<IllegalStateException> { emptyString.checkNotBlank() }
-        shouldThrow<IllegalStateException> { emptyString.checkNotBlank { "error" } } shouldHaveMessage "error"
-        shouldThrow<IllegalStateException> { blankCharSequence.checkNotBlank() }
-        shouldThrow<IllegalStateException> { blankCharSequence.checkNotBlank { "error" } } shouldHaveMessage "error"
-        shouldThrow<IllegalStateException> { blankString.checkNotBlank() }
-        shouldThrow<IllegalStateException> { blankString.checkNotBlank { "error" } } shouldHaveMessage "error"
+        checkNotBlank(charSequence) shouldBe charSequence
+        checkNotBlank(charSequence) { "error" } shouldBe charSequence
+        checkNotBlank(string) shouldBe string
+        checkNotBlank(string) { "error" } shouldBe string
+        shouldThrow<IllegalStateException> { checkNotBlank(emptyCharSequence) }
+        shouldThrow<IllegalStateException> { checkNotBlank(emptyCharSequence) { "error" } } shouldHaveMessage "error"
+        shouldThrow<IllegalStateException> { checkNotBlank(emptyString) }
+        shouldThrow<IllegalStateException> { checkNotBlank(emptyString) { "error" } } shouldHaveMessage "error"
+        shouldThrow<IllegalStateException> { checkNotBlank(blankCharSequence) }
+        shouldThrow<IllegalStateException> { checkNotBlank(blankCharSequence) { "error" } } shouldHaveMessage "error"
+        shouldThrow<IllegalStateException> { checkNotBlank(blankString) }
+        shouldThrow<IllegalStateException> { checkNotBlank(blankString) { "error" } } shouldHaveMessage "error"
     }
 
     @Test fun take_if_not_empty() = tests {

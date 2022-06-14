@@ -12,6 +12,7 @@ import java.io.Writer
 import java.net.URI
 import java.net.URL
 import java.nio.charset.Charset
+import java.nio.file.CopyOption
 import java.nio.file.DirectoryNotEmptyException
 import java.nio.file.FileSystem
 import java.nio.file.FileSystemNotFoundException
@@ -32,12 +33,14 @@ import java.nio.file.attribute.BasicFileAttributeView
 import java.nio.file.attribute.FileTime
 import java.security.DigestInputStream
 import java.security.MessageDigest
+import java.time.Instant
 import java.util.concurrent.locks.ReentrantLock
 import java.util.stream.Stream
 import kotlin.concurrent.thread
 import kotlin.concurrent.withLock
 import kotlin.io.path.bufferedReader
 import kotlin.io.path.bufferedWriter
+import kotlin.io.path.copyTo
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.forEachDirectoryEntry
@@ -111,15 +114,15 @@ public fun Path.isSubPathOf(path: Path): Boolean =
  * Example: If directory `/some/where` existed and this method was called on `/some/where/resides/a/file`,
  * the missing directories `/some/where/resides` and `/some/where/resides/a` would be created.
  */
-public fun Path.createParentDirectories(): Path = apply { parent.takeUnless { it.exists() }?.createDirectories() }
+public fun Path.createParentDirectories(): Path = apply { parent?.takeUnless { it.exists() }?.createDirectories() }
 
 /**
  * Contains since when this file was last modified.
  */
 public var Path.age: Duration
-    get() :Duration = (Now.millis - getLastModifiedTime().toMillis()).milliseconds
+    get() :Duration = (Timestamp - getLastModifiedTime().toMillis()).milliseconds
     set(value) {
-        setLastModifiedTime(FileTime.from(Now.instant.minusMillis(value.inWholeMilliseconds)))
+        setLastModifiedTime(FileTime.from(Instant.now().minusMillis(value.inWholeMilliseconds)))
     }
 
 /**
@@ -302,6 +305,39 @@ public fun <T> Path.useDirectoryEntriesRecursively(glob: String = "*", vararg op
  */
 public fun Path.forEachDirectoryEntryRecursively(glob: String = "*", vararg options: LinkOption, action: (Path) -> Unit): Unit =
     streamContentsRecursively(glob, *options).use { it.forEach(action) }
+
+
+/**
+ * Copies a file or directory located by this path to the given [target]
+ * directory to a path with the same [Path.getFileName] as this one.
+ *
+ * @see Path.copyTo
+ */
+@Suppress("NOTHING_TO_INLINE")
+public inline fun Path.copyToDirectory(
+    target: Path,
+    overwrite: Boolean = false,
+    createDirectories: Boolean = false
+): Path {
+    if (createDirectories) target.createDirectories()
+    return copyTo(target.resolve(fileName.pathString), overwrite)
+}
+
+/**
+ * Copies a file or directory located by this path to the given [target]
+ * directory to a path with the same [Path.getFileName] as this one.
+ *
+ * @see Path.copyTo
+ */
+@Suppress("NOTHING_TO_INLINE")
+public inline fun Path.copyToDirectory(
+    target: Path,
+    vararg options: CopyOption,
+    createDirectories: Boolean = false
+): Path {
+    if (createDirectories) target.createDirectories()
+    return copyTo(target.resolve(fileName.pathString), *options)
+}
 
 
 /**

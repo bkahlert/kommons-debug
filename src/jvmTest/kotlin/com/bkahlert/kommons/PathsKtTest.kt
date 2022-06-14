@@ -24,6 +24,7 @@ import java.io.IOException
 import java.net.URI
 import java.net.URL
 import java.nio.file.DirectoryNotEmptyException
+import java.nio.file.FileAlreadyExistsException
 import java.nio.file.FileSystem
 import java.nio.file.FileSystems
 import java.nio.file.Files
@@ -36,6 +37,7 @@ import java.nio.file.ProviderNotFoundException
 import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
 import java.nio.file.attribute.FileTime
 import java.util.jar.JarOutputStream
+import kotlin.io.path.appendText
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createFile
@@ -119,20 +121,14 @@ class PathsKtTest {
         }
     }
 
-    @Nested
-    inner class CreateParentDirectories {
-
-        @Test
-        fun `should create missing directories`(@TempDir tempDir: Path) = tests {
-            val file = tempDir.resolve("some/dir/some/file")
-            file.createParentDirectories().parent should {
-                it.shouldExist()
-                it.shouldBeADirectory()
-                it.shouldBeEmptyDirectory()
-            }
+    @Test fun create_parent_directories(@TempDir tempDir: Path) = tests {
+        val file = tempDir.resolve("some/dir/some/file")
+        file.createParentDirectories().parent should {
+            it.shouldExist()
+            it.shouldBeADirectory()
+            it.shouldBeEmptyDirectory()
         }
     }
-
 
     @Test
     fun age(@TempDir tempDir: Path) = tests {
@@ -441,6 +437,28 @@ class PathsKtTest {
         )
 
         shouldThrow<NotDirectoryException> { tempDir.randomFile().forEachDirectoryEntryRecursively { } }
+    }
+
+    @Test fun copy_to_directory(@TempDir tempDir: Path) = tests {
+        val file = tempDir.singleFile("file")
+        val dir = tempDir.resolve("dir")
+
+        shouldThrow<NoSuchFileException> { file.copyToDirectory(dir) }
+
+        file.copyToDirectory(dir, createDirectories = true) should {
+            it.parent.fileName.pathString shouldBe "dir"
+            it.fileName.pathString shouldBe "file"
+            it.readText() shouldBe "content file"
+        }
+
+        file.appendText("-overwritten")
+        shouldThrow<FileAlreadyExistsException> { file.copyToDirectory(dir) }
+
+        file.copyToDirectory(dir, overwrite = true) should {
+            it.parent.fileName.pathString shouldBe "dir"
+            it.fileName.pathString shouldBe "file"
+            it.readText() shouldBe "content file-overwritten"
+        }
     }
 
 

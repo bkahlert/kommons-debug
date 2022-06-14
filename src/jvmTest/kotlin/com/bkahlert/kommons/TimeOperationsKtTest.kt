@@ -4,9 +4,11 @@ import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
 import io.kotest.matchers.comparables.shouldBeLessThanOrEqualTo
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import org.junit.jupiter.api.Test
 import java.nio.file.attribute.FileTime
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.OffsetDateTime
@@ -25,68 +27,75 @@ class TimeOperationsKtTest {
     private val javaDuration = duration.toJavaDuration()
 
     @Test
-    fun `should provide now`() = tests {
-        Now.instant should {
+    fun now() = tests {
+        Now should {
             it shouldBeLessThanOrEqualTo Instant.now()
             it shouldBeGreaterThanOrEqualTo Instant.now() - 1.seconds
         }
-        Now.localTime should {
-            it shouldBeLessThanOrEqualTo LocalTime.now()
-            it shouldBeGreaterThanOrEqualTo LocalTime.now() - 1.seconds
+    }
+
+    @Test
+    fun today() = tests {
+        Today shouldBe LocalDate.now()
+    }
+
+    @Test
+    fun yesterday() = tests {
+        Yesterday should {
+            it shouldBe LocalDate.now() - 1.days
+            it shouldBe LocalDate.now() - (1.days + 1.seconds)
+            it shouldBe LocalDate.now() - (2.days - 1.seconds)
+            it shouldNotBe LocalDate.now() - (1.days - 1.seconds)
+            it shouldNotBe LocalDate.now() - 2.days
         }
-        Now.localDateTime should {
-            it shouldBeLessThanOrEqualTo LocalDateTime.now()
-            it shouldBeGreaterThanOrEqualTo LocalDateTime.now() - 1.seconds
+    }
+
+    @Test
+    fun tomorrow() = tests {
+        Tomorrow should {
+            it shouldBe LocalDate.now() + 1.days
+            it shouldBe LocalDate.now() + (1.days + 1.seconds)
+            it shouldBe LocalDate.now() + (2.days - 1.seconds)
+            it shouldNotBe LocalDate.now() + (1.days - 1.seconds)
+            it shouldNotBe LocalDate.now() + 2.days
         }
-        Now.zonedDateTime should {
-            it shouldBeLessThanOrEqualTo ZonedDateTime.now()
-            it shouldBeGreaterThanOrEqualTo ZonedDateTime.now() - 1.seconds
-        }
-        Now.offsetDateTime should {
-            it shouldBeLessThanOrEqualTo OffsetDateTime.now()
-            it shouldBeGreaterThanOrEqualTo OffsetDateTime.now() - 1.seconds
-        }
-        Now.offsetTime should {
-            it shouldBeLessThanOrEqualTo OffsetTime.now()
-            it shouldBeGreaterThanOrEqualTo OffsetTime.now() - 1.seconds
-        }
-        Now.fileTime should {
-            it shouldBeLessThanOrEqualTo FileTime.from(Instant.now())
-            it shouldBeGreaterThanOrEqualTo FileTime.from(Instant.now()) - 1.seconds
+    }
+
+    @Test
+    fun timestamp() = tests {
+        Timestamp should {
+            it shouldBeLessThanOrEqualTo Instant.now().toEpochMilli()
+            it shouldBeGreaterThanOrEqualTo Instant.now().toEpochMilli() - 100
         }
     }
 
     @Test
     fun `should add`() = tests {
-        (Now + duration) should {
+        (Instant.now() + duration) should {
             it shouldBeLessThanOrEqualTo Instant.now().plus(javaDuration)
             it shouldBeGreaterThanOrEqualTo Instant.now().plus(javaDuration) - 1.seconds
         }
-        (Now.instant + duration) should {
-            it shouldBeLessThanOrEqualTo Instant.now().plus(javaDuration)
-            it shouldBeGreaterThanOrEqualTo Instant.now().plus(javaDuration) - 1.seconds
-        }
-        (Now.localTime + duration) should {
+        (LocalTime.now() + duration) should {
             it shouldBeLessThanOrEqualTo LocalTime.now().plus(javaDuration)
             it shouldBeGreaterThanOrEqualTo LocalTime.now().plus(javaDuration) - 1.seconds
         }
-        (Now.localDateTime + duration) should {
+        (LocalDateTime.now() + duration) should {
             it shouldBeLessThanOrEqualTo LocalDateTime.now().plus(javaDuration)
             it shouldBeGreaterThanOrEqualTo LocalDateTime.now().plus(javaDuration) - 1.seconds
         }
-        (Now.zonedDateTime + duration) should {
+        (ZonedDateTime.now() + duration) should {
             it shouldBeLessThanOrEqualTo ZonedDateTime.now().plus(javaDuration)
             it shouldBeGreaterThanOrEqualTo ZonedDateTime.now().plus(javaDuration) - 1.seconds
         }
-        (Now.offsetDateTime + duration) should {
+        (OffsetDateTime.now() + duration) should {
             it shouldBeLessThanOrEqualTo OffsetDateTime.now().plus(javaDuration)
             it shouldBeGreaterThanOrEqualTo OffsetDateTime.now().plus(javaDuration) - 1.seconds
         }
-        (Now.offsetTime + duration) should {
+        (OffsetTime.now() + duration) should {
             it shouldBeLessThanOrEqualTo OffsetTime.now().plus(javaDuration)
             it shouldBeGreaterThanOrEqualTo OffsetTime.now().plus(javaDuration) - 1.seconds
         }
-        (Now.fileTime + duration) should {
+        (FileTime.from(Instant.now()) + duration) should {
             it shouldBeLessThanOrEqualTo FileTime.from(Instant.now().plus(javaDuration))
             it shouldBeGreaterThanOrEqualTo FileTime.from(Instant.now().plus(javaDuration)) - 1.seconds
         }
@@ -94,35 +103,31 @@ class TimeOperationsKtTest {
 
     @Test
     fun `should subtract`() = tests {
-        (Now - duration) should {
+        (Instant.now() - duration) should {
             it shouldBeLessThanOrEqualTo Instant.now().minus(javaDuration)
             it shouldBeGreaterThanOrEqualTo Instant.now().minus(javaDuration) - 1.seconds
         }
-        (Now.instant - duration) should {
-            it shouldBeLessThanOrEqualTo Instant.now().minus(javaDuration)
-            it shouldBeGreaterThanOrEqualTo Instant.now().minus(javaDuration) - 1.seconds
-        }
-        (Now.localTime - duration) should {
+        (LocalTime.now() - duration) should {
             it shouldBeLessThanOrEqualTo LocalTime.now().minus(javaDuration)
             it shouldBeGreaterThanOrEqualTo LocalTime.now().minus(javaDuration) - 1.seconds
         }
-        (Now.localDateTime - duration) should {
+        (LocalDateTime.now() - duration) should {
             it shouldBeLessThanOrEqualTo LocalDateTime.now().minus(javaDuration)
             it shouldBeGreaterThanOrEqualTo LocalDateTime.now().minus(javaDuration) - 1.seconds
         }
-        (Now.zonedDateTime - duration) should {
+        (ZonedDateTime.now() - duration) should {
             it shouldBeLessThanOrEqualTo ZonedDateTime.now().minus(javaDuration)
             it shouldBeGreaterThanOrEqualTo ZonedDateTime.now().minus(javaDuration) - 1.seconds
         }
-        (Now.offsetDateTime - duration) should {
+        (OffsetDateTime.now() - duration) should {
             it shouldBeLessThanOrEqualTo OffsetDateTime.now().minus(javaDuration)
             it shouldBeGreaterThanOrEqualTo OffsetDateTime.now().minus(javaDuration) - 1.seconds
         }
-        (Now.offsetTime - duration) should {
+        (OffsetTime.now() - duration) should {
             it shouldBeLessThanOrEqualTo OffsetTime.now().minus(javaDuration)
             it shouldBeGreaterThanOrEqualTo OffsetTime.now().minus(javaDuration) - 1.seconds
         }
-        (Now.fileTime - duration) should {
+        (FileTime.from(Instant.now()) - duration) should {
             it shouldBeLessThanOrEqualTo FileTime.from(Instant.now().minus(javaDuration))
             it shouldBeGreaterThanOrEqualTo FileTime.from(Instant.now().minus(javaDuration)) - 1.seconds
         }
@@ -130,7 +135,7 @@ class TimeOperationsKtTest {
 
     @Test
     fun `should return FileTime`() {
-        val now = Now.instant
+        val now = Instant.now()
         now.toFileTime() shouldBe FileTime.from(now)
     }
 }

@@ -7,59 +7,32 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.OffsetTime
-import java.time.Year
-import java.time.YearMonth
 import java.time.ZonedDateTime
 import kotlin.time.Duration
 import kotlin.time.toJavaDuration
 
-/** Provider of the current moment in time in various formats. */
-public object Now {
-    /** Returns the current date and time as an [Instant]. */
-    public val instant: Instant get() = Instant.now()
+/** The current date and time in Coordinated Universal Time (UTC). */
+public inline val Now: Instant get() = Instant.now()
 
-    /** Returns the current time as a [LocalTime]. */
-    public val localTime: LocalTime get() = LocalTime.now()
+/** The current local date. */
+public inline val Today: LocalDate get() = LocalDate.now()
 
-    /** Returns the current date as a [LocalDate]. */
-    public val localDate: LocalDate get() = LocalDate.now()
+/** The current local date but 1 day in the past. */
+public inline val Yesterday: LocalDate get() = LocalDate.now().minusDays(1)
 
-    /** Returns the current date and time as a [LocalDateTime]. */
-    public val localDateTime: LocalDateTime get() = LocalDateTime.now()
+/** The current local date but 1 day in the future. */
+public inline val Tomorrow: LocalDate get() = LocalDate.now().plusDays(1)
 
-    /** Returns the current date and time as a [ZonedDateTime]. */
-    public val zonedDateTime: ZonedDateTime get() = ZonedDateTime.now()
-
-    /** Returns the current date and time as a [OffsetDateTime]. */
-    public val offsetDateTime: OffsetDateTime get() = OffsetDateTime.now()
-
-    /** Returns the current time as a [OffsetTime]. */
-    public val offsetTime: OffsetTime get() = OffsetTime.now()
-
-    /** Returns the current year and month as a [YearMonth]. */
-    public val yearMonth: YearMonth get() = YearMonth.now()
-
-    /** Returns the current year as a [Year]. */
-    public val year: Year get() = Year.now()
-
-    /** Returns the current date and time as a [FileTime]. */
-    public val fileTime: FileTime get() = FileTime.from(instant)
-
-    /** Returns the passes seconds since 1970-01-01T00:00:00Z as a [Long]. */
-    public val millis: Long get() = instant.toEpochMilli()
-
-    /** Returns the current date and time with the specified amount added. */
-    public operator fun plus(duration: Duration): Instant = instant + duration
-
-    /** Returns the current date and time with the specified amount subtracted. */
-    public operator fun minus(duration: Duration): Instant = instant - duration
-
-    public override fun toString(): String = "$instant"
-}
+/** The passed seconds since 1970-01-01T00:00:00Z. */
+public inline val Timestamp: Long get() = Instant.now().toEpochMilli()
 
 @Suppress("NOTHING_TO_INLINE")
 /** Returns a copy of this [Instant] with the specified [duration] added. */
 public inline operator fun Instant.plus(duration: Duration): Instant = this.plus(duration.toJavaDuration())
+
+@Suppress("NOTHING_TO_INLINE")
+/** Returns a copy of this [LocalTime] with the whole days of the specified [duration] added. */
+public inline operator fun LocalDate.plus(duration: Duration): LocalDate = this.plusDays(duration.inWholeDays)
 
 @Suppress("NOTHING_TO_INLINE")
 /** Returns a copy of this [LocalTime] with the specified [duration] added. */
@@ -88,6 +61,10 @@ public inline operator fun FileTime.plus(duration: Duration): FileTime = FileTim
 @Suppress("NOTHING_TO_INLINE")
 /** Returns a copy of this [Instant] with the specified [duration] subtracted. */
 public inline operator fun Instant.minus(duration: Duration): Instant = this.minus(duration.toJavaDuration())
+
+@Suppress("NOTHING_TO_INLINE")
+/** Returns a copy of this [LocalTime] with the whole days of the specified [duration] subtracted. */
+public inline operator fun LocalDate.minus(duration: Duration): LocalDate = this.minusDays(duration.inWholeDays)
 
 @Suppress("NOTHING_TO_INLINE")
 /** Returns a copy of this [LocalTime] with the specified [duration] subtracted. */

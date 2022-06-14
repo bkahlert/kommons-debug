@@ -1,128 +1,86 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.debug.trace
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.inspectors.forAll
-import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.assertions.withClue
 import io.kotest.matchers.ints.shouldBeGreaterThan
-import io.kotest.matchers.nulls.shouldBeNull
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Nested
+import io.kotest.matchers.string.shouldEndWith
+import io.kotest.matchers.string.shouldMatch
+import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-import java.nio.file.Files
+import java.net.URI
+import java.net.URL
 import java.nio.file.NoSuchFileException
 import java.nio.file.Path
 import kotlin.io.path.copyTo
-import kotlin.io.path.extension
+import kotlin.io.path.div
 import kotlin.io.path.pathString
 import kotlin.io.path.readBytes
 import kotlin.io.path.readText
 
 class ClassPathTest {
 
-    @Nested
-    inner class UseClassPaths {
-        @Test fun `should map root with no provided path`() = tests {
-            useClassPaths("") { it.listDirectoryEntriesRecursively() }
-                .flatten().count { it.fileName.pathString.endsWith(".class") }.shouldBeGreaterThan(20)
-        }
-
-        @Test
-        fun `should map resource on matching path`() = tests {
-            useClassPaths(classPathTextFile) { it.readBytes() }
-                .forAll { it.contentEquals(classPathTextFileBytes).shouldBeTrue() }
-        }
-
-        @Test
-        fun `should map resource on non-matching path`() = tests {
-            useClassPaths("invalid.file") { it.pathString }.shouldBeEmpty()
-        }
-
-        @Test
-        fun `should support different notations`() = tests {
-            listOf(
-                classPathTextFile,
-                "/$classPathTextFile",
-                "classpath:$classPathTextFile",
-                "classpath:/$classPathTextFile",
-            ).forAll {
-                useClassPaths(it) { it.readBytes() }
-                    .forAll { it.contentEquals(classPathTextFileBytes).shouldBeTrue() }
-            }
-        }
-    }
-
-    @Nested
-    inner class UseClassPath {
-        @Test fun `should map root with no provided path`() = tests {
-            useClassPath("") { it.listDirectoryEntriesRecursively() }
-                .shouldNotBeNull()
-                .count { it.fileName.pathString.endsWith(".class") }.shouldBeGreaterThan(20)
-        }
-
-        @Test
-        fun `should map resource on matching path`() = tests {
-            useClassPath(classPathTextFile) { it.readBytes() }
-                .contentEquals(classPathTextFileBytes).shouldBeTrue()
-        }
-
-        @Test
-        fun `should map resource on non-matching path`() = tests {
-            useClassPath("invalid.file") { it.pathString }.shouldBeNull()
-        }
-
-        @Test
-        fun `should support different notations`() = tests {
-            listOf(
-                classPathTextFile,
-                "/$classPathTextFile",
-                "classpath:$classPathTextFile",
-                "classpath:/$classPathTextFile",
-            ).forAll {
-                useClassPath(it) { it.readBytes() }
-                    .contentEquals(classPathTextFileBytes).shouldBeTrue()
-            }
-        }
-    }
-
-    @Test fun `use required class path`() = tests {
-        useRequiredClassPath(classPathTextFile) { it.readBytes() }
-            .contentEquals(classPathTextFileBytes).shouldBeTrue()
-        shouldThrow<NoSuchFileException> { useRequiredClassPath("invalid.file") {} }
-    }
-
-    @Test fun `read class path`() = tests {
-        readClassPathText(classPathTextFile) shouldBe classPathTextFileBytes.decodeToString()
-        readClassPathBytes(classPathTextFile).contentEquals(classPathTextFileBytes).shouldBeTrue()
-        readClassPathText("invalid.file").shouldBeNull()
-        readClassPathBytes("invalid.file").shouldBeNull()
-    }
-
-    @Test fun `require class path`() = tests {
-        requireClassPathText(classPathTextFile) shouldBe classPathTextFileBytes.decodeToString()
-        requireClassPathBytes(classPathTextFile).contentEquals(classPathTextFileBytes).shouldBeTrue()
-        shouldThrow<NoSuchFileException> { requireClassPathText("invalid.file") }
-        shouldThrow<NoSuchFileException> { requireClassPathBytes("invalid.file") }
-    }
-
-
     @Test fun class_path() = tests {
         ClassPath(classPathTextFile) should {
+            it.fileSystem.shouldBeInstanceOf<DelegatingFileSystem>()
+            it.isAbsolute shouldBe true
+            it.root.pathString shouldBe "/"
+            it.fileName.pathString shouldBe "61C285F09D95930D0AE298B00AF09F918B0A.txt"
+            it.parent.pathString shouldEndWith "jvm/test"
+            it.nameCount shouldBeGreaterThan 3
+            it.getName(it.nameCount - 2).pathString shouldBe "test"
+            it.subpath(it.nameCount - 3, it.nameCount - 1).pathString shouldBe "jvm/test"
+            withClue("starts with self") { it.startsWith(it) shouldBe true }
+            withClue("not starts without root") { it.startsWith(it.subpath(0, 2)) shouldBe false }
+            withClue("starts with root") { it.startsWith(it.root / it.subpath(0, 2)) shouldBe true }
+            withClue("starts with root string") { it.startsWith("/") shouldBe true }
+            withClue("ends with self") { it.endsWith(it) shouldBe true }
+            withClue("not ends without file name") { it.endsWith(it.subpath(it.nameCount - 3, it.nameCount - 2)) shouldBe false }
+            withClue("ends with file name") { it.endsWith(it.subpath(it.nameCount - 3, it.nameCount)) shouldBe true }
+            withClue("ends with file name string") { it.endsWith("61C285F09D95930D0AE298B00AF09F918B0A.txt") shouldBe true }
+            it.normalize().pathString shouldBe it.pathString
+            it.resolve("..").normalize().pathString shouldBe it.parent.pathString
+            it.relativize(it.parent).pathString shouldBe ".."
+            it.toUri().toString() shouldMatch "file:.*/jvm/test/61C285F09D95930D0AE298B00AF09F918B0A\\.txt".toRegex()
+            it.toAbsolutePath().pathString shouldMatch "/.*/jvm/test/61C285F09D95930D0AE298B00AF09F918B0A\\.txt".toRegex()
+            it.toRealPath().pathString shouldMatch "/.*/jvm/test/61C285F09D95930D0AE298B00AF09F918B0A\\.txt".toRegex()
             it.readText() shouldBe classPathTextFileText
             it.readBytes() shouldBe classPathTextFileBytes
         }
         ClassPath(standardLibraryClassPathClass) should {
+            it.fileSystem.shouldBeInstanceOf<DelegatingFileSystem>()
+            it.isAbsolute shouldBe true
+            it.root.pathString shouldBe "/"
+            it.fileName.pathString shouldBe "Regex.class"
+            it.parent.pathString shouldBe "/kotlin/text"
+            it.nameCount shouldBe 3
+            it.getName(it.nameCount - 2).pathString shouldBe "text"
+            it.subpath(it.nameCount - 3, it.nameCount - 1).pathString shouldBe "kotlin/text"
+            withClue("starts with self") { it.startsWith(it) shouldBe true }
+            withClue("not starts without root") { it.startsWith(it.subpath(0, 2)) shouldBe false }
+            withClue("starts with root") { it.startsWith(it.root / it.subpath(0, 2)) shouldBe true }
+            withClue("starts with root string") { it.startsWith("/") shouldBe true }
+            withClue("ends with self") { it.endsWith(it) shouldBe true }
+            withClue("not ends without file name") { it.endsWith(it.subpath(it.nameCount - 3, it.nameCount - 2)) shouldBe false }
+            withClue("ends with file name") { it.endsWith(it.subpath(it.nameCount - 3, it.nameCount)) shouldBe true }
+            withClue("ends with file name string") { it.endsWith("Regex.class") shouldBe true }
+            it.normalize().pathString shouldBe it.pathString
+            it.resolve("..").normalize().pathString shouldBe it.parent.pathString
+            it.relativize(it.parent).pathString shouldBe ".."
+            it.toUri().toString() shouldMatch "jar:file:.*/kotlin/text/Regex\\.class".toRegex()
+            it.toAbsolutePath().pathString shouldMatch "/kotlin/text/Regex\\.class".toRegex()
+            it.toRealPath().pathString shouldMatch "/kotlin/text/Regex\\.class".toRegex()
             it.readText() shouldBe standardLibraryClassPathClassText
             it.readBytes() shouldBe standardLibraryClassPathClassBytes
         }
         shouldThrow<NoSuchFileException> { ClassPath("invalid.file") }
+        shouldThrow<NoSuchFileException> { ClassPath(URL("jar:file:/invalid.jar!/invalid.class")) }
+        shouldThrow<NoSuchFileException> { ClassPath(URI("jar:file:/invalid.jar!/invalid.class")) }
     }
 
-    @Test fun class_path_use(@TempDir tempDir: Path) = tests {
+    @Test fun manually_copy_class_path(@TempDir tempDir: Path) = tests {
         ClassPath(classPathTextFile).useBufferedInputStream {
             tempDir.resolve("classPathTextFile-streamed-copy").useOutputStream { out -> it.copyTo(out) }
         }.readBytes() shouldBe classPathTextFileBytes
@@ -130,21 +88,30 @@ class ClassPathTest {
         ClassPath(standardLibraryClassPathClass).useBufferedInputStream {
             tempDir.resolve("standardLibraryClassPathClass-streamed-copy").useOutputStream { out -> it.copyTo(out) }
         }.readBytes() shouldBe standardLibraryClassPathClassBytes
-
-        ClassPath(classPathTextFile).copyTo(tempDir.resolve("classPathTextFile-kotlin-copy"))
-            .readBytes() shouldBe classPathTextFileBytes
-
-//        ClassPath(standardLibraryClassPathClass).copyTo(tempDir.resolve("standardLibraryClassPathClass-kotlin-copy").trace).trace
-//            .readBytes() shouldBe standardLibraryClassPathClassBytes
     }
 
-    @Test fun class_pathxx() = tests {
-        val p = ClassPath(classPathTextFile).trace
-        p.extension.trace("file name")
-        p.readText().trace("file name")
-        ClassPath(checkNotNull(Regex::class.java.getResource("Regex.class"))).readText().trace("file name")
-        val inputStream = Files.newInputStream(p)
-        inputStream.trace
+    @Test fun kotlin_copy_class_path(@TempDir tempDir: Path) = tests {
+        ClassPath(classPathTextFile).copyTo(tempDir.resolve("classPathTextFile-kotlin-copy")) should {
+            it.pathString shouldBe tempDir.resolve("classPathTextFile-kotlin-copy").pathString
+            it.readBytes() shouldBe classPathTextFileBytes
+        }
+
+        ClassPath(standardLibraryClassPathClass).copyTo(tempDir.resolve("standardLibraryClassPathClass-kotlin-copy")) should {
+            it.pathString shouldBe tempDir.resolve("standardLibraryClassPathClass-kotlin-copy").pathString
+            it.readBytes() shouldBe standardLibraryClassPathClassBytes
+        }
+    }
+
+    @Test fun kotlin_copy_class_path_to_directory(@TempDir tempDir: Path) = tests {
+        ClassPath(classPathTextFile).copyToDirectory(tempDir) should {
+            it.pathString shouldBe tempDir.resolve(classPathTextFile).pathString
+            it.readBytes() shouldBe classPathTextFileBytes
+        }
+
+        ClassPath(standardLibraryClassPathClass).copyToDirectory(tempDir) should {
+            it.pathString shouldBe tempDir.resolve("Regex.class").pathString
+            it.readBytes() shouldBe standardLibraryClassPathClassBytes
+        }
     }
 }
 

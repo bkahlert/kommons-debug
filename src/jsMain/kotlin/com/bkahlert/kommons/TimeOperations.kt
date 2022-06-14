@@ -9,6 +9,19 @@ import kotlin.time.Duration.Companion.minutes
 /** The current date and time. */
 public inline val Now: Date get() = Date()
 
+/** The current date. */
+public inline val Today: Date get() = Now.run { Date(fullYear, month, date, 0, 0, 0, 0) }
+
+/** The current date but 1 day in the past. */
+public inline val Yesterday: Date get() = Now.run { Date(fullYear, month, date - 1, 0, 0, 0, 0) }
+
+/** The current date but 1 day in the future. */
+public inline val Tomorrow: Date get() = Now.run { Date(fullYear, month, date + 1, 0, 0, 0, 0) }
+
+/** The passed seconds since 1970-01-01T00:00:00Z. */
+public inline val Timestamp: Double get() = Now.time
+
+
 /** The number of milliseconds since [ECMAScript epoch](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#the_ecmascript_epoch_and_timestamps). */
 public inline val Date.time: Double get() = getTime()
 
