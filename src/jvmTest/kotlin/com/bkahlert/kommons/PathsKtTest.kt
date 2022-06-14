@@ -1,5 +1,6 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.DeleteOnExecTestHelper.Variant
 import io.kotest.assertions.asClue
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -26,12 +27,9 @@ import java.nio.file.LinkOption.NOFOLLOW_LINKS
 import java.nio.file.NoSuchFileException
 import java.nio.file.NotDirectoryException
 import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
 import java.nio.file.attribute.FileTime
-import java.time.LocalDate
-import java.time.Period
-import java.time.Year
-import java.time.YearMonth
-import java.time.temporal.Temporal
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createFile
@@ -40,39 +38,75 @@ import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.pathString
+import kotlin.io.path.readText
 import kotlin.io.path.writeBytes
-import kotlin.time.Duration
+import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 class PathsKtTest {
 
+    @Test fun is_directory_normalized(@TempDir tempDir: Path) = tests {
+        tempDir.isDirectoryNormalized() shouldBe true
+        (tempDir / "foo" / "..").isDirectoryNormalized() shouldBe true
+        (tempDir / "foo").isDirectoryNormalized() shouldBe false
+    }
+
+    @Test fun require_directory_normalized(@TempDir tempDir: Path) = tests {
+        tempDir should { it.requireDirectoryNormalized() shouldBe it }
+        tempDir / "foo" / ".." should { it.requireDirectoryNormalized() shouldBe it }
+        shouldThrow<IllegalArgumentException> { (tempDir / "foo").requireDirectoryNormalized() }
+    }
+
+    @Test fun check_directory_normalized(@TempDir tempDir: Path) = tests {
+        tempDir should { it.checkDirectoryNormalized() shouldBe it }
+        tempDir / "foo" / ".." should { it.checkDirectoryNormalized() shouldBe it }
+        shouldThrow<IllegalStateException> { (tempDir / "foo").checkDirectoryNormalized() }
+    }
+
+    @Test fun require_no_directory_normalized(@TempDir tempDir: Path) = tests {
+        shouldThrow<IllegalArgumentException> { tempDir.requireNoDirectoryNormalized() }
+        shouldThrow<IllegalArgumentException> { (tempDir / "foo" / "..").requireNoDirectoryNormalized() }
+        tempDir / "foo" should { it.requireNoDirectoryNormalized() shouldBe it }
+    }
+
+    @Test fun check_no_directory_normalized(@TempDir tempDir: Path) = tests {
+        shouldThrow<IllegalStateException> { tempDir.checkNoDirectoryNormalized() }
+        shouldThrow<IllegalStateException> { (tempDir / "foo" / "..").checkNoDirectoryNormalized() }
+        tempDir / "foo" should { it.checkNoDirectoryNormalized() shouldBe it }
+    }
+
     @Nested
     inner class IsSubPathOf {
 
         @Test
         fun `should return true if child`(@TempDir tempDir: Path) = tests {
+            (tempDir / "child").isInside(tempDir) shouldBe true
             (tempDir / "child").isSubPathOf(tempDir) shouldBe true
         }
 
         @Test
         fun `should return true if descendent`(@TempDir tempDir: Path) = tests {
+            (tempDir / "child1" / "child2").isInside(tempDir) shouldBe true
             (tempDir / "child1" / "child2").isSubPathOf(tempDir) shouldBe true
         }
 
         @Test
         fun `should return true if path is obscure`(@TempDir tempDir: Path) = tests {
+            (tempDir / "child1" / ".." / "child2").isInside(tempDir) shouldBe true
             (tempDir / "child1" / ".." / "child2").isSubPathOf(tempDir) shouldBe true
         }
 
         @Test
         fun `should return true if same`(@TempDir tempDir: Path) = tests {
+            tempDir.isInside(tempDir) shouldBe true
             tempDir.isSubPathOf(tempDir) shouldBe true
         }
 
         @Test
         fun `should return false if not inside`(@TempDir tempDir: Path) = tests {
+            tempDir.isInside(tempDir / "child") shouldBe false
             tempDir.isSubPathOf(tempDir / "child") shouldBe false
         }
     }
@@ -91,36 +125,25 @@ class PathsKtTest {
         }
     }
 
-    @Nested
-    inner class Age {
 
-        @Test
-        fun `should return age of file`(@TempDir tempDir: Path) = tests {
-            tempDir.resolve("file").apply {
-                createFile()
-                lastModified -= 1.days
-            }.age should {
+    @Test
+    fun age(@TempDir tempDir: Path) = tests {
+        with(tempDir.resolve("existing").createFile().apply { lastModified -= 1.days }) {
+            age should {
                 it shouldBeGreaterThanOrEqualTo (1.days - 5.seconds)
                 it shouldBeLessThanOrEqualTo (1.days + 5.seconds)
             }
-        }
-
-        @Test
-        fun `should return age of directory`(@TempDir tempDir: Path) = tests {
-            tempDir.resolve("dir").apply {
-                createDirectory()
-                lastModified -= 1.days
-            }.age should {
-                it shouldBeGreaterThanOrEqualTo (1.days - 5.seconds)
-                it shouldBeLessThanOrEqualTo (1.days + 5.seconds)
+            age = 42.days
+            age should {
+                it shouldBeGreaterThanOrEqualTo (42.days - 5.seconds)
+                it shouldBeLessThanOrEqualTo (42.days + 5.seconds)
             }
         }
 
-        @Test
-        fun `should throw if missing`(@TempDir tempDir: Path) = tests {
-            shouldThrow<NoSuchFileException> { tempDir.resolve("file").age }
-        }
+        shouldThrow<NoSuchFileException> { tempDir.resolve("missing").age }
+        shouldThrow<NoSuchFileException> { tempDir.resolve("missing").age = 42.days; @Suppress("RedundantUnitExpression") Unit }
     }
+
 
     @Nested
     inner class CreatedKtTest {
@@ -253,35 +276,97 @@ class PathsKtTest {
         }
     }
 
+    @Test
+    fun resolve_file(@TempDir tempDir: Path) = tests {
+        tempDir.resolveFile { Path.of("dir", "file") } shouldBe tempDir / "dir" / "file"
+        tempDir.resolveFile(Path.of("dir", "file")) shouldBe tempDir / "dir" / "file"
+        tempDir.resolveFile("dir/file") shouldBe tempDir / "dir" / "file"
+        shouldThrow<IllegalStateException> { tempDir.resolveFile { Path.of("dir", "..") } }
+        shouldThrow<IllegalStateException> { tempDir.resolveFile(Path.of("dir", "..")) }
+        shouldThrow<IllegalStateException> { tempDir.resolveFile("dir/..") }
+    }
+
+    @Test
+    fun list_directory_entries_recursively(@TempDir tempDir: Path) = tests {
+        val dir = tempDir.directoryWithTwoFiles()
+
+        dir.listDirectoryEntriesRecursively()
+            .map { it.pathString } shouldContainExactlyInAnyOrder listOf(
+            dir.resolve("example.html").pathString,
+            dir.resolve("sub-dir").pathString,
+            dir.resolve("sub-dir/config.txt").pathString,
+        )
+
+        dir.listDirectoryEntriesRecursively("**/*.*")
+            .map { it.pathString } shouldContainExactlyInAnyOrder listOf(
+            dir.resolve("example.html").pathString,
+            dir.resolve("sub-dir/config.txt").pathString,
+        )
+
+        shouldThrow<NotDirectoryException> { tempDir.randomFile().listDirectoryEntriesRecursively() }
+    }
+
     @Nested
-    inner class ListDirectoryEntriesRecursively {
+    inner class ListDirectoryEntriesRecursivelyOperation {
 
         @Test
-        fun `should list all entries recursively`(@TempDir tempDir: Path) = tests {
-            val dir = tempDir.directoryWithTwoFiles()
-            val subject = dir.listDirectoryEntriesRecursively().map { it.pathString }
-            subject shouldContainExactlyInAnyOrder listOf(
-                dir.resolve("example.html").pathString,
-                dir.resolve("sub-dir").pathString,
-                dir.resolve("sub-dir/config.txt").pathString,
-            )
+        fun `should delete directory contents`(@TempDir tempDir: Path) = tests {
+            val dir = tempDir.resolve("dir")
+            dir.directoryWithTwoFiles()
+
+            dir.deleteDirectoryEntriesRecursively().shouldExist()
+            dir.shouldBeEmptyDirectory()
         }
 
         @Test
-        fun `should apply glob expression`(@TempDir tempDir: Path) = tests {
-            val dir = tempDir.directoryWithTwoFiles()
-            val subject = dir.listDirectoryEntriesRecursively("**/*.*").map { it.pathString }
-            subject shouldContainExactlyInAnyOrder listOf(
-                dir.resolve("example.html").pathString,
-                dir.resolve("sub-dir/config.txt").pathString,
-            )
+        fun `should delete filtered directory contents`(@TempDir tempDir: Path) = tests {
+            val dir = tempDir.resolve("dir")
+            val exception = dir.directoryWithTwoFiles().listDirectoryEntriesRecursively().first()
+
+            dir.deleteDirectoryEntriesRecursively { it != exception && !it.isDirectory() }.shouldExist()
+            dir.listDirectoryEntries().map { it.pathString }.shouldNotContain(exception.pathString)
         }
 
         @Test
-        fun `should throw on listing file`(@TempDir tempDir: Path) = tests {
-            shouldThrow<NotDirectoryException> { tempDir.randomFile().listDirectoryEntriesRecursively() }
+        fun `should throw on non-directory`(@TempDir tempDir: Path) = tests {
+            val file = tempDir.resolve("file").createFile()
+            shouldThrow<NotDirectoryException> { file.deleteDirectoryEntriesRecursively() }
         }
     }
+
+    @Test
+    fun use_directory_entries_recursively(@TempDir tempDir: Path) = tests {
+        val dir = tempDir.directoryWithTwoFiles()
+
+        dir.useDirectoryEntriesRecursively { seq -> seq.map { it.fileName.pathString }.sorted().joinToString() }
+            .shouldBe("config.txt, example.html, sub-dir")
+
+        dir.useDirectoryEntriesRecursively("**/*.*") { seq -> seq.map { it.fileName.pathString }.sorted().joinToString() }
+            .shouldBe("config.txt, example.html")
+
+        shouldThrow<NotDirectoryException> { tempDir.randomFile().useDirectoryEntriesRecursively { } }
+    }
+
+    @Test
+    fun for_each_directory_entries_recursively(@TempDir tempDir: Path) = tests {
+        val dir = tempDir.directoryWithTwoFiles()
+
+        buildList { dir.forEachDirectoryEntryRecursively { add(it) } }
+            .map { it.pathString } shouldContainExactlyInAnyOrder listOf(
+            dir.resolve("example.html").pathString,
+            dir.resolve("sub-dir").pathString,
+            dir.resolve("sub-dir/config.txt").pathString,
+        )
+
+        buildList { dir.forEachDirectoryEntryRecursively("**/*.*") { add(it) } }
+            .map { it.pathString } shouldContainExactlyInAnyOrder listOf(
+            dir.resolve("example.html").pathString,
+            dir.resolve("sub-dir/config.txt").pathString,
+        )
+
+        shouldThrow<NotDirectoryException> { tempDir.randomFile().forEachDirectoryEntryRecursively { } }
+    }
+
 
     @Nested
     inner class Delete {
@@ -385,67 +470,132 @@ class PathsKtTest {
         }
     }
 
-    @Nested
-    inner class ListDirectoryEntriesRecursivelyOperation {
-
-        @Test
-        fun `should delete directory contents`(@TempDir tempDir: Path) = tests {
-            val dir = tempDir.resolve("dir")
-            dir.directoryWithTwoFiles()
-
-            dir.deleteDirectoryEntriesRecursively().shouldExist()
-            dir.shouldBeEmptyDirectory()
+    @Test fun delete_on_exit(@TempDir tempDir: Path) = tests {
+        tempDir.singleFile("file-delete-default").asClue {
+            IsolatedProcess.exec(DeleteOnExecTestHelper::class, Variant.Default.name, it.pathString) shouldBe 0
+            it.shouldNotExist()
+        }
+        tempDir.singleFile("file-delete-recursively").asClue {
+            IsolatedProcess.exec(DeleteOnExecTestHelper::class, Variant.Recursively.name, it.pathString) shouldBe 0
+            it.shouldNotExist()
+        }
+        tempDir.singleFile("file-delete-non-recursively").asClue {
+            IsolatedProcess.exec(DeleteOnExecTestHelper::class, Variant.NonRecursively.name, it.pathString) shouldBe 0
+            it.shouldNotExist()
         }
 
-        @Test
-        fun `should delete filtered directory contents`(@TempDir tempDir: Path) = tests {
-            val dir = tempDir.resolve("dir")
-            val exception = dir.directoryWithTwoFiles().listDirectoryEntriesRecursively().first()
-
-            dir.deleteDirectoryEntriesRecursively { it != exception && !it.isDirectory() }.shouldExist()
-            dir.listDirectoryEntries().map { it.pathString }.shouldNotContain(exception.pathString)
+        tempDir.directoryWithTwoFiles("dir-delete-default").asClue {
+            IsolatedProcess.exec(DeleteOnExecTestHelper::class, Variant.Default.name, it.pathString) shouldBe 0
+            it.shouldNotExist()
+        }
+        tempDir.directoryWithTwoFiles("dir-delete-recursively").asClue {
+            IsolatedProcess.exec(DeleteOnExecTestHelper::class, Variant.Recursively.name, it.pathString) shouldBe 0
+            it.shouldNotExist()
+        }
+        tempDir.directoryWithTwoFiles("dir-delete-non-recursively").asClue {
+            IsolatedProcess.exec(DeleteOnExecTestHelper::class, Variant.NonRecursively.name, it.pathString) shouldBe 0
+            it.shouldExist()
         }
 
-        @Test
-        fun `should throw on non-directory`(@TempDir tempDir: Path) = tests {
-            val file = tempDir.resolve("file").createFile()
-            shouldThrow<NotDirectoryException> { file.deleteDirectoryEntriesRecursively() }
+        tempDir.resolve("missing").asClue {
+            IsolatedProcess.exec(DeleteOnExecTestHelper::class, Variant.Default.name, it.pathString) shouldBe 0
+            it.shouldNotExist()
+        }
+    }
+
+    @Test fun use_input_stream(@TempDir tempDir: Path) = tests {
+        tempDir.singleFile(content = "abc").useInputStream { it.readBytes().decodeToString() } shouldBe "abc"
+        shouldThrow<NoSuchFileException> { tempDir.randomPath().useInputStream {} }
+    }
+
+    @Test fun use_buffered_input_stream(@TempDir tempDir: Path) = tests {
+        tempDir.singleFile(content = "abc").useBufferedInputStream { it.readBytes().decodeToString() } shouldBe "abc"
+        shouldThrow<NoSuchFileException> { tempDir.randomPath().useBufferedInputStream {} }
+    }
+
+    @Test fun use_reader(@TempDir tempDir: Path) = tests {
+        tempDir.singleFile(content = "abc").useReader { it.readText() } shouldBe "abc"
+        shouldThrow<NoSuchFileException> { tempDir.randomPath().useReader {} }
+    }
+
+    @Test fun use_buffered_reader(@TempDir tempDir: Path) = tests {
+        tempDir.singleFile(content = "abc").useBufferedReader { it.readText() } shouldBe "abc"
+        shouldThrow<NoSuchFileException> { tempDir.randomPath().useBufferedReader {} }
+    }
+
+    @Test fun use_output_stream(@TempDir tempDir: Path) = tests {
+        tempDir.resolve("file").useOutputStream { it.write("abc".encodeToByteArray()) }.readText() shouldBe "abc"
+        shouldThrow<NoSuchFileException> { tempDir.randomPath().useOutputStream(TRUNCATE_EXISTING) {} }
+    }
+
+    @Test fun use_buffered_output_stream(@TempDir tempDir: Path) = tests {
+        tempDir.resolve("file").useBufferedOutputStream { it.write("abc".encodeToByteArray()) }.readText() shouldBe "abc"
+        shouldThrow<NoSuchFileException> { tempDir.randomPath().useBufferedOutputStream(TRUNCATE_EXISTING) {} }
+    }
+
+    @Test fun use_writer(@TempDir tempDir: Path) = tests {
+        tempDir.resolve("file").useWriter { it.write("abc") }.readText() shouldBe "abc"
+        shouldThrow<NoSuchFileException> { tempDir.randomPath().useWriter(TRUNCATE_EXISTING) {} }
+    }
+
+    @Test fun use_buffered_writer(@TempDir tempDir: Path) = tests {
+        tempDir.resolve("file").useBufferedWriter { it.write("abc") }.readText() shouldBe "abc"
+        shouldThrow<NoSuchFileException> { tempDir.randomPath().useBufferedWriter(TRUNCATE_EXISTING) {} }
+    }
+}
+
+class DeleteOnExecTestHelper {
+    enum class Variant {
+        Default {
+            override fun deleteOnExit(path: Path) {
+                path.deleteOnExit()
+            }
+        },
+        Recursively {
+            override fun deleteOnExit(path: Path) {
+                path.deleteOnExit(recursively = true)
+            }
+        },
+        NonRecursively {
+            override fun deleteOnExit(path: Path) {
+                path.deleteOnExit(recursively = false)
+            }
+        };
+
+        abstract fun deleteOnExit(path: Path)
+    }
+
+    companion object {
+        @JvmStatic
+        fun main(vararg args: String) {
+            kotlin.runCatching {
+                val operation = Variant.valueOf(args.first())::deleteOnExit
+                val file = Paths.get(args.last())
+                require(file.isSubPathOf(Locations.Default.Temp))
+                operation(file)
+            }.onFailure { exitProcess(1) }
         }
     }
 }
 
 
-/**
- * Returns an object of the same type [T] as this object with the specified [duration] subtracted.
- *
- * **Important:** This operation does not work for date types like [LocalDate], [YearMonth] or [Year]
- * as they don't differ in [Duration] but in [Period].
- */
-private inline operator fun <reified T : Temporal> T.minus(duration: Duration): T {
-    return duration.toComponents { days, hours, minutes, seconds, nanoseconds ->
-        sequenceOf(
-            java.time.Duration.ofDays(days),
-            java.time.Duration.ofHours(hours.toLong()),
-            java.time.Duration.ofMinutes(minutes.toLong()),
-            java.time.Duration.ofSeconds(seconds.toLong()),
-            java.time.Duration.ofNanos(nanoseconds.toLong()),
-        ).filter { !it.isZero }.fold(this) { temporal, adjuster ->
-            if (adjuster.isZero) temporal
-            else temporal.minus(adjuster) as? T ?: error("broken contract of Temporal operations returning the same type")
-        }
-    }
+internal fun Path.symbolicLink(): Path = randomPath().apply {
+    Files.createSymbolicLink(this, randomPath())
+    check(exists(NOFOLLOW_LINKS)) { "Failed to create symbolic link $this." }
 }
 
+internal fun Path.singleFile(
+    name: String = "example.html",
+    content: String = "content $name",
+): Path = resolve(name).apply {
+    writeBytes(content.encodeToByteArray())
+    check(exists()) { "Failed to provide archive with single file." }
+}
 
-internal fun Path.symbolicLink(): Path = randomPath()
-    .also { link -> Files.createSymbolicLink(link, randomPath()) }
-    .apply { check(exists(NOFOLLOW_LINKS)) { "Failed to create symbolic link $this." } }
-
-internal fun Path.singleFile(name: String = "example.html", content: String = "content $name"): Path = resolve(name)
-    .apply { writeBytes(content.encodeToByteArray()) }
-    .apply { check(exists()) { "Failed to provide archive with single file." } }
-
-internal fun Path.directoryWithTwoFiles(): Path = randomDirectory().also {
-    it.singleFile()
-    it.resolve("sub-dir").createDirectories().singleFile("config.txt")
-}.apply { check(listDirectoryEntries().size == 2) { "Failed to provide directory with two files." } }
+internal fun Path.directoryWithTwoFiles(
+    base: String = randomString(4),
+): Path = randomDirectory(base).apply {
+    singleFile()
+    resolve("sub-dir").createDirectories().singleFile("config.txt")
+    check(listDirectoryEntries().size == 2) { "Failed to provide directory with two files." }
+}

@@ -29,31 +29,32 @@ Kommons Debug is hosted on GitHub with releases provided on Maven Central.
 ### Any?.trace / Any?.inspect
 
 Print tracing information and easily cleanup afterwards using
-IntelliJ's code cleanup
+IntelliJ's code cleanup feature.
 
 #### Example
 
 ```kotlin
 data class Foo(val bar: String = "baz") {
     private val baz = 42.0
+    fun compute() // used to demonstrate that trace/inspect return their argument unchanged
 }
 
-Foo().trace
+Foo().trace.compute()
 // output: (sample.kt:5) ⟨ Foo(bar=baz) ⟩
 
-Foo().trace("caption")
+Foo().trace("caption").compute()
 // output: (sample.kt:8) caption ⟨ Foo(bar=baz) ⟩
 
-Foo().trace("details") { it.bar.reversed() }
+Foo().trace("details") { it.bar.reversed() }.compute()
 // output: (sample.kt:11) details ⟨ Foo(bar=baz) ⟩ { "zab" }
 
-Foo().inspect
+Foo().inspect.compute()
 // output: (sample.kt:14) ⟨ !Foo { baz: !Double 42.0, bar: !String "baz" } ⟩
 
-Foo().inspect("caption")
+Foo().inspect("caption").compute()
 // output: (sample.kt:17) caption ⟨ !Foo { baz: !Double 42.0, bar: !String "baz" } ⟩
 
-Foo().inspect("details") { it.bar.reversed() }
+Foo().inspect("details") { it.bar.reversed() }.compute()
 // output: (sample.kt:20) details ⟨ !Foo { baz: !Double 42.0, bar: !String "baz" } ⟩ { !String "zab" }
 ```
 
@@ -184,11 +185,17 @@ file.computeSha1Checksum()
 file.computeSha256Checksum()
 ```
 
-### Default system locations
+### File Handling \[only JVM\]
 
 Easily access your working directory with `Locations.Default.Work`,
 your home directory with `Locations.Default.Home` and your system's
 temporary directory with `Locations.Default.Temp`.
+
+Safely read files with 
+`useInputStream`, `useBufferedInputStream`, `useReader`, and `useBufferedReader`,
+and write files with
+`useOutputStream`, `useBufferedOutputStream`, `useWriter`, and `useBufferedWriter`.
+
 
 ### Unicode
 

@@ -1,31 +1,91 @@
 package com.bkahlert.kommons
 
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
+import java.io.BufferedReader
+import java.io.BufferedWriter
 import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.io.OutputStream
+import java.io.Writer
+import java.nio.charset.Charset
 import java.nio.file.DirectoryNotEmptyException
 import java.nio.file.FileSystem
 import java.nio.file.FileVisitOption.FOLLOW_LINKS
 import java.nio.file.Files
 import java.nio.file.LinkOption
 import java.nio.file.NotDirectoryException
+import java.nio.file.OpenOption
 import java.nio.file.Path
 import java.nio.file.PathMatcher
+import java.nio.file.StandardOpenOption.CREATE
+import java.nio.file.StandardOpenOption.READ
+import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
+import java.nio.file.StandardOpenOption.WRITE
 import java.nio.file.attribute.BasicFileAttributeView
 import java.nio.file.attribute.FileTime
 import java.security.DigestInputStream
 import java.security.MessageDigest
 import java.util.stream.Stream
 import kotlin.concurrent.thread
+import kotlin.io.path.bufferedReader
+import kotlin.io.path.bufferedWriter
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.forEachDirectoryEntry
 import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.inputStream
 import kotlin.io.path.isDirectory
+import kotlin.io.path.outputStream
 import kotlin.io.path.pathString
+import kotlin.io.path.reader
 import kotlin.io.path.setLastModifiedTime
+import kotlin.io.path.writer
 import kotlin.streams.asSequence
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+
+/**
+ * Checks if the file located by the **normalized** path is a directory.
+ *
+ * By default, symbolic links in the path are followed.
+ *
+ * @param options options to control how symbolic links are handled.
+ *
+ * @see Files.isDirectory
+ */
+@Suppress("NOTHING_TO_INLINE")
+public inline fun Path.isDirectoryNormalized(vararg options: LinkOption): Boolean =
+    Files.isDirectory(normalize(), *options)
+
+/**
+ * Checks if the file located by the **normalized** path is a directory,
+ * or throws an [IllegalArgumentException] otherwise.
+ */
+public fun Path.requireDirectoryNormalized(vararg options: LinkOption): Path =
+    apply { require(isDirectoryNormalized(*options)) { "${normalize()} is no directory" } }
+
+/**
+ * Checks if the file located by the **normalized** path is a directory,
+ * or throws an [IllegalStateException] otherwise.
+ */
+public fun Path.checkDirectoryNormalized(vararg options: LinkOption): Path =
+    apply { check(isDirectoryNormalized(*options)) { "${normalize()} is no directory" } }
+
+/**
+ * Checks if the file located by the **normalized** path is **no** directory,
+ * or throws an [IllegalArgumentException] otherwise.
+ */
+public fun Path.requireNoDirectoryNormalized(vararg options: LinkOption): Path =
+    apply { require(!isDirectoryNormalized(*options)) { "${normalize()} is a directory" } }
+
+/**
+ * Checks if the file located by the **normalized** path is **no** directory,
+ * or throws an [IllegalStateException] otherwise.
+ */
+public fun Path.checkNoDirectoryNormalized(vararg options: LinkOption): Path =
+    apply { check(!isDirectoryNormalized(*options)) { "${normalize()} is a directory" } }
 
 /**
  * Alias for [isSubPathOf].
@@ -120,6 +180,37 @@ public fun Path.computeSha1Checksum(): String = computeChecksum(MessageDigestPro
  * Computes the [MessageDigests.SHA-256] hash of this file and returns it formatted as a checksum.
  */
 public fun Path.computeSha256Checksum(): String = computeChecksum(MessageDigestProvider.`SHA-256`)
+
+
+/**
+ * Returns a path based on the following rules:
+ * - If this path **is no directory** it is returned.
+ * - If this path **is a directory** the file name returned by the specified [computeFileName] relative to this directory is returned.
+ *
+ * Use [options] to control how symbolic links are handled.
+ */
+public fun Path.resolveFile(vararg options: LinkOption, computeFileName: () -> Path): Path =
+    if (isDirectoryNormalized(*options)) resolve(computeFileName()).checkNoDirectoryNormalized(*options) else this
+
+/**
+ * Returns a path based on the following rules:
+ * - If this path **is no directory** it is returned.
+ * - If this path **is a directory** the specified [fileName] relative to this directory is returned.
+ *
+ * Use [options] to control how symbolic links are handled.
+ */
+public fun Path.resolveFile(fileName: Path, vararg options: LinkOption): Path =
+    if (isDirectoryNormalized(*options)) resolve(fileName).checkNoDirectoryNormalized(*options) else this
+
+/**
+ * Returns a path based on the following rules:
+ * - If this path **is no directory** it is returned.
+ * - If this path **is a directory** the specified [fileName] relative to this directory is returned.
+ *
+ * Use [options] to control how symbolic links are handled.
+ */
+public fun Path.resolveFile(fileName: String, vararg options: LinkOption): Path =
+    if (isDirectoryNormalized(*options)) resolve(fileName).checkNoDirectoryNormalized(*options) else this
 
 
 private fun Path.getPathMatcher(glob: String): PathMatcher? {
@@ -242,3 +333,138 @@ public fun Path.deleteOnExit(recursively: Boolean = true): Path {
     })
     return this
 }
+
+
+/**
+ * Calls the specified [block] callback
+ * giving it a new [InputStream] of this file
+ * and returns the result.
+ *
+ * The [InputStream] is closed down correctly whether an exception is thrown or not.
+ *
+ * If no [options] are present then it is equivalent to opening the file with
+ * the [READ]
+ * options.
+ */
+public inline fun <R> Path.useInputStream(vararg options: OpenOption, block: (InputStream) -> R): R =
+    inputStream(*options).use(block)
+
+/**
+ * Calls the specified [block] callback
+ * giving it a new [BufferedInputStream] of this file
+ * and returns the result.
+ *
+ * The [BufferedInputStream] is closed down correctly whether an exception is thrown or not.
+ *
+ * If no [options] are present then it is equivalent to opening the file with
+ * the [READ]
+ * options.
+ */
+public inline fun <R> Path.useBufferedInputStream(
+    vararg options: OpenOption,
+    bufferSize: Int = DEFAULT_BUFFER_SIZE,
+    block: (BufferedInputStream) -> R
+): R = inputStream(*options).buffered(bufferSize).use(block)
+
+/**
+ * Calls the specified [block] callback
+ * giving it a new [InputStreamReader] of this file
+ * and returns the result.
+ *
+ * The [InputStreamReader] is closed down correctly whether an exception is thrown or not.
+ *
+ * If no [options] are present then it is equivalent to opening the file with
+ * the [READ]
+ * options.
+ */
+public inline fun <R> Path.useReader(
+    vararg options: OpenOption,
+    charset: Charset = Charsets.UTF_8,
+    block: (InputStreamReader) -> R
+): R = reader(charset, *options).use(block)
+
+/**
+ * Calls the specified [block] callback
+ * giving it a new [BufferedReader] of this file
+ * and returns the result.
+ *
+ * The [BufferedReader] is closed down correctly whether an exception is thrown or not.
+ *
+ * If no [options] are present then it is equivalent to opening the file with
+ * the [READ]
+ * options.
+ */
+public inline fun <R> Path.useBufferedReader(
+    vararg options: OpenOption,
+    charset: Charset = Charsets.UTF_8,
+    bufferSize: Int = DEFAULT_BUFFER_SIZE,
+    block: (BufferedReader) -> R
+): R = bufferedReader(charset, bufferSize, *options).use(block)
+
+/**
+ * Calls the specified [block] callback
+ * giving it a new [OutputStream] of this file
+ * and returns the result.
+ *
+ * The [OutputStream] is closed down correctly whether an exception is thrown or not.
+ *
+ * If no [options] are present then it is equivalent to opening the file with
+ * the [CREATE], [TRUNCATE_EXISTING], and [WRITE]
+ * options.
+ */
+public inline fun Path.useOutputStream(
+    vararg options: OpenOption,
+    block: (OutputStream) -> Unit
+): Path = apply { outputStream(*options).use(block) }
+
+/**
+ * Calls the specified [block] callback
+ * giving it a new [BufferedOutputStream] of this file
+ * and returns the result.
+ *
+ * The [BufferedOutputStream] is closed down correctly whether an exception is thrown or not.
+ *
+ * If no [options] are present then it is equivalent to opening the file with
+ * the [CREATE], [TRUNCATE_EXISTING], and [WRITE]
+ * options.
+ */
+public inline fun Path.useBufferedOutputStream(
+    vararg options: OpenOption,
+    bufferSize: Int = DEFAULT_BUFFER_SIZE,
+    block: (BufferedOutputStream) -> Unit
+): Path = apply { outputStream(*options).buffered(bufferSize).use(block) }
+
+/**
+ * Calls the specified [block] callback
+ * giving it a new [Writer] of this file
+ * and returns the result.
+ *
+ * The [Writer] is closed down correctly whether an exception is thrown or not.
+ *
+ * If no [options] are present then it is equivalent to opening the file with
+ * the [CREATE], [TRUNCATE_EXISTING], and [WRITE]
+ * options.
+ */
+public inline fun Path.useWriter(
+    vararg options: OpenOption,
+    charset: Charset = Charsets.UTF_8,
+    block: (Writer) -> Unit
+): Path = apply { writer(charset, *options).use(block) }
+
+/**
+ * Calls the specified [block] callback
+ * giving it a new [BufferedWriter] of this file
+ * and returns the result.
+ *
+ * The [BufferedWriter] is closed down correctly whether an exception is thrown or not.
+ *
+ * If no [options] are present then it is equivalent to opening the file with
+ * the [CREATE], [TRUNCATE_EXISTING], and [WRITE]
+ * options.
+ */
+public inline fun Path.useBufferedWriter(
+    vararg options: OpenOption,
+    charset: Charset = Charsets.UTF_8,
+    bufferSize: Int = DEFAULT_BUFFER_SIZE,
+    block: (BufferedWriter) -> Unit
+): Path = apply { bufferedWriter(charset, bufferSize, *options).use(block) }

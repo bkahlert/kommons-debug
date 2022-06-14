@@ -20,6 +20,31 @@
 
 ### Fixed
 
+## [0.6.0] - 2022-06-14
+
+### Added
+
+#### File Handling
+
+Read files with
+`useInputStream`, `useBufferedInputStream`, `useReader`, and `useBufferedReader`,
+and write files with
+`useOutputStream`, `useBufferedOutputStream`, `useWriter`, and `useBufferedWriter`.
+
+### Changed
+
+*none*
+
+### Deprecated
+
+*none*
+
+### Removed
+
+*none*
+
+### Fixed
+
 - reduce chance of recursion due to `render` invoking `toString`
 
 ## [0.5.0] - 2022-06-13
@@ -220,7 +245,9 @@ and backslashes, line feeds, carriage returns, tabs and double quotes escaped.
 
 *none*
 
-[unreleased]: https://github.com/bkahlert/kommons/compare/v0.5.0...HEAD
+[unreleased]: https://github.com/bkahlert/kommons/compare/v0.6.0...HEAD
+
+[0.6.0]: https://github.com/bkahlert/kommons/compare/v0.5.0...v0.6.0
 
 [0.5.0]: https://github.com/bkahlert/kommons/compare/v0.4.0...v0.5.0
 

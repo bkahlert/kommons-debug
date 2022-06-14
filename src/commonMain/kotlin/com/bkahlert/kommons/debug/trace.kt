@@ -12,7 +12,7 @@ public typealias Renderer = (Any?) -> String
 /** Function that outputs any string. */
 public typealias Printer = (String) -> Unit
 /** Function that transform an instance of type `T` for further inspection. */
-public typealias Inspector<T> = T.() -> Any?
+public typealias Inspector<T> = (T) -> Any?
 
 /**
  * Helper property that supports

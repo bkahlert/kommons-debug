@@ -116,9 +116,8 @@ public fun Path.randomFile(base: String = randomString(4), extension: String = "
  */
 
 /**
- * Checks if this path is inside of one of the System's temporary directories.
- *
- * @throws IllegalArgumentException this path is not inside [Locations.Temp]
+ * Checks if this path is inside of one of the System's temporary directories,
+ * or throws an [IllegalArgumentException] otherwise.
  */
 public fun Path.requireTempSubPath(): Path =
     apply {

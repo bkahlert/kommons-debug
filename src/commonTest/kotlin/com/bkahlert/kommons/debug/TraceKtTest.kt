@@ -33,7 +33,7 @@ class TraceTest {
 
     @Test fun trace_with_inspect() = tests {
         buildString {
-            "subject".trace(highlight = false, includeCallSite = false, out = this::append) { length }
+            "subject".trace(highlight = false, includeCallSite = false, out = this::append) { it.length }
         } shouldBe """
             ⟨ "subject" ⟩ { 0x07 }
         """.trimIndent()
@@ -41,7 +41,7 @@ class TraceTest {
 
     @Test fun trace_with_caption_and_inspect() = tests {
         buildString {
-            "subject".trace("caption", highlight = false, includeCallSite = false, out = this::append) { length }
+            "subject".trace("caption", highlight = false, includeCallSite = false, out = this::append) { it.length }
         } shouldBe """
             caption ⟨ "subject" ⟩ { 0x07 }
         """.trimIndent()
@@ -50,7 +50,7 @@ class TraceTest {
     @Suppress("LongLine")
     @Test fun trace_with_highlighting() = tests {
         buildString {
-            "subject".trace("caption", highlight = true, includeCallSite = false, out = this::append) { length.toString() }
+            "subject".trace("caption", highlight = true, includeCallSite = false, out = this::append) { it.length.toString() }
         } shouldBe when (Platform.Current) {
             JS -> """
                 <span style="color:#01818F;font-weight:bold;">caption</span> <span style="color:#01818F;font-weight:bold;">⟨</span> <span style="color:#01E6FF;">"subject"</span> <span style="color:#01818F;font-weight:bold;">⟩</span> <span style="color:#01818F;font-weight:bold;">{</span> <span style="color:#01E6FF;">"7"</span> <span style="color:#01818F;font-weight:bold;">}</span>
@@ -63,7 +63,7 @@ class TraceTest {
 
     @Test fun trace_with_call_site() = tests {
         buildString {
-            "subject".trace(highlight = false, out = this::append) { length.toString() }
+            "subject".trace(highlight = false, out = this::append) { it.length.toString() }
         } should {
             @Suppress("RegExpRedundantEscape")
             when (Platform.Current) {
@@ -77,7 +77,7 @@ class TraceTest {
 
     @Test fun trace_with_custom_render() = tests {
         buildString {
-            "subject".trace("caption", highlight = false, includeCallSite = false, render = { ">>> $it <<<" }, out = this::append) { length.toString() }
+            "subject".trace("caption", highlight = false, includeCallSite = false, render = { ">>> $it <<<" }, out = this::append) { it.length.toString() }
         } shouldBe """
             caption ⟨ >>> subject <<< ⟩ { >>> 7 <<< }
         """.trimIndent()
@@ -175,14 +175,14 @@ class TraceTest {
                 highlight = false,
                 includeCallSite = false,
                 out = this::append
-            ) { length.toString() }
+            ) { it.length.toString() }
         } shouldBe buildString {
             "subject".trace(
                 highlight = false,
                 includeCallSite = false,
                 render = { it.render { typing = SimplyTyped; customToString = Ignore } },
                 out = this::append
-            ) { length.toString() }
+            ) { it.length.toString() }
         }
     }
 
