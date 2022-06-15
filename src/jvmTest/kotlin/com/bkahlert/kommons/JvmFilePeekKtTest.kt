@@ -1,9 +1,12 @@
 package com.bkahlert.kommons
 
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.paths.shouldExist
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldEndWith
 import org.junit.jupiter.api.Test
+import java.nio.file.Paths
 
 class JvmFilePeekKtTest {
 
@@ -15,8 +18,11 @@ class JvmFilePeekKtTest {
                 e.stackTrace.first()
             }
         ).shouldNotBeNull() should {
-            it.lineNumber shouldBe 13
-            it.sourceFileName shouldBe "/Users/bkahlert/Development/com.bkahlert/kommons-debug/src/jvmTest/kotlin/com/bkahlert/kommons/JvmFilePeekKtTest.kt"
+            it.lineNumber shouldBe 16
+            it.sourceFileName should { name ->
+                name shouldEndWith "src/jvmTest/kotlin/com/bkahlert/kommons/JvmFilePeekKtTest.kt"
+                Paths.get(name).shouldExist()
+            }
             it.line shouldBe "throw RuntimeException()"
             it.methodName shouldBe "get_caller_file_info"
         }

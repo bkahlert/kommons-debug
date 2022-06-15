@@ -10,9 +10,9 @@ import io.kotest.matchers.string.shouldMatch
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import java.io.IOException
 import java.net.URI
 import java.net.URL
-import java.nio.file.NoSuchFileException
 import java.nio.file.Path
 import kotlin.io.path.copyTo
 import kotlin.io.path.div
@@ -75,9 +75,9 @@ class ClassPathTest {
             it.readText() shouldBe standardLibraryClassPathClassText
             it.readBytes() shouldBe standardLibraryClassPathClassBytes
         }
-        shouldThrow<NoSuchFileException> { ClassPath("invalid.file") }
-        shouldThrow<NoSuchFileException> { ClassPath(URL("jar:file:/invalid.jar!/invalid.class")) }
-        shouldThrow<NoSuchFileException> { ClassPath(URI("jar:file:/invalid.jar!/invalid.class")) }
+        shouldThrow<IOException> { ClassPath("invalid.file") }
+        shouldThrow<IOException> { ClassPath(URL("jar:file:/invalid.jar!/invalid.class")) }
+        shouldThrow<IOException> { ClassPath(URI("jar:file:/invalid.jar!/invalid.class")) }
     }
 
     @Test fun manually_copy_class_path(@TempDir tempDir: Path) = tests {
@@ -113,13 +113,24 @@ class ClassPathTest {
             it.readBytes() shouldBe standardLibraryClassPathClassBytes
         }
     }
+
+    @Test fun kotlin_copy_class_path_to_directory2(@TempDir tempDir: Path) = tests {
+        for (i in 0..0) {
+            ClassPath(classPathTextFile).copyTo(tempDir.resolve(classPathTextFile + i)) should {
+                it.pathString shouldBe tempDir.resolve(classPathTextFile + i).pathString
+                it.readBytes() shouldBe classPathTextFileBytes
+            }
+
+            ClassPath(standardLibraryClassPathClass).copyTo(tempDir.resolve("Regex.class" + i)) should {
+                it.pathString shouldBe tempDir.resolve("Regex.class" + i).pathString
+                it.readBytes() shouldBe standardLibraryClassPathClassBytes
+            }
+        }
+    }
 }
 
 internal val classPathTextFile = "61C285F09D95930D0AE298B00AF09F918B0A.txt"
-internal val classPathTextFileBytes = ubyteArrayOf(
-    0x61u, 0xC2u, 0x85u, 0xF0u, 0x9Du, 0x95u, 0x93u, 0x0Du, 0x0Au,
-    0xE2u, 0x98u, 0xB0u, 0x0Au, 0xF0u, 0x9Fu, 0x91u, 0x8Bu, 0x0Au
-).toByteArray()
+internal val classPathTextFileBytes = checkNotNull(Thread.currentThread().contextClassLoader.getResource(classPathTextFile)).readBytes()
 internal val classPathTextFileText = classPathTextFileBytes.decodeToString()
 
 internal val standardLibraryClassPathClass = checkNotNull(Regex::class.java.getResource("Regex.class"))

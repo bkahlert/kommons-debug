@@ -1,5 +1,6 @@
 package com.bkahlert.kommons
 
+import java.io.File
 import java.net.URI
 import java.net.URL
 import java.nio.channels.SeekableByteChannel
@@ -23,6 +24,7 @@ import java.nio.file.attribute.FileAttribute
 import java.nio.file.attribute.FileAttributeView
 import java.nio.file.attribute.UserPrincipalLookupService
 import java.nio.file.spi.FileSystemProvider
+import kotlin.io.path.exists
 
 /**
  * Returns a [Path] that points to the specified [resource].
@@ -57,15 +59,17 @@ internal class DelegatingPath(
 
     fun <R> useActual(transform: (Path) -> R): R {
         return actualResource.usePath { actual ->
-            val actualSubPath = range?.let { actual.subpath(it.first, it.last + 1) } ?: actual
+            val actualParent: Path? = actual.parent
+            val fixedActual =
+                if (actualParent == null || actualParent.exists()) actual
+                else actual.resolve("/modules").resolve(actual.root.relativize(actualParent))
+            val actualSubPath = range?.let { fixedActual.subpath(it.first, it.last + 1) } ?: actual
             transform(actualSubPath)
         }
     }
 
     override fun toString(): String = useActual { actual -> actual.toString() }
     override fun compareTo(other: Path): Int = useActual { actual -> other.useActual { actual.compareTo(it) } }
-    override fun register(watcher: WatchService, events: Array<out Kind<*>>, vararg modifiers: Modifier?): WatchKey =
-        throw UnsupportedOperationException("Watching files is not supported.")
 
     override fun getFileSystem(): FileSystem = useActual { actual -> DelegatingFileSystem(actual.fileSystem) }
     override fun isAbsolute(): Boolean = useActual { actual -> actual.isAbsolute }
@@ -76,15 +80,29 @@ internal class DelegatingPath(
     override fun getName(index: Int): Path = DelegatingPath(actualResource, index until index + 1)
     override fun subpath(beginIndex: Int, endIndex: Int): Path = DelegatingPath(actualResource, beginIndex until endIndex)
     override fun startsWith(other: Path): Boolean = useActual { actual -> other.useActual { actual.startsWith(it) } }
+    override fun startsWith(other: String): Boolean = useActual { actual -> actual.startsWith(other) }
     override fun endsWith(other: Path): Boolean = useActual { actual -> other.useActual { actual.endsWith(it) } }
+    override fun endsWith(other: String): Boolean = useActual { actual -> actual.endsWith(other) }
     override fun normalize(): Path = useActual { actual -> DelegatingPath(actual.normalize()) }
     override fun resolve(other: Path): Path = useActual { actual -> DelegatingPath(other.useActual { actual.resolve(it) }) }
+    override fun resolve(other: String): Path = useActual { actual -> DelegatingPath(actual.resolve(other)) }
+    override fun resolveSibling(other: Path): Path = useActual { actual -> DelegatingPath(other.useActual { actual.resolveSibling(it) }) }
+    override fun resolveSibling(other: String): Path = useActual { actual -> DelegatingPath(actual.resolveSibling(other)) }
     override fun relativize(other: Path): Path =
         useActual { actual -> other.useActual { actual.relativize(it) } } // TODO return delegated with computed range
 
+    override fun toFile(): File = useActual { actual -> actual.toFile() }
     override fun toUri(): URI = useActual { actual -> actual.toUri() }
     override fun toAbsolutePath(): Path = useActual { actual -> DelegatingPath(actual.toAbsolutePath()) }
     override fun toRealPath(vararg options: LinkOption?): Path = useActual { actual -> DelegatingPath(actual.toRealPath(*options)) }
+
+    override fun iterator(): MutableIterator<Path> = useActual { actual -> actual.iterator() }
+
+    override fun register(watcher: WatchService, vararg events: Kind<*>): WatchKey =
+        useActual { actual -> actual.register(watcher, events) }
+
+    override fun register(watcher: WatchService, events: Array<out Kind<*>>, vararg modifiers: Modifier?): WatchKey =
+        useActual { actual -> actual.register(watcher, events, *modifiers) }
 }
 
 private fun <R> Path.useActual(block: (Path) -> R): R = when (this) {

@@ -11,6 +11,7 @@ import java.io.OutputStream
 import java.io.Writer
 import java.net.URI
 import java.net.URL
+import java.nio.channels.SeekableByteChannel
 import java.nio.charset.Charset
 import java.nio.file.CopyOption
 import java.nio.file.DirectoryNotEmptyException
@@ -399,7 +400,38 @@ public fun Path.deleteOnExit(recursively: Boolean = true): Path {
 
 
 /** Lock used to synchronize the creation of file systems by [usePath]. */
-private val usePathLock = ReentrantLock()
+private val usePathLock: ReentrantLock = ReentrantLock()
+private val openFileSystems: MutableMap<FileSystem, MutableList<SeekableByteChannel>> = mutableMapOf()
+private fun addOpenFileSystem(fileSystem: FileSystem, byteChannel: SeekableByteChannel) {
+    if (fileSystem == FileSystems.getDefault()) return
+    if (!byteChannel.isOpen) return
+    usePathLock.withLock {
+        openFileSystems.computeIfAbsent(fileSystem) { mutableListOf() }.add(byteChannel)
+        startOpenFileSystemsCloseJob()
+    }
+}
+
+private var openFileSystemsCloseJob: Thread? = null
+private fun startOpenFileSystemsCloseJob() {
+    usePathLock.withLock {
+        if (openFileSystemsCloseJob == null) {
+            openFileSystemsCloseJob = thread {
+                while (openFileSystems.isNotEmpty()) {
+                    usePathLock.withLock {
+                        openFileSystems.toList().forEach { (fileSystem, byteChannels) ->
+                            if (byteChannels.none { it.isOpen }) {
+                                fileSystem.close()
+                                openFileSystems.remove(fileSystem)
+                            }
+                        }
+                    }
+                    Thread.sleep(100)
+                }
+                openFileSystemsCloseJob = null
+            }
+        }
+    }
+}
 
 /**
  * Calls the specified [block] callback
@@ -414,19 +446,25 @@ private val usePathLock = ReentrantLock()
  * @see FileSystems.newFileSystem
  */
 public fun <R> URI.usePath(block: (Path) -> R): R =
-    usePathLock.withLock {
-        runCatching {
-            block(Paths.get(this))
-        }.recoverCatching { ex ->
-            when (ex) {
-                is FileSystemNotFoundException -> {
-                    val fileSystem = FileSystems.newFileSystem(this, emptyMap<String, Any>())
-                    fileSystem.use { block(it.provider().getPath(this)) }
+    usePathLock.withLock(runCatching {
+        block(Paths.get(this))
+    }.recoverCatching { ex ->
+        when (ex) {
+            is FileSystemNotFoundException -> {
+                val fileSystem = FileSystems.newFileSystem(this, emptyMap<String, Any>())
+                try {
+                    block(fileSystem.provider().getPath(this)).also {
+                        if (it is SeekableByteChannel) addOpenFileSystem(fileSystem, it)
+                        else fileSystem.close()
+                    }
+                } catch (e: Exception) {
+                    fileSystem.close()
+                    throw e
                 }
-                else -> throw ex
             }
-        }.getOrThrow()
-    }
+            else -> throw ex
+        }
+    }::getOrThrow)
 
 /**
  * Calls the specified [block] callback

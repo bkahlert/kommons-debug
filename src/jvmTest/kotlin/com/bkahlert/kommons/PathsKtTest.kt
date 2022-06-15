@@ -350,11 +350,11 @@ class PathsKtTest {
 
     @Test
     fun resolve_file(@TempDir tempDir: Path) = tests {
-        tempDir.resolveFile { Path.of("dir", "file") } shouldBe tempDir / "dir" / "file"
-        tempDir.resolveFile(Path.of("dir", "file")) shouldBe tempDir / "dir" / "file"
+        tempDir.resolveFile { Paths.get("dir", "file") } shouldBe tempDir / "dir" / "file"
+        tempDir.resolveFile(Paths.get("dir", "file")) shouldBe tempDir / "dir" / "file"
         tempDir.resolveFile("dir/file") shouldBe tempDir / "dir" / "file"
-        shouldThrow<IllegalStateException> { tempDir.resolveFile { Path.of("dir", "..") } }
-        shouldThrow<IllegalStateException> { tempDir.resolveFile(Path.of("dir", "..")) }
+        shouldThrow<IllegalStateException> { tempDir.resolveFile { Paths.get("dir", "..") } }
+        shouldThrow<IllegalStateException> { tempDir.resolveFile(Paths.get("dir", "..")) }
         shouldThrow<IllegalStateException> { tempDir.resolveFile("dir/..") }
     }
 

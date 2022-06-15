@@ -203,7 +203,7 @@ Map URIs and URLs to a Path with `usePath`, which also works for class path reso
 ```kotlin
 standardLibraryClassPath.usePath {
     it.pathString
-} // ����   2� kotlin/text/Regex  java/lang/Object ...
+} // [cryptic] kotlin/text/Regex [cryptic] java/lang/Object ...
 ```
 
 Find the class directory, the source directory or the source file itself of a class.
@@ -320,6 +320,21 @@ checkNotBlank("   ")    // throws IllegalStateException
 "   ".takeIfNotBlank()  // returns null
 "abc".takeUnlessEmpty() // returns "abc"
 "   ".takeUnlessBlank() // returns null
+```
+
+### Collections and Ranges
+
+Require or check emptiness of collections and arrays using `requireNotEmpty`
+and `checkNotEmpty`.
+
+Iterate any type of closed ranges using `asIterable`.
+
+#### Examples
+
+```kotlin
+(-4.2..42.0)
+  .asIterable { it + 9 }
+  .map { it.toInt() } // [-4, 4, 13, 22, 31, 40]
 ```
 
 ### Time Operations
