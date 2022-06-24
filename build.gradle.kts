@@ -42,6 +42,7 @@ kotlin {
                 }
             }
         }
+        nodejs()
     }
 
     sourceSets {

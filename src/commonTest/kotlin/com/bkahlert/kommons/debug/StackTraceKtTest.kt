@@ -12,6 +12,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldEndWith
 import io.kotest.matchers.string.shouldNotStartWith
 import io.kotest.matchers.string.shouldStartWith
 import kotlin.test.Test
@@ -31,10 +32,17 @@ class StackTraceTest {
     @Test fun get_first() = test {
         StackTrace.get().first() should {
             when (Platform.Current) {
-                JS -> {
+                JS.Browser -> {
                     it.receiver shouldBe "StackTraceTest"
                     it.function shouldStartWith "get_first"
                     it.file shouldContain "/commons.js"
+                    it.line shouldBeGreaterThan 0
+                    it.column.shouldNotBeNull().shouldBeGreaterThan(0)
+                }
+                JS.NodeJS -> {
+                    it.receiver shouldBe "StackTraceTest"
+                    it.function shouldStartWith "get_first"
+                    it.file shouldEndWith "/JsStackTrace.kt"
                     it.line shouldBeGreaterThan 0
                     it.column.shouldNotBeNull().shouldBeGreaterThan(0)
                 }

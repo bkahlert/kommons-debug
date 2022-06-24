@@ -225,7 +225,7 @@ class StringsKtTest {
 
     @Test fun as_string() = test {
         OrdinaryClass().asString() shouldBe when (Platform.Current) {
-            JS -> """
+            is JS -> """
                 OrdinaryClass {
                     baseProperty: "base-property",
                     openBaseProperty: 0x2a,
@@ -245,7 +245,7 @@ class StringsKtTest {
                 }
             """.trimIndent()
         }
-        if (Platform.Current != JS) {
+        if (Platform.Current !is JS) {
             ThrowingClass().asString() shouldBe """
             ThrowingClass {
                 throwingProperty: <error:java.lang.RuntimeException: error reading property>,
@@ -259,7 +259,7 @@ class StringsKtTest {
         """.trimIndent()
 
         OrdinaryClass().asString(exclude = listOf(OrdinaryClass::ordinaryProperty)) shouldBe when (Platform.Current) {
-            JS -> """
+            is JS -> """
                 OrdinaryClass {
                     baseProperty: "base-property",
                     openBaseProperty: 0x2a,

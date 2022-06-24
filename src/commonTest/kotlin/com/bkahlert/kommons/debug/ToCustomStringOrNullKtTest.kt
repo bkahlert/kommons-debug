@@ -20,12 +20,12 @@ class ToCustomStringOrNullTest {
 
     @Test fun test_lambda() = test {
         {}.toCustomStringOrNull() shouldBe when (Platform.Current) {
-            JS -> """
+            is JS -> """
                 function () {
                       return Unit_getInstance();
                     }
             """.trimIndent()
-            JVM -> """
+            is JVM -> """
                 () -> kotlin.Unit
             """.trimIndent()
         }

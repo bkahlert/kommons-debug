@@ -26,7 +26,7 @@ class PropertiesTest {
             put("baseProperty", "base-property")
             put("openBaseProperty", 42)
             put("protectedOpenBaseProperty", "protected-open-base-property")
-            if (Platform.Current == JS) put("privateBaseProperty", "private-base-property")
+            if (Platform.Current is JS) put("privateBaseProperty", "private-base-property")
             put("singletonProperty", "singleton-property")
             put("privateSingletonProperty", "private-singleton-property")
         }
@@ -39,8 +39,8 @@ class PropertiesTest {
             put("openBaseProperty", 42)
             put("protectedOpenBaseProperty", "protected-open-base-property")
             when (Platform.Current) {
-                JS -> put("privateBaseProperty", "private-base-property")
-                JVM -> put("size", 2)
+                is JS -> put("privateBaseProperty", "private-base-property")
+                is JVM -> put("size", 2)
             }
             put("singletonProperty", "singleton-property")
             put("privateSingletonProperty", "private-singleton-property")
@@ -55,8 +55,8 @@ class PropertiesTest {
             put("openBaseProperty", 42)
             put("protectedOpenBaseProperty", "protected-open-base-property")
             when (Platform.Current) {
-                JS -> put("privateBaseProperty", "private-base-property")
-                JVM -> {
+                is JS -> put("privateBaseProperty", "private-base-property")
+                is JVM -> {
                     put("size", 2)
                     put("keys", MapImplementingSingleton.keys)
                     put("values", MapImplementingSingleton.values)
@@ -80,7 +80,7 @@ class PropertiesTest {
             put("baseProperty", "base-property")
             put("openBaseProperty", 42)
             put("protectedOpenBaseProperty", "protected-open-base-property")
-            if (Platform.Current == JS) put("privateBaseProperty", "private-base-property")
+            if (Platform.Current is JS) put("privateBaseProperty", "private-base-property")
             put("ordinaryProperty", "ordinary-property")
             put("privateOrdinaryProperty", "private-ordinary-property")
         }
@@ -88,11 +88,11 @@ class PropertiesTest {
             put("baseProperty", "base-property")
             put("openBaseProperty", 37)
             put("protectedOpenBaseProperty", "overridden-protected-open-base-property")
-            if (Platform.Current == JS) put("privateBaseProperty", "private-base-property")
+            if (Platform.Current is JS) put("privateBaseProperty", "private-base-property")
             put("dataProperty", "data-property")
             put("privateDataProperty", "private-data-property")
         }
-        if (Platform.Current != JS) {
+        if (Platform.Current !is JS) {
             ThrowingClass().properties should {
                 it["throwingProperty"].shouldBeInstanceOf<PropertyAccessError>()
                 it["privateThrowingProperty"].shouldBeInstanceOf<PropertyAccessError>()

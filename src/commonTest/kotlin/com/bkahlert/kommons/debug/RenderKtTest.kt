@@ -2,6 +2,8 @@ package com.bkahlert.kommons.debug
 
 import com.bkahlert.kommons.Current
 import com.bkahlert.kommons.Platform
+import com.bkahlert.kommons.Platform.JS
+import com.bkahlert.kommons.Platform.JVM
 import com.bkahlert.kommons.debug.Compression.Always
 import com.bkahlert.kommons.debug.Compression.Never
 import com.bkahlert.kommons.debug.CustomToString.Ignore
@@ -537,12 +539,12 @@ class RenderTest {
 
     @Test fun render_function() = test {
         ({ }).render() shouldBe when (Platform.Current) {
-            Platform.JS -> """
+            is JS -> """
                 function () {
                       return Unit_getInstance();
                     }
             """.trimIndent()
-            Platform.JVM -> """
+            is JVM -> """
                 () -> kotlin.Unit
             """.trimIndent()
         }

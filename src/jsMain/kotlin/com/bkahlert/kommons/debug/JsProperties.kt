@@ -1,11 +1,14 @@
 package com.bkahlert.kommons.debug
 
-import kotlinx.browser.document
-import kotlinx.browser.window
 import kotlin.js.Json
 import kotlin.js.json
 import kotlin.reflect.KProperty0
 import kotlin.reflect.KProperty1
+
+private val windowOrNull by lazy { runCatching { kotlinx.browser.window }.getOrNull() }
+private val documentOrNull by lazy { runCatching { kotlinx.browser.document }.getOrNull() }
+
+private val ignoredValues = listOfNotNull(windowOrNull, documentOrNull).toTypedArray()
 
 private fun sanitizeKey(key: String): String =
     key.replace("(?<key>.+)_\\d+".toRegex()) { it.groupValues.drop(1).first() }
@@ -59,11 +62,10 @@ public fun Any?.stringify(
     predicate: (Any?, String, Any?) -> Boolean = run {
         val ignoredKeyPrefixes = arrayOf("\$", "_", "coroutine", "jQuery")
         val ignoredKeyInfix = arrayOf("\$")
-        val ignoredValues = arrayOf(window, document)
         ({ self, key, value ->
             ignoredKeyPrefixes.none { key.startsWith(it) } &&
                 ignoredKeyInfix.none { key.contains(it) } &&
-                ignoredValues.none<Any> { value === it } &&
+                ignoredValues.none { value === it } &&
                 value !== self
         })
     }

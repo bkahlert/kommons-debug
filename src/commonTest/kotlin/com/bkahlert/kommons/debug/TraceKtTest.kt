@@ -52,10 +52,10 @@ class TraceTest {
         buildString {
             "subject".trace("caption", highlight = true, includeCallSite = false, out = this::append) { it.length.toString() }
         } shouldBe when (Platform.Current) {
-            JS -> """
+            is JS -> """
                 <span style="color:#01818F;font-weight:bold;">caption</span> <span style="color:#01818F;font-weight:bold;">⟨</span> <span style="color:#01E6FF;">"subject"</span> <span style="color:#01818F;font-weight:bold;">⟩</span> <span style="color:#01818F;font-weight:bold;">{</span> <span style="color:#01E6FF;">"7"</span> <span style="color:#01818F;font-weight:bold;">}</span>
             """.trimIndent()
-            JVM -> """
+            is JVM -> """
                 [1;36mcaption[0m [1;36m⟨[0m [96m"subject"[0m [1;36m⟩[0m [1;36m{[0m [96m"7"[0m [1;36m}[0m
             """.trimIndent()
         }
@@ -67,7 +67,12 @@ class TraceTest {
         } should {
             @Suppress("RegExpRedundantEscape")
             when (Platform.Current) {
-                JS -> it shouldMatch ".ͭ \\(.*/commons\\.js.*\\) ⟨ \"subject\" ⟩ \\{ \"7\" \\}".toRegex()
+                JS.Browser -> it shouldMatch """
+                    .ͭ \(.*/commons\.js.*\) ⟨ "subject" ⟩ \{ "7" \}
+                """.trimIndent().toRegex()
+                JS.NodeJS -> it shouldMatch """
+                    .ͭ \(.*TraceKtTest\.kt:66\) ⟨ "subject" ⟩ \{ "7" \}
+                """.trimIndent().toRegex()
                 JVM -> it shouldBe """
                     .ͭ (TraceKtTest.kt:66) ⟨ "subject" ⟩ { "7" }
                 """.trimIndent()
@@ -192,9 +197,14 @@ class TraceTest {
         } should {
             @Suppress("RegExpRedundantEscape")
             when (Platform.Current) {
-                JS -> it shouldMatch ".ͭ \\(.*/commons\\.js.*\\) ⟨ !String \"subject\" ⟩".toRegex()
+                JS.Browser -> it shouldMatch """
+                    .ͭ \(.*/commons\.js.*\) ⟨ !String "subject" ⟩
+                """.trimIndent().toRegex()
+                JS.NodeJS -> it shouldMatch """
+                    .ͭ \(.*/TraceKtTest\.kt:196\) ⟨ !String "subject" ⟩
+                """.trimIndent().toRegex()
                 JVM -> it shouldBe """
-                    .ͭ (TraceKtTest.kt:191) ⟨ !String "subject" ⟩
+                    .ͭ (TraceKtTest.kt:196) ⟨ !String "subject" ⟩
                 """.trimIndent()
             }
         }

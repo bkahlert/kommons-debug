@@ -20,7 +20,7 @@ class RenderTypeTest {
 
     @Test fun render_primitive_types() = test {
         when (Platform.Current) {
-            JS -> {
+            is JS -> {
                 PrimitiveTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
                     "String",
                     "Boolean", "Char", "Double", "Double",
@@ -44,7 +44,7 @@ class RenderTypeTest {
                     "Array",
                 )
             }
-            JVM -> {
+            is JVM -> {
                 PrimitiveTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
                     "String",
                     "Boolean", "Char", "Float", "Double",
@@ -73,7 +73,7 @@ class RenderTypeTest {
 
     @Test fun render_collections() = test {
         when (Platform.Current) {
-            JS -> {
+            is JS -> {
                 CollectionTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
                     "Iterable", "EmptySet", "List", "List"
                 )
@@ -81,7 +81,7 @@ class RenderTypeTest {
                     "<object>", "EmptySet", "ArrayList", "ArrayList"
                 )
             }
-            JVM -> {
+            is JVM -> {
                 CollectionTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
                     "Iterable", "Set", "List", "List"
                 )
@@ -94,7 +94,7 @@ class RenderTypeTest {
 
     @Test fun render_classes() = test {
         when (Platform.Current) {
-            JS -> {
+            is JS -> {
                 ClassTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
                     "Singleton",
                     "<object>",
@@ -120,7 +120,7 @@ class RenderTypeTest {
                     "KClass"
                 )
             }
-            JVM -> {
+            is JVM -> {
                 ClassTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
                     "Singleton",
                     "<object>",
@@ -151,7 +151,7 @@ class RenderTypeTest {
 
     @Test fun test_functions() = test {
         when (Platform.Current) {
-            JS -> {
+            is JS -> {
                 FunctionTypes.allValues.filterIsInstance<Function<*>>()
                     .map { it.renderFunctionType() }.shouldForAll { it shouldBe "Function" }
                 ({}).renderFunctionType() shouldBe "Function"
@@ -159,7 +159,7 @@ class RenderTypeTest {
                     .map { it.renderFunctionType(simplified = false) }.shouldForAll { it shouldBe "Function" }
                 ({}).renderFunctionType(simplified = false) shouldBe "Function"
             }
-            JVM -> {
+            is JVM -> {
                 FunctionTypes.allValues.filterIsInstance<Function<*>>()
                     .map { it.renderFunctionType() } shouldContainExactly listOf(
                     "work0() -> Unit",
