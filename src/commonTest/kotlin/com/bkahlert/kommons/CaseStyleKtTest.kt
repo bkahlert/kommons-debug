@@ -1,5 +1,7 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testEnum
 import io.kotest.assertions.asClue
 import io.kotest.assertions.withClue
 import io.kotest.inspectors.forAll
@@ -12,81 +14,81 @@ import kotlin.test.Test
 class CaseStyleKtTest {
 
     @Test
-    fun camel_case_matches() = tests {
+    fun camel_case_matches() = test {
         testCaseStyleMatches(CaseStyle.camelCase)
     }
 
     @Test
-    fun camel_case_split() = tests {
+    fun camel_case_split() = test {
         testCaseStyleSplit(CaseStyle.camelCase)
     }
 
     @Test
-    fun camel_case_join() = tests {
+    fun camel_case_join() = test {
         testCaseStyleJoin(CaseStyle.camelCase)
     }
 
 
     @Test
-    fun pascal_case_matches() = tests {
+    fun pascal_case_matches() = test {
         testCaseStyleMatches(CaseStyle.PascalCase, "FOO")
     }
 
     @Test
-    fun pascal_case_split() = tests {
+    fun pascal_case_split() = test {
         testCaseStyleSplit(CaseStyle.PascalCase)
     }
 
     @Test
-    fun pascal_case_join() = tests {
+    fun pascal_case_join() = test {
         testCaseStyleJoin(CaseStyle.PascalCase)
     }
 
 
     @Test
-    fun screaming_snake_case_matches() = tests {
+    fun screaming_snake_case_matches() = test {
         testCaseStyleMatches(CaseStyle.SCREAMING_SNAKE_CASE, "BAZ")
     }
 
     @Test
-    fun screaming_snake_case_split() = tests {
+    fun screaming_snake_case_split() = test {
         testCaseStyleSplit(CaseStyle.SCREAMING_SNAKE_CASE)
     }
 
     @Test
-    fun screaming_snake_case_join() = tests {
+    fun screaming_snake_case_join() = test {
         testCaseStyleJoin(CaseStyle.SCREAMING_SNAKE_CASE)
     }
 
 
     @Test
-    fun kebab_case_matches() = tests {
+    fun kebab_case_matches() = test {
         testCaseStyleMatches(CaseStyle.`kebab-case`)
     }
 
     @Test
-    fun kebab_case_split() = tests {
+    fun kebab_case_split() = test {
         testCaseStyleSplit(CaseStyle.`kebab-case`)
     }
 
     @Test
-    fun kebab_case_join() = tests {
+    fun kebab_case_join() = test {
         testCaseStyleJoin(CaseStyle.`kebab-case`)
     }
 
 
     @Test
-    fun title_case_matches() = tests {
+    fun title_case_matches() = test {
         testCaseStyleMatches(CaseStyle.`Title Case`, "BFoo")
     }
 
     @Test
-    fun title_case_split() = tests {
+    fun title_case_split() = test {
         testCaseStyleSplit(CaseStyle.`Title Case`)
     }
 
     @Test
-    fun title_case_join() = tests {
+    fun title_case_join() = test {
         testCaseStyleJoin(CaseStyle.`Title Case`)
     }
 
@@ -137,39 +139,37 @@ class CaseStyleKtTest {
 
 
     @Test
-    fun find_by_matching() = tests {
-        CaseStyle.values().forAll { caseStyle ->
-            caseJoinedWords.getValue(caseStyle).forAll { CaseStyle.findByMatching(it) shouldContain caseStyle }
-        }
+    fun find_by_matching() = testEnum<CaseStyle> { caseStyle ->
+        caseJoinedWords.getValue(caseStyle).forAll { CaseStyle.findByMatching(it) shouldContain caseStyle }
     }
 
 
     @Test
-    fun to_camel_cased_string() = tests {
+    fun to_camel_cased_string() = test {
         testConversion(CaseStyle.camelCase, "FOO") { it.toCamelCasedString() }
         testConversion(CaseStyle.camelCase, "FOO") { it.toCasedString(CaseStyle.camelCase) }
     }
 
     @Test
-    fun to_pascal_cased_string() = tests {
+    fun to_pascal_cased_string() = test {
         testConversion(CaseStyle.PascalCase, "FOO") { it.toPascalCasedString() }
         testConversion(CaseStyle.PascalCase, "FOO") { it.toCasedString(CaseStyle.PascalCase) }
     }
 
     @Test
-    fun to_screaming_snake_cased_string() = tests {
+    fun to_screaming_snake_cased_string() = test {
         testConversion(CaseStyle.SCREAMING_SNAKE_CASE, "FOO") { it.toScreamingSnakeCasedString() }
         testConversion(CaseStyle.SCREAMING_SNAKE_CASE, "FOO") { it.toCasedString(CaseStyle.SCREAMING_SNAKE_CASE) }
     }
 
     @Test
-    fun to_kebab_cased_string() = tests {
+    fun to_kebab_cased_string() = test {
         testConversion(CaseStyle.`kebab-case`, "FOO") { it.toKebabCasedString() }
         testConversion(CaseStyle.`kebab-case`, "FOO") { it.toCasedString(CaseStyle.`kebab-case`) }
     }
 
     @Test
-    fun to_title_cased_string() = tests {
+    fun to_title_cased_string() = test {
         testConversion(CaseStyle.`Title Case`, "FOO") { it.toTitleCasedString() }
         testConversion(CaseStyle.`Title Case`, "FOO") { it.toCasedString(CaseStyle.`Title Case`) }
     }
@@ -192,7 +192,7 @@ class CaseStyleKtTest {
     }
 
     @Test
-    fun cased_class_name() = tests {
+    fun cased_class_name() = test {
         TestEnum::class.simpleCamelCasedName shouldBe "testEnum"
         TestEnum::class.simplePascalCasedName shouldBe "TestEnum"
         TestEnum::class.simpleScreamingSnakeCasedName shouldBe "TEST_ENUM"
@@ -204,7 +204,7 @@ class CaseStyleKtTest {
      * Tests if [Enum.getKebabCaseName] returns an actual kebab-case name.
      */
     @Test
-    fun cased_enum_name() = tests {
+    fun cased_enum_name() = test {
         Enum<*>::camelCasedName.asClue { prop -> TestEnum.values().forAll { prop.get(it) shouldBe "enumConstant" } }
         Enum<*>::pascalCasedName.asClue { prop -> TestEnum.values().forAll { prop.get(it) shouldBe "EnumConstant" } }
         Enum<*>::screamingSnakeCasedName.asClue { prop -> TestEnum.values().forAll { prop.get(it) shouldBe "ENUM_CONSTANT" } }

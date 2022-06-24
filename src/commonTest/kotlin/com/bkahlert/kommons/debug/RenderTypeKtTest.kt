@@ -4,7 +4,7 @@ import com.bkahlert.kommons.Current
 import com.bkahlert.kommons.Platform
 import com.bkahlert.kommons.Platform.JS
 import com.bkahlert.kommons.Platform.JVM
-import com.bkahlert.kommons.tests
+import com.bkahlert.kommons.test.test
 import io.kotest.inspectors.shouldForAll
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
@@ -18,7 +18,7 @@ import kotlin.test.Test
 
 class RenderTypeTest {
 
-    @Test fun render_primitive_types() = tests {
+    @Test fun render_primitive_types() = test {
         when (Platform.Current) {
             JS -> {
                 PrimitiveTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
@@ -71,7 +71,7 @@ class RenderTypeTest {
         }
     }
 
-    @Test fun render_collections() = tests {
+    @Test fun render_collections() = test {
         when (Platform.Current) {
             JS -> {
                 CollectionTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
@@ -92,7 +92,7 @@ class RenderTypeTest {
         }
     }
 
-    @Test fun render_classes() = tests {
+    @Test fun render_classes() = test {
         when (Platform.Current) {
             JS -> {
                 ClassTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
@@ -149,7 +149,7 @@ class RenderTypeTest {
         }
     }
 
-    @Test fun test_functions() = tests {
+    @Test fun test_functions() = test {
         when (Platform.Current) {
             JS -> {
                 FunctionTypes.allValues.filterIsInstance<Function<*>>()

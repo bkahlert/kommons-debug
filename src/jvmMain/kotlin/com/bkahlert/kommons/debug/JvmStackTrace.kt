@@ -30,12 +30,6 @@ public actual fun StackTrace.Companion.demangleFunction(function: String): Strin
 
 
 /** The [Class] containing the execution point represented by this element. */
-public val java.lang.StackTraceElement.`class`: Class<*> get() = Class.forName(className)
-
-/** The [KClass] containing the execution point represented by this element. */
-public val java.lang.StackTraceElement.kClass: KClass<*> get() = `class`.kotlin
-
-/** The [Class] containing the execution point represented by this element. */
 public val StackTraceElement.`class`: Class<*> get() = Class.forName(receiver)
 
 /** The [KClass] containing the execution point represented by this element. */

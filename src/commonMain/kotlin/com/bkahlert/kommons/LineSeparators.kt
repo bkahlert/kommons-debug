@@ -12,14 +12,14 @@ import com.bkahlert.kommons.Unicode as UnicodeConstants
 public object LineSeparators : AbstractList<String>() {
 
     /**
-     * Line break as used on Windows systems.
+     * Line separator as used on Windows systems.
      *
      * Representations: `\r\n`,  `␍␊`, `⏎`
      */
     public const val CRLF: String = UnicodeConstants.CARRIAGE_RETURN.toString() + UnicodeConstants.LINE_FEED.toString()
 
     /**
-     * Line break as used on Unix systems and modern Mac systems.
+     * Line separator as used on Unix systems and modern Mac systems.
      *
      * Representations: `\n`, `␊`, `⏎`
      *
@@ -27,7 +27,7 @@ public object LineSeparators : AbstractList<String>() {
     public const val LF: String = UnicodeConstants.LINE_FEED.toString()
 
     /**
-     * Line break as used on old Mac systems.
+     * Line separator as used on old Mac systems.
      *
      * Representations: `\r`, `␍`, `⏎`
      */
@@ -67,8 +67,12 @@ public object LineSeparators : AbstractList<String>() {
     override val size: Int get() = Common.size
     override fun get(index: Int): String = Common[index]
 
-    /**
-     * All [Unicode® Technical Standard #18—Line Boundaries](https://www.unicode.org/reports/tr18/#RL1.6).
-     */
+    /** All [Unicode® Technical Standard #18—Line Boundaries](https://www.unicode.org/reports/tr18/#RL1.6). */
     public val Unicode: Array<String> = arrayOf(CRLF, LF, CR, NEL, PS, LS)
+
+    /**
+     * All [Unicode® Technical Standard #18—Line Boundaries](https://www.unicode.org/reports/tr18/#RL1.6)
+     * that are not [Common].
+     */
+    public val Uncommon: Array<String> = Unicode.subtract(Common.toSet()).toTypedArray()
 }

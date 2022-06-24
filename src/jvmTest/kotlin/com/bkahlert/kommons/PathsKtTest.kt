@@ -1,6 +1,10 @@
 package com.bkahlert.kommons
 
 import com.bkahlert.kommons.DeleteOnExecTestHelper.Variant
+import com.bkahlert.kommons.test.directoryWithTwoFiles
+import com.bkahlert.kommons.test.singleFile
+import com.bkahlert.kommons.test.tempJarFileSystem
+import com.bkahlert.kommons.test.test
 import io.kotest.assertions.asClue
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -25,8 +29,6 @@ import java.net.URI
 import java.net.URL
 import java.nio.file.DirectoryNotEmptyException
 import java.nio.file.FileAlreadyExistsException
-import java.nio.file.FileSystem
-import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.LinkOption.NOFOLLOW_LINKS
 import java.nio.file.NoSuchFileException
@@ -36,16 +38,13 @@ import java.nio.file.Paths
 import java.nio.file.ProviderNotFoundException
 import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
 import java.nio.file.attribute.FileTime
-import java.util.jar.JarOutputStream
 import kotlin.io.path.appendText
-import kotlin.io.path.createDirectories
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createFile
 import kotlin.io.path.div
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.outputStream
 import kotlin.io.path.pathString
 import kotlin.io.path.readBytes
 import kotlin.io.path.readText
@@ -57,31 +56,31 @@ import kotlin.time.Duration.Companion.seconds
 
 class PathsKtTest {
 
-    @Test fun is_directory_normalized(@TempDir tempDir: Path) = tests {
+    @Test fun is_directory_normalized(@TempDir tempDir: Path) = test {
         tempDir.isDirectoryNormalized() shouldBe true
         (tempDir / "foo" / "..").isDirectoryNormalized() shouldBe true
         (tempDir / "foo").isDirectoryNormalized() shouldBe false
     }
 
-    @Test fun require_directory_normalized(@TempDir tempDir: Path) = tests {
+    @Test fun require_directory_normalized(@TempDir tempDir: Path) = test {
         tempDir should { it.requireDirectoryNormalized() shouldBe it }
         tempDir / "foo" / ".." should { it.requireDirectoryNormalized() shouldBe it }
         shouldThrow<IllegalArgumentException> { (tempDir / "foo").requireDirectoryNormalized() }
     }
 
-    @Test fun check_directory_normalized(@TempDir tempDir: Path) = tests {
+    @Test fun check_directory_normalized(@TempDir tempDir: Path) = test {
         tempDir should { it.checkDirectoryNormalized() shouldBe it }
         tempDir / "foo" / ".." should { it.checkDirectoryNormalized() shouldBe it }
         shouldThrow<IllegalStateException> { (tempDir / "foo").checkDirectoryNormalized() }
     }
 
-    @Test fun require_no_directory_normalized(@TempDir tempDir: Path) = tests {
+    @Test fun require_no_directory_normalized(@TempDir tempDir: Path) = test {
         shouldThrow<IllegalArgumentException> { tempDir.requireNoDirectoryNormalized() }
         shouldThrow<IllegalArgumentException> { (tempDir / "foo" / "..").requireNoDirectoryNormalized() }
         tempDir / "foo" should { it.requireNoDirectoryNormalized() shouldBe it }
     }
 
-    @Test fun check_no_directory_normalized(@TempDir tempDir: Path) = tests {
+    @Test fun check_no_directory_normalized(@TempDir tempDir: Path) = test {
         shouldThrow<IllegalStateException> { tempDir.checkNoDirectoryNormalized() }
         shouldThrow<IllegalStateException> { (tempDir / "foo" / "..").checkNoDirectoryNormalized() }
         tempDir / "foo" should { it.checkNoDirectoryNormalized() shouldBe it }
@@ -91,37 +90,37 @@ class PathsKtTest {
     inner class IsSubPathOf {
 
         @Test
-        fun `should return true if child`(@TempDir tempDir: Path) = tests {
+        fun `should return true if child`(@TempDir tempDir: Path) = test {
             (tempDir / "child").isInside(tempDir) shouldBe true
             (tempDir / "child").isSubPathOf(tempDir) shouldBe true
         }
 
         @Test
-        fun `should return true if descendent`(@TempDir tempDir: Path) = tests {
+        fun `should return true if descendent`(@TempDir tempDir: Path) = test {
             (tempDir / "child1" / "child2").isInside(tempDir) shouldBe true
             (tempDir / "child1" / "child2").isSubPathOf(tempDir) shouldBe true
         }
 
         @Test
-        fun `should return true if path is obscure`(@TempDir tempDir: Path) = tests {
+        fun `should return true if path is obscure`(@TempDir tempDir: Path) = test {
             (tempDir / "child1" / ".." / "child2").isInside(tempDir) shouldBe true
             (tempDir / "child1" / ".." / "child2").isSubPathOf(tempDir) shouldBe true
         }
 
         @Test
-        fun `should return true if same`(@TempDir tempDir: Path) = tests {
+        fun `should return true if same`(@TempDir tempDir: Path) = test {
             tempDir.isInside(tempDir) shouldBe true
             tempDir.isSubPathOf(tempDir) shouldBe true
         }
 
         @Test
-        fun `should return false if not inside`(@TempDir tempDir: Path) = tests {
+        fun `should return false if not inside`(@TempDir tempDir: Path) = test {
             tempDir.isInside(tempDir / "child") shouldBe false
             tempDir.isSubPathOf(tempDir / "child") shouldBe false
         }
     }
 
-    @Test fun create_parent_directories(@TempDir tempDir: Path) = tests {
+    @Test fun create_parent_directories(@TempDir tempDir: Path) = test {
         val file = tempDir.resolve("some/dir/some/file")
         file.createParentDirectories().parent should {
             it.shouldExist()
@@ -131,7 +130,7 @@ class PathsKtTest {
     }
 
     @Test
-    fun age(@TempDir tempDir: Path) = tests {
+    fun age(@TempDir tempDir: Path) = test {
         with(tempDir.resolve("existing").createFile().apply { lastModified -= 1.days }) {
             age should {
                 it shouldBeGreaterThanOrEqualTo (1.days - 5.seconds)
@@ -153,7 +152,7 @@ class PathsKtTest {
     inner class CreatedKtTest {
 
         @Test
-        fun `should read created`(@TempDir tempDir: Path) = tests {
+        fun `should read created`(@TempDir tempDir: Path) = test {
             tempDir.randomFile().created.toInstant() should {
                 it shouldBeLessThan (Now + 1.minutes)
                 it shouldBeGreaterThan (Now - 1.minutes)
@@ -161,7 +160,7 @@ class PathsKtTest {
         }
 
         @Test
-        fun `should write created`(@TempDir tempDir: Path) = tests {
+        fun `should write created`(@TempDir tempDir: Path) = test {
             tempDir.randomFile().apply {
                 created = (Now - 20.minutes).toFileTime()
             }.created should {
@@ -175,7 +174,7 @@ class PathsKtTest {
     inner class LastAccessedKtTest {
 
         @Test
-        fun `should read last accessed`(@TempDir tempDir: Path) = tests {
+        fun `should read last accessed`(@TempDir tempDir: Path) = test {
             tempDir.randomFile().lastAccessed.toInstant() should {
                 it shouldBeLessThan (Now + 1.minutes)
                 it shouldBeGreaterThan (Now - 1.minutes)
@@ -183,7 +182,7 @@ class PathsKtTest {
         }
 
         @Test
-        fun `should write last accessed`(@TempDir tempDir: Path) = tests {
+        fun `should write last accessed`(@TempDir tempDir: Path) = test {
             tempDir.randomFile().apply {
                 lastAccessed = FileTime.from(Now - 20.minutes)
             }.lastAccessed.toInstant() should {
@@ -197,7 +196,7 @@ class PathsKtTest {
     inner class LastModifiedKtTest {
 
         @Test
-        fun `should read last modified`(@TempDir tempDir: Path) = tests {
+        fun `should read last modified`(@TempDir tempDir: Path) = test {
             tempDir.randomFile().lastModified.toInstant() should {
                 it shouldBeLessThan (Now + 1.minutes)
                 it shouldBeGreaterThan (Now - 1.minutes)
@@ -205,7 +204,7 @@ class PathsKtTest {
         }
 
         @Test
-        fun `should write last modified`(@TempDir tempDir: Path) = tests {
+        fun `should write last modified`(@TempDir tempDir: Path) = test {
             tempDir.randomFile().apply {
                 lastModified = FileTime.from(Now - 20.minutes)
             }.lastModified.toInstant() should {
@@ -224,7 +223,7 @@ class PathsKtTest {
         private val bytes = byteArrayOf(Byte.MIN_VALUE, -1, 0, 1, Byte.MAX_VALUE)
 
         @Test
-        fun `should compute hash`(@TempDir tempDir: Path) = tests {
+        fun `should compute hash`(@TempDir tempDir: Path) = test {
             val file = (tempDir / "md5").apply { writeBytes(bytes) }
             file.computeHash(MessageDigestProvider.MD5) shouldBe byteArrayOf(
                 0x0A, 0x12, 0xF1, 0xE7, 0xD3, 0x46, 0xDE, 0x6D,
@@ -258,7 +257,7 @@ class PathsKtTest {
 
         @Suppress("SpellCheckingInspection")
         @Test
-        fun `should compute checksum`(@TempDir tempDir: Path) = tests {
+        fun `should compute checksum`(@TempDir tempDir: Path) = test {
             val file = (tempDir / "md5").apply { writeBytes(bytes) }
             file.computeChecksum(MessageDigestProvider.MD5) shouldBe "0a12f1e7d346de6d51e7788fe87eccd3"
             file.computeChecksum(MessageDigestProvider.`SHA-1`) shouldBe "445d11bdf8713f3d7fa1335b141a7798272cf781"
@@ -349,7 +348,7 @@ class PathsKtTest {
     }
 
     @Test
-    fun resolve_file(@TempDir tempDir: Path) = tests {
+    fun resolve_file(@TempDir tempDir: Path) = test {
         tempDir.resolveFile { Paths.get("dir", "file") } shouldBe tempDir / "dir" / "file"
         tempDir.resolveFile(Paths.get("dir", "file")) shouldBe tempDir / "dir" / "file"
         tempDir.resolveFile("dir/file") shouldBe tempDir / "dir" / "file"
@@ -359,7 +358,7 @@ class PathsKtTest {
     }
 
     @Test
-    fun list_directory_entries_recursively(@TempDir tempDir: Path) = tests {
+    fun list_directory_entries_recursively(@TempDir tempDir: Path) = test {
         val dir = tempDir.directoryWithTwoFiles()
 
         dir.listDirectoryEntriesRecursively()
@@ -382,7 +381,7 @@ class PathsKtTest {
     inner class ListDirectoryEntriesRecursivelyOperation {
 
         @Test
-        fun `should delete directory contents`(@TempDir tempDir: Path) = tests {
+        fun `should delete directory contents`(@TempDir tempDir: Path) = test {
             val dir = tempDir.resolve("dir")
             dir.directoryWithTwoFiles()
 
@@ -391,7 +390,7 @@ class PathsKtTest {
         }
 
         @Test
-        fun `should delete filtered directory contents`(@TempDir tempDir: Path) = tests {
+        fun `should delete filtered directory contents`(@TempDir tempDir: Path) = test {
             val dir = tempDir.resolve("dir")
             val exception = dir.directoryWithTwoFiles().listDirectoryEntriesRecursively().first()
 
@@ -400,14 +399,14 @@ class PathsKtTest {
         }
 
         @Test
-        fun `should throw on non-directory`(@TempDir tempDir: Path) = tests {
+        fun `should throw on non-directory`(@TempDir tempDir: Path) = test {
             val file = tempDir.resolve("file").createFile()
             shouldThrow<NotDirectoryException> { file.deleteDirectoryEntriesRecursively() }
         }
     }
 
     @Test
-    fun use_directory_entries_recursively(@TempDir tempDir: Path) = tests {
+    fun use_directory_entries_recursively(@TempDir tempDir: Path) = test {
         val dir = tempDir.directoryWithTwoFiles()
 
         dir.useDirectoryEntriesRecursively { seq -> seq.map { it.fileName.pathString }.sorted().joinToString() }
@@ -420,7 +419,7 @@ class PathsKtTest {
     }
 
     @Test
-    fun for_each_directory_entries_recursively(@TempDir tempDir: Path) = tests {
+    fun for_each_directory_entries_recursively(@TempDir tempDir: Path) = test {
         val dir = tempDir.directoryWithTwoFiles()
 
         buildList { dir.forEachDirectoryEntryRecursively { add(it) } }
@@ -439,7 +438,7 @@ class PathsKtTest {
         shouldThrow<NotDirectoryException> { tempDir.randomFile().forEachDirectoryEntryRecursively { } }
     }
 
-    @Test fun copy_to_directory(@TempDir tempDir: Path) = tests {
+    @Test fun copy_to_directory(@TempDir tempDir: Path) = test {
         val file = tempDir.singleFile("file")
         val dir = tempDir.resolve("dir")
 
@@ -466,27 +465,27 @@ class PathsKtTest {
     inner class Delete {
 
         @Test
-        fun `should delete file`(@TempDir tempDir: Path) = tests {
+        fun `should delete file`(@TempDir tempDir: Path) = test {
             val file = tempDir.singleFile()
             file.delete().shouldNotExist()
             tempDir.shouldBeEmptyDirectory()
         }
 
         @Test
-        fun `should delete empty directory`(@TempDir tempDir: Path) = tests {
+        fun `should delete empty directory`(@TempDir tempDir: Path) = test {
             val dir = tempDir.resolve("dir").createDirectory()
             dir.delete().shouldNotExist()
             tempDir.shouldBeEmptyDirectory()
         }
 
         @Test
-        fun `should throw on non-empty directory`(@TempDir tempDir: Path) = tests {
+        fun `should throw on non-empty directory`(@TempDir tempDir: Path) = test {
             val dir = tempDir.resolve("dir").createDirectory().apply { singleFile() }
             shouldThrow<DirectoryNotEmptyException> { dir.delete() }
         }
 
         @Test
-        fun `should delete non-existing file`(@TempDir tempDir: Path) = tests {
+        fun `should delete non-existing file`(@TempDir tempDir: Path) = test {
             val file = tempDir.resolve("file")
             file.delete().asClue { it.exists() shouldBe false }
             tempDir.shouldBeEmptyDirectory()
@@ -496,7 +495,7 @@ class PathsKtTest {
         inner class WithNoFollowLinks {
 
             @Test
-            fun `should delete symbolic link itself`(@TempDir tempDir: Path) = tests {
+            fun `should delete symbolic link itself`(@TempDir tempDir: Path) = test {
                 val symbolicLink = tempDir.symbolicLink()
                 symbolicLink.delete()
 
@@ -509,7 +508,7 @@ class PathsKtTest {
         inner class WithoutNoFollowLinks {
 
             @Test
-            fun `should not delete symbolic link itself`(@TempDir tempDir: Path) = tests {
+            fun `should not delete symbolic link itself`(@TempDir tempDir: Path) = test {
                 val symbolicLink = tempDir.symbolicLink()
 
                 symbolicLink.shouldBeSymbolicLink()
@@ -522,31 +521,31 @@ class PathsKtTest {
     inner class DeleteRecursively {
 
         @Test
-        fun `should delete file`(@TempDir tempDir: Path) = tests {
+        fun `should delete file`(@TempDir tempDir: Path) = test {
             tempDir.singleFile().deleteRecursively().shouldNotExist()
             tempDir.shouldBeEmptyDirectory()
         }
 
         @Test
-        fun `should delete empty directory`(@TempDir tempDir: Path) = tests {
+        fun `should delete empty directory`(@TempDir tempDir: Path) = test {
             tempDir.resolve("dir").createDirectory().deleteRecursively().shouldNotExist()
             tempDir.shouldBeEmptyDirectory()
         }
 
         @Test
-        fun `should delete non-empty directory`(@TempDir tempDir: Path) = tests {
+        fun `should delete non-empty directory`(@TempDir tempDir: Path) = test {
             tempDir.resolve("dir").createDirectory().apply { singleFile() }.deleteRecursively().shouldNotExist()
             tempDir.shouldBeEmptyDirectory()
         }
 
         @Test
-        fun `should delete non-existing file`(@TempDir tempDir: Path) = tests {
+        fun `should delete non-existing file`(@TempDir tempDir: Path) = test {
             tempDir.resolve("file").deleteRecursively().shouldNotExist()
             tempDir.shouldBeEmptyDirectory()
         }
 
         @Test
-        fun `should delete complex file tree`(@TempDir tempDir: Path) = tests {
+        fun `should delete complex file tree`(@TempDir tempDir: Path) = test {
             val dir = tempDir.resolve("dir")
             dir.directoryWithTwoFiles().symbolicLink()
 
@@ -555,7 +554,7 @@ class PathsKtTest {
         }
 
         @Test
-        fun `should delete filtered files`(@TempDir tempDir: Path) = tests {
+        fun `should delete filtered files`(@TempDir tempDir: Path) = test {
             val dir = tempDir.resolve("dir")
             val exception = dir.directoryWithTwoFiles().listDirectoryEntriesRecursively().first()
 
@@ -564,7 +563,7 @@ class PathsKtTest {
         }
     }
 
-    @Test fun delete_on_exit(@TempDir tempDir: Path) = tests {
+    @Test fun delete_on_exit(@TempDir tempDir: Path) = test {
         tempDir.singleFile("file-delete-default").asClue {
             IsolatedProcess.exec(DeleteOnExecTestHelper::class, Variant.Default.name, it.pathString) shouldBe 0
             it.shouldNotExist()
@@ -597,7 +596,7 @@ class PathsKtTest {
         }
     }
 
-    @Test fun use_path(@TempDir tempDir: Path) = tests {
+    @Test fun use_path(@TempDir tempDir: Path) = test {
         val regularFile = tempDir.singleFile(content = "foo")
         regularFile.toUri().usePath { it.readText() } shouldBe "foo"
         regularFile.toUri().toURL().usePath { it.readText() } shouldBe "foo"
@@ -613,42 +612,42 @@ class PathsKtTest {
         shouldThrow<ProviderNotFoundException> { URL("https://example.com").usePath { } }
     }
 
-    @Test fun use_input_stream(@TempDir tempDir: Path) = tests {
+    @Test fun use_input_stream(@TempDir tempDir: Path) = test {
         tempDir.singleFile(content = "abc").useInputStream { it.readBytes().decodeToString() } shouldBe "abc"
         shouldThrow<NoSuchFileException> { tempDir.randomPath().useInputStream {} }
     }
 
-    @Test fun use_buffered_input_stream(@TempDir tempDir: Path) = tests {
+    @Test fun use_buffered_input_stream(@TempDir tempDir: Path) = test {
         tempDir.singleFile(content = "abc").useBufferedInputStream { it.readBytes().decodeToString() } shouldBe "abc"
         shouldThrow<NoSuchFileException> { tempDir.randomPath().useBufferedInputStream {} }
     }
 
-    @Test fun use_reader(@TempDir tempDir: Path) = tests {
+    @Test fun use_reader(@TempDir tempDir: Path) = test {
         tempDir.singleFile(content = "abc").useReader { it.readText() } shouldBe "abc"
         shouldThrow<NoSuchFileException> { tempDir.randomPath().useReader {} }
     }
 
-    @Test fun use_buffered_reader(@TempDir tempDir: Path) = tests {
+    @Test fun use_buffered_reader(@TempDir tempDir: Path) = test {
         tempDir.singleFile(content = "abc").useBufferedReader { it.readText() } shouldBe "abc"
         shouldThrow<NoSuchFileException> { tempDir.randomPath().useBufferedReader {} }
     }
 
-    @Test fun use_output_stream(@TempDir tempDir: Path) = tests {
+    @Test fun use_output_stream(@TempDir tempDir: Path) = test {
         tempDir.resolve("file").useOutputStream { it.write("abc".encodeToByteArray()) }.readText() shouldBe "abc"
         shouldThrow<NoSuchFileException> { tempDir.randomPath().useOutputStream(TRUNCATE_EXISTING) {} }
     }
 
-    @Test fun use_buffered_output_stream(@TempDir tempDir: Path) = tests {
+    @Test fun use_buffered_output_stream(@TempDir tempDir: Path) = test {
         tempDir.resolve("file").useBufferedOutputStream { it.write("abc".encodeToByteArray()) }.readText() shouldBe "abc"
         shouldThrow<NoSuchFileException> { tempDir.randomPath().useBufferedOutputStream(TRUNCATE_EXISTING) {} }
     }
 
-    @Test fun use_writer(@TempDir tempDir: Path) = tests {
+    @Test fun use_writer(@TempDir tempDir: Path) = test {
         tempDir.resolve("file").useWriter { it.write("abc") }.readText() shouldBe "abc"
         shouldThrow<NoSuchFileException> { tempDir.randomPath().useWriter(TRUNCATE_EXISTING) {} }
     }
 
-    @Test fun use_buffered_writer(@TempDir tempDir: Path) = tests {
+    @Test fun use_buffered_writer(@TempDir tempDir: Path) = test {
         tempDir.resolve("file").useBufferedWriter { it.write("abc") }.readText() shouldBe "abc"
         shouldThrow<NoSuchFileException> { tempDir.randomPath().useBufferedWriter(TRUNCATE_EXISTING) {} }
     }
@@ -688,51 +687,7 @@ class DeleteOnExecTestHelper {
     }
 }
 
-
-internal fun Path.symbolicLink(): Path = randomPath().apply {
+public fun Path.symbolicLink(): Path = randomPath().apply {
     Files.createSymbolicLink(this, randomPath())
     check(exists(NOFOLLOW_LINKS)) { "Failed to create symbolic link $this." }
 }
-
-internal fun Path.singleFile(
-    name: String = "example.html",
-    content: String = "content $name",
-): Path = resolve(name).apply {
-    writeBytes(content.encodeToByteArray())
-    check(exists()) { "Failed to provide archive with single file." }
-}
-
-internal fun Path.directoryWithTwoFiles(
-    base: String = randomString(4),
-): Path = randomDirectory(base).apply {
-    singleFile()
-    resolve("sub-dir").createDirectories().singleFile("config.txt")
-    check(listDirectoryEntries().size == 2) { "Failed to provide directory with two files." }
-}
-
-/**
- * Creates an empty `jar` file in the system's temp directory.
- *
- * @see asNewJarFileSystem
- */
-public fun Path.tempJar(base: String = "", extension: String = ".jar"): Path =
-    tempFile(base, extension).apply {
-        JarOutputStream(outputStream().buffered()).use { }
-    }
-
-/**
- * Attempts to create a [FileSystem] from an existing `jar` file.
- *
- * @see tempJar
- */
-public fun Path.asNewJarFileSystem(vararg env: Pair<String, Any?>): FileSystem =
-    FileSystems.newFileSystem(URI.create("jar:${toUri()}"), env.toMap())
-
-/**
- * Creates an empty `jar` file system the system's temp directory.
- *
- * @see tempJar
- * @see asNewJarFileSystem
- */
-public fun Path.tempJarFileSystem(base: String = "", extension: String = ".jar"): FileSystem =
-    tempJar(base, extension).asNewJarFileSystem()

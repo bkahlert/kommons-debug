@@ -1,5 +1,6 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.test.test
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.test.Test
@@ -9,20 +10,20 @@ import kotlin.test.assertTrue
 @Suppress("ReplaceCallWithBinaryOperator")
 class DelegatingCharSequenceTest {
 
-    @Test fun of_string() = tests {
+    @Test fun of_string() = test {
         val string = "foo"
         val foo = DelegatingCharSequence(string)
         assertFoo(foo)
         foo.toString() shouldBeSameInstanceAs "foo"
     }
 
-    @Test fun of_string_builder() = tests {
+    @Test fun of_string_builder() = test {
         val stringBuilder = StringBuilder("foo")
         val foo = DelegatingCharSequence(stringBuilder)
         assertFoo(foo)
     }
 
-    @Test fun of_delegate() = tests {
+    @Test fun of_delegate() = test {
         val stringBuilder = StringBuilder("foo")
         val delegate = DelegatingCharSequence(stringBuilder)
         val foo = DelegatingCharSequence(delegate)
@@ -36,7 +37,7 @@ class DelegatingCharSequenceTest {
         foo.toString() shouldBe "foo-bar"
     }
 
-    @Test fun of_delegate_subSequence() = tests {
+    @Test fun of_delegate_subSequence() = test {
         val stringBuilder = StringBuilder("-foo-")
         val delegate = DelegatingCharSequence(stringBuilder)
         val foo = delegate.subSequence(1, 4)

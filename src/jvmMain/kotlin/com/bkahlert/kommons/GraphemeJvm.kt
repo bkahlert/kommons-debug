@@ -10,9 +10,7 @@ public actual fun String.asGraphemeSequence(): Sequence<Grapheme> {
     return sequence {
         while (true) {
             val end = iterator.next()
-            if (end == BreakIterator.DONE) {
-                break
-            }
+            if (end == BreakIterator.DONE) break
             yield(Grapheme(this@asGraphemeSequence.substring(start, end)))
             start = end
         }

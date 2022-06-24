@@ -6,7 +6,7 @@ import com.bkahlert.kommons.Platform.JS
 import com.bkahlert.kommons.Platform.JVM
 import com.bkahlert.kommons.debug.CustomToString.Ignore
 import com.bkahlert.kommons.debug.Typing.SimplyTyped
-import com.bkahlert.kommons.tests
+import com.bkahlert.kommons.test.test
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldMatch
@@ -15,7 +15,7 @@ import kotlin.test.Test
 @Suppress("DEPRECATION")
 class TraceTest {
 
-    @Test fun trace_with_no_arguments() = tests {
+    @Test fun trace_with_no_arguments() = test {
         buildString {
             "subject".trace(highlight = false, includeCallSite = false, out = this::append)
         } shouldBe """
@@ -23,7 +23,7 @@ class TraceTest {
         """.trimIndent()
     }
 
-    @Test fun trace_with_caption() = tests {
+    @Test fun trace_with_caption() = test {
         buildString {
             "subject".trace("caption", highlight = false, includeCallSite = false, out = this::append)
         } shouldBe """
@@ -31,7 +31,7 @@ class TraceTest {
         """.trimIndent()
     }
 
-    @Test fun trace_with_inspect() = tests {
+    @Test fun trace_with_inspect() = test {
         buildString {
             "subject".trace(highlight = false, includeCallSite = false, out = this::append) { it.length }
         } shouldBe """
@@ -39,7 +39,7 @@ class TraceTest {
         """.trimIndent()
     }
 
-    @Test fun trace_with_caption_and_inspect() = tests {
+    @Test fun trace_with_caption_and_inspect() = test {
         buildString {
             "subject".trace("caption", highlight = false, includeCallSite = false, out = this::append) { it.length }
         } shouldBe """
@@ -48,7 +48,7 @@ class TraceTest {
     }
 
     @Suppress("LongLine")
-    @Test fun trace_with_highlighting() = tests {
+    @Test fun trace_with_highlighting() = test {
         buildString {
             "subject".trace("caption", highlight = true, includeCallSite = false, out = this::append) { it.length.toString() }
         } shouldBe when (Platform.Current) {
@@ -61,7 +61,7 @@ class TraceTest {
         }
     }
 
-    @Test fun trace_with_call_site() = tests {
+    @Test fun trace_with_call_site() = test {
         buildString {
             "subject".trace(highlight = false, out = this::append) { it.length.toString() }
         } should {
@@ -75,7 +75,7 @@ class TraceTest {
         }
     }
 
-    @Test fun trace_with_custom_render() = tests {
+    @Test fun trace_with_custom_render() = test {
         buildString {
             "subject".trace("caption", highlight = false, includeCallSite = false, render = { ">>> $it <<<" }, out = this::append) { it.length.toString() }
         } shouldBe """
@@ -83,7 +83,7 @@ class TraceTest {
         """.trimIndent()
     }
 
-    @Test fun trace_with_multiline() = tests {
+    @Test fun trace_with_multiline() = test {
         buildString {
             "subject 1\nsubject 2".trace(
                 highlight = false,
@@ -169,7 +169,7 @@ class TraceTest {
         """.trimIndent()
     }
 
-    @Test fun inspect() = tests {
+    @Test fun inspect() = test {
         buildString {
             "subject".inspect(
                 highlight = false,
@@ -186,7 +186,7 @@ class TraceTest {
         }
     }
 
-    @Test fun inspect_with_call_site() = tests {
+    @Test fun inspect_with_call_site() = test {
         buildString {
             "subject".inspect(highlight = false, out = this::append)
         } should {

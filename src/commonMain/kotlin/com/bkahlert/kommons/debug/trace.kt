@@ -35,7 +35,7 @@ public typealias Inspector<T> = (T) -> Any?
  *
  * will be printed.
  */
-@Suppress("GrazieInspection", "DEPRECATION")
+@Suppress("GrazieInspection", "DEPRECATION", "unused")
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
 public val <T> T.trace: T get(): T = trace()
 
@@ -60,7 +60,7 @@ public val <T> T.trace: T get(): T = trace()
  *
  * will be printed.
  */
-@Suppress("GrazieInspection", "DEPRECATION")
+@Suppress("GrazieInspection", "DEPRECATION", "unused")
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
 public fun <T> T.trace(
     caption: CharSequence? = null,
@@ -99,7 +99,7 @@ public fun <T> T.trace(
  * Special version of [trace] that inspects the structure of
  * each object, no matter if a custom [Any.toString] exists or not.
  */
-@Suppress("GrazieInspection", "DEPRECATION")
+@Suppress("GrazieInspection", "DEPRECATION", "unused")
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
 public val <T> T.inspect: T get(): T = inspect()
 
@@ -107,7 +107,7 @@ public val <T> T.inspect: T get(): T = inspect()
  * Special version of [trace] that inspects the structure of
  * each object, no matter if a custom [Any.toString] exists or not.
  */
-@Suppress("GrazieInspection", "DEPRECATION")
+@Suppress("GrazieInspection", "DEPRECATION", "unused")
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
 public fun <T> T.inspect(
     caption: CharSequence? = null,

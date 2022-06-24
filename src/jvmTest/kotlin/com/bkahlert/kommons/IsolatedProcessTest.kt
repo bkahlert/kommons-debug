@@ -1,9 +1,6 @@
-package com.bkahlert.kommons.debug
+package com.bkahlert.kommons
 
-import com.bkahlert.kommons.IsolatedProcess
-import com.bkahlert.kommons.Locations
-import com.bkahlert.kommons.isSubPathOf
-import com.bkahlert.kommons.tests
+import com.bkahlert.kommons.test.test
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
@@ -19,7 +16,7 @@ import kotlin.system.exitProcess
 class IsolatedProcessTest {
 
     @Test
-    fun `should execute main`(@TempDir tempDir: Path) = tests {
+    fun `should execute main`(@TempDir tempDir: Path) = test {
         val file = tempDir / "file"
         val result = IsolatedProcess.exec(TestClass::class, file.pathString)
         result shouldBe 0
@@ -27,14 +24,14 @@ class IsolatedProcessTest {
     }
 
     @Test
-    fun `should return non-zero exit code on error`(@TempDir tempDir: Path) = tests {
+    fun `should return non-zero exit code on error`(@TempDir tempDir: Path) = test {
         val file = tempDir / "not-existing-dir" / "file"
         val result = IsolatedProcess.exec(TestClass::class, file.pathString)
         result shouldBe 1
     }
 
     @Test
-    fun `should throw on missing main`() = tests {
+    fun `should throw on missing main`() = test {
         shouldThrow<IllegalArgumentException> { IsolatedProcess.exec(IsolatedProcessTest::class) }
     }
 }

@@ -1,14 +1,14 @@
 package com.bkahlert.kommons.debug
 
 import com.bkahlert.kommons.debug.CustomToString.Ignore
-import com.bkahlert.kommons.tests
+import com.bkahlert.kommons.test.test
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import kotlin.collections.Map.Entry
 
 class JvmRenderTest {
 
-    @Test fun render_inaccessible() = tests {
+    @Test fun render_inaccessible() = test {
 
         val evilMap: Map<Any, Any?> = object : AbstractMap<Any, Any?>() {
             override fun equals(other: Any?): Boolean = false

@@ -1,5 +1,6 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.test.test
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -7,7 +8,7 @@ import kotlin.test.Test
 
 class BytesTest {
 
-    @Test fun to_hexadecimal_string() = tests {
+    @Test fun to_hexadecimal_string() = test {
         ubyteArray should { array ->
             array.map { it.toHexadecimalString() } shouldContainExactly listOf("00", "7f", "80", "ff")
             array.toHexadecimalString() shouldBe "007f80ff"
@@ -26,7 +27,7 @@ class BytesTest {
         veryLargeByteArray.toHexadecimalString() shouldBe "0100000000000000000000000000000000"
     }
 
-    @Test fun to_decimal_string() = tests {
+    @Test fun to_decimal_string() = test {
         ubyteArray should { array ->
             array.map { it.toDecimalString() } shouldContainExactly listOf("0", "127", "128", "255")
         }
@@ -35,7 +36,7 @@ class BytesTest {
         }
     }
 
-    @Test fun to_octal_string() = tests {
+    @Test fun to_octal_string() = test {
         ubyteArray should { array ->
             array.map { it.toOctalString() } shouldContainExactly listOf("000", "177", "200", "377")
             array.toOctalString() shouldBe "000177200377"
@@ -53,7 +54,7 @@ class BytesTest {
     }
 
     @Suppress("LongLine")
-    @Test fun to_binary_string() = tests {
+    @Test fun to_binary_string() = test {
         ubyteArray should { array ->
             array.map { it.toBinaryString() } shouldContainExactly listOf("00000000", "01111111", "10000000", "11111111")
             array.toBinaryString() shouldBe "00000000011111111000000011111111"

@@ -2,14 +2,14 @@
 
 package com.bkahlert.kommons.debug
 
-import com.bkahlert.kommons.tests
+import com.bkahlert.kommons.test.test
 import io.kotest.matchers.should
 import io.kotest.matchers.string.shouldMatch
 import kotlin.test.Test
 
 class TraceJsKtTest {
 
-    @Test fun trace_js() = tests {
+    @Test fun trace_js() = test {
         buildString {
             "subject".traceJs(out = this::append)
         } should {

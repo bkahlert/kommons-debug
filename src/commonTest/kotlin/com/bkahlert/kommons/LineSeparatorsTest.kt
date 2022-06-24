@@ -1,5 +1,6 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.test.test
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -7,7 +8,7 @@ import kotlin.test.Test
 class LineSeparatorsTest {
 
     @Test
-    fun constants() = tests {
+    fun constants() = test {
         LineSeparators.CRLF shouldBe "\r\n"
         LineSeparators.LF shouldBe "\n"
         LineSeparators.CR shouldBe "\r"
@@ -17,7 +18,7 @@ class LineSeparatorsTest {
     }
 
     @Test
-    fun list() = tests {
+    fun list() = test {
         LineSeparators.shouldContainExactly(
             LineSeparators.CRLF,
             LineSeparators.LF,
@@ -26,7 +27,7 @@ class LineSeparatorsTest {
     }
 
     @Test
-    fun common() = tests {
+    fun common() = test {
         LineSeparators.Common.shouldContainExactly(
             LineSeparators.CRLF,
             LineSeparators.LF,
@@ -34,13 +35,21 @@ class LineSeparatorsTest {
         )
     }
 
-
     @Test
-    fun unicode() = tests {
+    fun unicode() = test {
         LineSeparators.Unicode.shouldContainExactly(
             LineSeparators.CRLF,
             LineSeparators.LF,
             LineSeparators.CR,
+            LineSeparators.NEL,
+            LineSeparators.PS,
+            LineSeparators.LS,
+        )
+    }
+
+    @Test
+    fun uncommon() = test {
+        LineSeparators.Uncommon.shouldContainExactly(
             LineSeparators.NEL,
             LineSeparators.PS,
             LineSeparators.LS,

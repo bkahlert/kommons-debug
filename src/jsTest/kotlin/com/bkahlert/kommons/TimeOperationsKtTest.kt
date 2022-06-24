@@ -1,5 +1,6 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.test.test
 import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
 import io.kotest.matchers.comparables.shouldBeLessThanOrEqualTo
 import io.kotest.matchers.should
@@ -18,7 +19,7 @@ class TimeOperationsKtTest {
     private val duration = 2.days + 3.hours + 4.minutes + 5.seconds + 6.nanoseconds
 
     @Test
-    fun now() = tests {
+    fun now() = test {
         Now should {
             it.compareTo(Now) shouldBeLessThanOrEqualTo 0
             it.compareTo(Now - 1.seconds) shouldBeGreaterThanOrEqualTo 0
@@ -26,7 +27,7 @@ class TimeOperationsKtTest {
     }
 
     @Test
-    fun today() = tests {
+    fun today() = test {
         Today should {
             it.fullYear shouldBe Now.fullYear
             it.month shouldBe Now.month
@@ -39,7 +40,7 @@ class TimeOperationsKtTest {
     }
 
     @Test
-    fun yesterday() = tests {
+    fun yesterday() = test {
         Yesterday should {
             it.fullYear shouldBe Now.fullYear
             it.month shouldBe Now.month
@@ -52,7 +53,7 @@ class TimeOperationsKtTest {
     }
 
     @Test
-    fun tomorrow() = tests {
+    fun tomorrow() = test {
         Tomorrow should {
             it.fullYear shouldBe Now.fullYear
             it.month shouldBe Now.month
@@ -65,7 +66,7 @@ class TimeOperationsKtTest {
     }
 
     @Test
-    fun timestamp() = tests {
+    fun timestamp() = test {
         Timestamp should {
             it shouldBeLessThanOrEqualTo Date().getTime()
             it shouldBeGreaterThanOrEqualTo Date().getTime() - 1
@@ -73,7 +74,7 @@ class TimeOperationsKtTest {
     }
 
     @Test
-    fun components() = tests {
+    fun components() = test {
         Date("August 19, 1975 23:15:30 GMT-11:00") should {
             it.time shouldBe it.getTime()
             it.timezoneOffset shouldBe it.getTimezoneOffset().minutes
@@ -99,17 +100,17 @@ class TimeOperationsKtTest {
     }
 
     @Test
-    fun add() = tests {
+    fun add() = test {
         (Date("August 19, 1975 23:15:30 GMT-11:00") + duration).time shouldBe Date("Fri Aug 22 1975 02:19:35 GMT-11:00").time
     }
 
     @Test
-    fun subtract() = tests {
+    fun subtract() = test {
         (Date("August 19, 1975 23:15:30 GMT-11:00") - duration).time shouldBe Date("Mon Aug 18 1975 08:11:25 GMT+0100").time
     }
 
     @Test
-    fun subtract_date() = tests {
+    fun subtract_date() = test {
         (Now - Now) should {
             it shouldBeLessThanOrEqualTo ZERO
             it shouldBeGreaterThanOrEqualTo ZERO - 1.seconds

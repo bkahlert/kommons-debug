@@ -1,5 +1,6 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.test.test
 import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
 import io.kotest.matchers.comparables.shouldBeLessThanOrEqualTo
 import io.kotest.matchers.should
@@ -27,7 +28,7 @@ class TimeOperationsKtTest {
     private val javaDuration = duration.toJavaDuration()
 
     @Test
-    fun now() = tests {
+    fun now() = test {
         Now should {
             it shouldBeLessThanOrEqualTo Instant.now()
             it shouldBeGreaterThanOrEqualTo Instant.now() - 1.seconds
@@ -35,12 +36,12 @@ class TimeOperationsKtTest {
     }
 
     @Test
-    fun today() = tests {
+    fun today() = test {
         Today shouldBe LocalDate.now()
     }
 
     @Test
-    fun yesterday() = tests {
+    fun yesterday() = test {
         Yesterday should {
             it shouldBe LocalDate.now() - 1.days
             it shouldBe LocalDate.now() - (1.days + 1.seconds)
@@ -51,7 +52,7 @@ class TimeOperationsKtTest {
     }
 
     @Test
-    fun tomorrow() = tests {
+    fun tomorrow() = test {
         Tomorrow should {
             it shouldBe LocalDate.now() + 1.days
             it shouldBe LocalDate.now() + (1.days + 1.seconds)
@@ -62,7 +63,7 @@ class TimeOperationsKtTest {
     }
 
     @Test
-    fun timestamp() = tests {
+    fun timestamp() = test {
         Timestamp should {
             it shouldBeLessThanOrEqualTo Instant.now().toEpochMilli()
             it shouldBeGreaterThanOrEqualTo Instant.now().toEpochMilli() - 100
@@ -70,7 +71,7 @@ class TimeOperationsKtTest {
     }
 
     @Test
-    fun `should add`() = tests {
+    fun `should add`() = test {
         (Instant.now() + duration) should {
             it shouldBeLessThanOrEqualTo Instant.now().plus(javaDuration)
             it shouldBeGreaterThanOrEqualTo Instant.now().plus(javaDuration) - 1.seconds
@@ -102,7 +103,7 @@ class TimeOperationsKtTest {
     }
 
     @Test
-    fun `should subtract`() = tests {
+    fun `should subtract`() = test {
         (Instant.now() - duration) should {
             it shouldBeLessThanOrEqualTo Instant.now().minus(javaDuration)
             it shouldBeGreaterThanOrEqualTo Instant.now().minus(javaDuration) - 1.seconds

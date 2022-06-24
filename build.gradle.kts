@@ -3,7 +3,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     kotlin("multiplatform") version "1.7.0"
-    id("org.jetbrains.dokka") version "1.6.21"
+    id("org.jetbrains.dokka") version "1.7.0"
     id("maven-publish")
     signing
     id("nebula.release") version "16.0.0"
@@ -18,6 +18,7 @@ group = "com.bkahlert.kommons"
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 kotlin {
@@ -31,11 +32,9 @@ kotlin {
             useJUnitPlatform()
         }
     }
+
     js(IR) {
         browser {
-            commonWebpackConfig {
-                cssSupport.enabled = true
-            }
             testTask {
                 testLogging.showStandardStreams = true
                 useKarma {
@@ -49,8 +48,7 @@ kotlin {
         val commonMain by getting
         val commonTest by getting {
             dependencies {
-                implementation(kotlin("test"))
-                implementation("io.kotest:kotest-assertions-core:5.3.0")
+                implementation("com.bkahlert.kommons:kommons-test:0.2.0")
             }
         }
         val jvmMain by getting {
@@ -58,13 +56,7 @@ kotlin {
                 implementation(kotlin("reflect"))
             }
         }
-        val jvmTest by getting {
-            dependencies {
-                implementation(kotlin("test-junit5"))
-                implementation(project.dependencies.platform("org.junit:junit-bom:5.9.0-M1"))
-                listOf("api", "engine").forEach { implementation("org.junit.jupiter:junit-jupiter-$it") }
-            }
-        }
+        val jvmTest by getting
         val jsMain by getting {
             dependencies {
                 @Suppress("SpellCheckingInspection")
@@ -144,7 +136,7 @@ publishing {
 
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/bkahlert/kommons")
+            url = uri("https://maven.pkg.github.com/bkahlert/kommons-debug")
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")

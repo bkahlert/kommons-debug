@@ -4,7 +4,7 @@ import com.bkahlert.kommons.Current
 import com.bkahlert.kommons.Platform
 import com.bkahlert.kommons.Platform.JS
 import com.bkahlert.kommons.Platform.JVM
-import com.bkahlert.kommons.tests
+import com.bkahlert.kommons.test.test
 import io.kotest.inspectors.shouldForAll
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.nulls.shouldBeNull
@@ -18,7 +18,7 @@ import kotlin.test.Test
 
 class StackTraceTest {
 
-    @Test fun to_string() = tests {
+    @Test fun to_string() = test {
         var stackTrace = ""
         foo { bar { StackTrace.get().also { stackTrace = it.toString() }.firstOrNull() } }
         stackTrace.lines() should {
@@ -28,7 +28,7 @@ class StackTraceTest {
         }
     }
 
-    @Test fun get_first() = tests {
+    @Test fun get_first() = test {
         StackTrace.get().first() should {
             when (Platform.Current) {
                 JS -> {
@@ -49,12 +49,12 @@ class StackTraceTest {
         }
     }
 
-    @Test fun find_or_null() = tests {
+    @Test fun find_or_null() = test {
         foo { bar { StackTrace.get().findOrNull { it.function == "foo" } } } should { it?.function shouldStartWith "find_or_null" }
         foo { bar { StackTrace.get().findOrNull { false } } }.shouldBeNull()
     }
 
-    @Test fun find_by_last_known_call_null() = tests {
+    @Test fun find_by_last_known_call_null() = test {
         foo { bar { StackTrace.get().findByLastKnownCallsOrNull("bar") } } should { it?.function shouldStartWith "foo" }
         foo { bar { StackTrace.get().findByLastKnownCallsOrNull(::bar) } } should { it?.function shouldStartWith "foo" }
 

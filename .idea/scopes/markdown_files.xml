@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="markdown files" pattern="file:*.md" />
+</component>

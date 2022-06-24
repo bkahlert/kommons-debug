@@ -4,21 +4,21 @@ import com.bkahlert.kommons.Current
 import com.bkahlert.kommons.Platform
 import com.bkahlert.kommons.Platform.JS
 import com.bkahlert.kommons.Platform.JVM
-import com.bkahlert.kommons.tests
+import com.bkahlert.kommons.test.test
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class ToCustomStringOrNullTest {
 
-    @Test fun test_null() = tests {
+    @Test fun test_null() = test {
         null.toCustomStringOrNull() shouldBe null
     }
 
-    @Test fun test_string() = tests {
+    @Test fun test_string() = test {
         "string".toCustomStringOrNull() shouldBe "string"
     }
 
-    @Test fun test_lambda() = tests {
+    @Test fun test_lambda() = test {
         {}.toCustomStringOrNull() shouldBe when (Platform.Current) {
             JS -> """
                 function () {
@@ -31,11 +31,11 @@ class ToCustomStringOrNullTest {
         }
     }
 
-    @Test fun test_object_with_default_tostring() = tests {
+    @Test fun test_object_with_default_tostring() = test {
         ClassWithDefaultToString().toCustomStringOrNull() shouldBe null
     }
 
-    @Test fun test_object_with_custom_tostring() = tests {
+    @Test fun test_object_with_custom_tostring() = test {
         ClassWithCustomToString().render() shouldBe "custom toString"
     }
 }

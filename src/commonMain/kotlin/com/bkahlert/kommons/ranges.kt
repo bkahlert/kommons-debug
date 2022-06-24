@@ -43,12 +43,11 @@ public fun ClosedRange<Double>.randomOrNull(random: Random): Double? =
  */
 public fun <T : Comparable<T>> ClosedRange<T>.asIterable(step: (T) -> T): Iterable<T> =
     Iterable {
-        object : Iterator<T> {
-            private var current: T = start
-            override fun hasNext(): Boolean = contains(current)
-
-            override fun next(): T =
-                if (hasNext()) current.also { current = step(it) }
-                else throw NoSuchElementException()
+        var next: T = start
+        iterator {
+            while (contains(next)) {
+                yield(next)
+                next = step(next)
+            }
         }
     }

@@ -8,19 +8,19 @@ import com.bkahlert.kommons.debug.CustomToString.Ignore
 import com.bkahlert.kommons.debug.CustomToString.IgnoreForPlainCollectionsAndMaps
 import com.bkahlert.kommons.debug.Typing.SimplyTyped
 import com.bkahlert.kommons.debug.Typing.Untyped
-import com.bkahlert.kommons.tests
+import com.bkahlert.kommons.test.test
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import kotlin.test.Test
 
 class RenderTest {
 
-    @Test fun render_null() = tests {
+    @Test fun render_null() = test {
         null.render() shouldBe "null"
     }
 
     @Suppress("SpellCheckingInspection")
-    @Test fun render_string() = tests {
+    @Test fun render_string() = test {
         renderString("") { compression = Always } shouldBe "\"\""
         renderString(" ") { compression = Always } shouldBe "\" \""
         renderString("string") { compression = Always } shouldBe "\"string\""
@@ -47,7 +47,7 @@ class RenderTest {
         """.trimIndent()
     }
 
-    @Test fun render_primitive() = tests {
+    @Test fun render_primitive() = test {
         renderPrimitive(PrimitiveTypes.boolean) shouldBe "true"
         renderPrimitive(PrimitiveTypes.char) shouldBe "*"
         renderPrimitive(PrimitiveTypes.float) shouldBe "42.1"
@@ -66,7 +66,7 @@ class RenderTest {
         renderPrimitive("string") shouldBe "⁉️"
     }
 
-    @Test fun render_primitive_array() = tests {
+    @Test fun render_primitive_array() = test {
         renderPrimitiveArray(PrimitiveTypes.booleanArray) shouldBe "[true, false, false]"
         renderPrimitiveArray(PrimitiveTypes.charArray) shouldBe "[a, r, r, a, y]"
         renderPrimitiveArray(PrimitiveTypes.floatArray) shouldBe "[0x61, 0x72, 0x72, 0x61, 0x79]"
@@ -84,7 +84,7 @@ class RenderTest {
     }
 
     @Suppress("SpellCheckingInspection")
-    @Test fun render_array() = tests {
+    @Test fun render_array() = test {
         renderArray(arrayOf<String>()) { compression = Always } shouldBe "[]"
         renderArray(arrayOf("string")) { compression = Always } shouldBe "[ \"string\" ]"
         renderArray(arrayOf("string", null)) { compression = Always } shouldBe "[ \"string\", null ]"
@@ -136,7 +136,7 @@ class RenderTest {
     }
 
     @Suppress("SpellCheckingInspection")
-    @Test fun render_collection() = tests {
+    @Test fun render_collection() = test {
         renderCollection(listOf<String>()) { compression = Always } shouldBe "[]"
         renderCollection(listOf("string")) { compression = Always } shouldBe "[ \"string\" ]"
         renderCollection(listOf("string", null)) { compression = Always } shouldBe "[ \"string\", null ]"
@@ -188,7 +188,7 @@ class RenderTest {
     }
 
     @Suppress("SpellCheckingInspection")
-    @Test fun render_map() = tests {
+    @Test fun render_map() = test {
         renderObject(emptyMap<String, Any?>()) { compression = Always } shouldBe "{}"
         renderObject(mapOf("foo" to "string")) { compression = Always } shouldBe "{ foo: \"string\" }"
         renderObject(mapOf("foo" to "string", "bar" to null)) { compression = Always } shouldBe "{ foo: \"string\", bar: null }"
@@ -239,7 +239,7 @@ class RenderTest {
         """.trimIndent()
     }
 
-    @Test fun render_map_with_any_key() = tests {
+    @Test fun render_map_with_any_key() = test {
         renderObject(mapOf(DataClass() to "foo", null to "bar")) { compression = Always } shouldBe """
             { DataClass(dataProperty=data-property, openBaseProperty=37): "foo", null: "bar" }
         """.trimIndent()
@@ -264,7 +264,7 @@ class RenderTest {
     }
 
     @Suppress("SpellCheckingInspection")
-    @Test fun render_object() = tests {
+    @Test fun render_object() = test {
         renderObject(ClassWithDefaultToString()) { compression = Always } shouldBe "{ foo: null, bar: \"baz\" }"
         renderObject(ClassWithDefaultToString("string")) { compression = Always } shouldBe "{ foo: \"string\", bar: \"baz\" }"
         renderObject(ClassWithDefaultToString("line 1\nline 2")) { compression = Always } shouldBe "{ foo: \"line 1\\nline 2\", bar: \"baz\" }"
@@ -341,7 +341,7 @@ class RenderTest {
     // render
 
     @Suppress("SpellCheckingInspection")
-    @Test fun render() = tests {
+    @Test fun render() = test {
 
         val simplyTypedAlwaysCompressingSettings = RenderingSettings.build { typing = SimplyTyped; compression = Always }
         null.render(simplyTypedAlwaysCompressingSettings) shouldBe "null"
@@ -500,11 +500,11 @@ class RenderTest {
         ClassWithDefaultToString(ClassWithDefaultToString()).render() shouldBe "{ foo: { foo: null, bar: \"baz\" }, bar: \"baz\" }"
     }
 
-    @Test fun render_object_with_rendering_to_string() = tests {
+    @Test fun render_object_with_rendering_to_string() = test {
         ClassWithRenderingToString().render() shouldBe "{ foo: null }"
     }
 
-    @Test fun render_option_custom_to_string() = tests {
+    @Test fun render_option_custom_to_string() = test {
         val plainCollectionsAndMapsToStringIgnoringSettings = RenderingSettings.build { customToString = IgnoreForPlainCollectionsAndMaps }
         val toStringIgnoringSettings = RenderingSettings.build { customToString = Ignore }
 
@@ -519,7 +519,7 @@ class RenderTest {
         ClassWithCustomToString().render(toStringIgnoringSettings) shouldBe "{ foo: null }"
     }
 
-    @Test fun render_with_filter() = tests {
+    @Test fun render_with_filter() = test {
         ClassWithDefaultToString(ClassTypes.triple).render() shouldBe """
             { foo: (39, 40, 41), bar: "baz" }
         """.trimIndent()
@@ -531,11 +531,11 @@ class RenderTest {
         """.trimIndent()
     }
 
-    @Test fun render_circular_reference() = tests {
+    @Test fun render_circular_reference() = test {
         SelfReferencingClass().render() shouldContain "selfProperty: <SelfReferencingClass@-?\\d+>".toRegex()
     }
 
-    @Test fun render_function() = tests {
+    @Test fun render_function() = test {
         ({ }).render() shouldBe when (Platform.Current) {
             Platform.JS -> """
                 function () {

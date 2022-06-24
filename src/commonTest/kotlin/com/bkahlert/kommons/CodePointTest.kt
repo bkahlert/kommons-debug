@@ -1,5 +1,6 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.test.test
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.comparables.shouldBeEqualComparingTo
@@ -12,7 +13,7 @@ import kotlin.test.Test
 
 class CodePointTest {
 
-    @Test fun to_code_point_list() = tests {
+    @Test fun to_code_point_list() = test {
         "a".toCodePointList().shouldContainExactly(CodePoint(0x61))
         "¶".toCodePointList().shouldContainExactly(CodePoint(0xB6))
         "☰".toCodePointList().shouldContainExactly(CodePoint(0x2630))
@@ -20,18 +21,18 @@ class CodePointTest {
         "a̳o".toCodePointList().shouldContainExactly(CodePoint('a'.code), CodePoint('̳'.code), CodePoint('o'.code))
     }
 
-    @Test fun equality() = tests {
+    @Test fun equality() = test {
         CodePoint(0x61) shouldNotBe CodePoint(0xB6)
         CodePoint(0xB6) shouldBe CodePoint(0xB6)
     }
 
-    @Test fun compare() = tests {
+    @Test fun compare() = test {
         CodePoint(0x61) shouldBeLessThan CodePoint(0xB6)
         CodePoint(0x2630) shouldBeGreaterThan CodePoint(0xB6)
         CodePoint(0xB6) shouldBeEqualComparingTo CodePoint(0xB6)
     }
 
-    @Test fun string() = tests {
+    @Test fun string() = test {
         CodePoint(0x61).string should {
             it shouldBe "a"
             it.encodeToByteArray() shouldBe ubyteArrayOf(0x61u).toByteArray()
@@ -50,75 +51,75 @@ class CodePointTest {
         }
     }
 
-    @Test fun to_string() = tests {
+    @Test fun to_string() = test {
         CodePoint(0x61).toString() shouldBe "a"
         CodePoint(0xB6).toString() shouldBe "¶"
         CodePoint(0x2630).toString() shouldBe "☰"
         CodePoint(0x1D553).toString() shouldBe "𝕓"
     }
 
-    @Test fun char() = tests {
+    @Test fun char() = test {
         CodePoint(0x61).char shouldBe 'a'
         CodePoint(0xB6).char shouldBe '¶'
         CodePoint(0x2630).char shouldBe '☰'
         CodePoint(0x1D553).char shouldBe null
     }
 
-    @Test fun code_point() = tests {
+    @Test fun code_point() = test {
         'a'.codePoint shouldBe CodePoint(0x61)
         '¶'.codePoint shouldBe CodePoint(0xB6)
         '☰'.codePoint shouldBe CodePoint(0x2630)
     }
 
-    @Test fun as_code_point() = tests {
+    @Test fun as_code_point() = test {
         0x61.toByte().asCodePoint() shouldBe CodePoint(0x61)
         0xB6.toByte().asCodePoint() shouldBe CodePoint(0xB6)
     }
 
-    @Test fun is_0to9() = tests {
+    @Test fun is_0to9() = test {
         "0123456789".asCodePointSequence().forEach { it.is0to9 shouldBe true }
         "AzΑωष".asCodePointSequence().forEach { it.is0to9 shouldBe false }
     }
 
-    @Test fun is_AtoZ() = tests {
+    @Test fun is_AtoZ() = test {
         @Suppress("SpellCheckingInspection")
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ".asCodePointSequence().forEach { it.isAtoZ shouldBe true }
         "abc123🜃🜂🜁🜄𝌀𝍖ि".asCodePointSequence().forEach { it.isAtoZ shouldBe false }
     }
 
     @Suppress("SpellCheckingInspection")
-    @Test fun is_atoz() = tests {
+    @Test fun is_atoz() = test {
         "abcdefghijklmnopqrstuvwxyz".asCodePointSequence().forEach { it.isatoz shouldBe true }
         "ABC123🜃🜂🜁🜄𝌀𝍖ि".asCodePointSequence().forEach { it.isatoz shouldBe false }
     }
 
     @Suppress("SpellCheckingInspection")
-    @Test fun is_Atoz() = tests {
+    @Test fun is_Atoz() = test {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".asCodePointSequence().forEach { it.isAtoz shouldBe true }
         "123🜃🜂🜁🜄𝌀𝍖ि".asCodePointSequence().forEach { it.isAtoz shouldBe false }
     }
 
-    @Test fun is_ascii_alphanumeric() = tests {
+    @Test fun is_ascii_alphanumeric() = test {
         "Az09".asCodePointSequence().forEach { it.isAsciiAlphanumeric shouldBe true }
         "Αωष🜃🜂🜁🜄𝌀𝍖ि".asCodePointSequence().forEach { it.isAsciiAlphanumeric shouldBe false }
     }
 
-    @Test fun is_alphanumeric() = tests {
+    @Test fun is_alphanumeric() = test {
         "Az09Αωष".asCodePointSequence().forEach { it.isAlphanumeric shouldBe true }
         "🜃🜂🜁🜄𝌀𝍖ि".asCodePointSequence().forEach { it.isAlphanumeric shouldBe false }
     }
 
-    @Test fun is_letter() = tests {
+    @Test fun is_letter() = test {
         "AzΑωष".asCodePointSequence().forEach { it.isLetter shouldBe true }
         "🜃🜂🜁🜄𝌀𝍖ि09".asCodePointSequence().forEach { it.isLetter shouldBe false }
     }
 
-    @Test fun is_digit() = tests {
+    @Test fun is_digit() = test {
         "0123456789".asCodePointSequence().forEach { it.isDigit shouldBe true }
         "AzΑωष".asCodePointSequence().forEach { it.isDigit shouldBe false }
     }
 
-    @Test fun is_whitespace() = tests {
+    @Test fun is_whitespace() = test {
         listOf(' ', '\u2000').forEach { withClue(it.codePoint.index.toByte().toHexadecimalString()) { it.codePoint.isWhitespace shouldBe true } }
         "Az09Αω𝌀𝍖षि🜃🜂🜁🜄".asCodePointSequence().forEach { it.isWhitespace shouldBe false }
     }

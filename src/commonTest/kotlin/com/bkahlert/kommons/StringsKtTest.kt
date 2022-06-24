@@ -5,6 +5,7 @@ import com.bkahlert.kommons.debug.ClassWithCustomToString
 import com.bkahlert.kommons.debug.ClassWithDefaultToString
 import com.bkahlert.kommons.debug.OrdinaryClass
 import com.bkahlert.kommons.debug.ThrowingClass
+import com.bkahlert.kommons.test.test
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.collections.shouldContain
@@ -18,14 +19,14 @@ import kotlin.test.Test
 
 class StringsKtTest {
 
-    @Test fun contains_any() = tests {
+    @Test fun contains_any() = test {
         "foo bar".containsAny("baz", "o b", "abc") shouldBe true
         "foo bar".containsAny("baz", "O B", "abc", ignoreCase = true) shouldBe true
         "foo bar".containsAny("baz", "O B", "abc") shouldBe false
         "foo bar".containsAny("baz", "---", "abc") shouldBe false
     }
 
-    @Test fun require_not_empty() = tests {
+    @Test fun require_not_empty() = test {
         requireNotEmpty(charSequence) shouldBe charSequence
         requireNotEmpty(charSequence) { "error" } shouldBe charSequence
         requireNotEmpty(string) shouldBe string
@@ -40,7 +41,7 @@ class StringsKtTest {
         requireNotEmpty(blankString) { "error" } shouldBe blankString
     }
 
-    @Test fun require_not_blank() = tests {
+    @Test fun require_not_blank() = test {
         requireNotBlank(charSequence) shouldBe charSequence
         requireNotBlank(charSequence) { "error" } shouldBe charSequence
         requireNotBlank(string) shouldBe string
@@ -55,7 +56,7 @@ class StringsKtTest {
         shouldThrow<IllegalArgumentException> { requireNotBlank(blankString) { "error" } } shouldHaveMessage "error"
     }
 
-    @Test fun check_not_empty() = tests {
+    @Test fun check_not_empty() = test {
         checkNotEmpty(charSequence) shouldBe charSequence
         checkNotEmpty(charSequence) { "error" } shouldBe charSequence
         checkNotEmpty(string) shouldBe string
@@ -70,7 +71,7 @@ class StringsKtTest {
         checkNotEmpty(blankString) { "error" } shouldBe blankString
     }
 
-    @Test fun check_not_blank() = tests {
+    @Test fun check_not_blank() = test {
         checkNotBlank(charSequence) shouldBe charSequence
         checkNotBlank(charSequence) { "error" } shouldBe charSequence
         checkNotBlank(string) shouldBe string
@@ -85,7 +86,7 @@ class StringsKtTest {
         shouldThrow<IllegalStateException> { checkNotBlank(blankString) { "error" } } shouldHaveMessage "error"
     }
 
-    @Test fun take_if_not_empty() = tests {
+    @Test fun take_if_not_empty() = test {
         charSequence.takeIfNotEmpty() shouldBe charSequence
         string.takeIfNotEmpty() shouldBe string
         emptyCharSequence.takeIfNotEmpty() shouldBe null
@@ -94,7 +95,7 @@ class StringsKtTest {
         blankString.takeIfNotEmpty() shouldBe blankString
     }
 
-    @Test fun take_if_not_blank() = tests {
+    @Test fun take_if_not_blank() = test {
         charSequence.takeIfNotBlank() shouldBe charSequence
         string.takeIfNotBlank() shouldBe string
         emptyCharSequence.takeIfNotBlank() shouldBe null
@@ -103,7 +104,7 @@ class StringsKtTest {
         blankString.takeIfNotBlank() shouldBe null
     }
 
-    @Test fun take_unless_empty() = tests {
+    @Test fun take_unless_empty() = test {
         charSequence.takeUnlessEmpty() shouldBe charSequence
         string.takeUnlessEmpty() shouldBe string
         emptyCharSequence.takeUnlessEmpty() shouldBe null
@@ -112,7 +113,7 @@ class StringsKtTest {
         blankString.takeUnlessEmpty() shouldBe blankString
     }
 
-    @Test fun take_unless_blank() = tests {
+    @Test fun take_unless_blank() = test {
         charSequence.takeUnlessBlank() shouldBe charSequence
         string.takeUnlessBlank() shouldBe string
         emptyCharSequence.takeUnlessBlank() shouldBe null
@@ -122,7 +123,7 @@ class StringsKtTest {
     }
 
 
-    @Test fun ansi_contained() = tests {
+    @Test fun ansi_contained() = test {
         charSequence.ansiContained shouldBe false
         string.ansiContained shouldBe false
         emptyCharSequence.ansiContained shouldBe false
@@ -135,7 +136,7 @@ class StringsKtTest {
         ansiOscString.ansiContained shouldBe true
     }
 
-    @Test fun ansi_removed() = tests {
+    @Test fun ansi_removed() = test {
         charSequence.ansiRemoved shouldBe charSequence
         string.ansiRemoved shouldBe string
         emptyCharSequence.ansiRemoved shouldBe emptyCharSequence
@@ -148,7 +149,7 @@ class StringsKtTest {
         ansiOscString.ansiRemoved shouldBe "↗ link"
     }
 
-    @Test fun with_prefix() = tests {
+    @Test fun with_prefix() = test {
         charSequence.withPrefix(charSequence) shouldBe charSequence
         charSequence.withPrefix("char") shouldBe charSequence
         charSequence.withPrefix("char-") shouldBe "char-$charSequence"
@@ -157,7 +158,7 @@ class StringsKtTest {
         string.withPrefix("str-") shouldBe "str-$string"
     }
 
-    @Test fun with_suffix() = tests {
+    @Test fun with_suffix() = test {
         charSequence.withSuffix(charSequence) shouldBe charSequence
         charSequence.withSuffix("sequence") shouldBe charSequence
         charSequence.withSuffix("-sequence") shouldBe "$charSequence-sequence"
@@ -166,7 +167,7 @@ class StringsKtTest {
         string.withSuffix("-ing") shouldBe "$string-ing"
     }
 
-    @Test fun with_random_suffix() = tests {
+    @Test fun with_random_suffix() = test {
         charSequence.withRandomSuffix() should {
             it shouldMatch Regex("$charSequence--[\\da-zA-Z]{4}")
             it shouldStartWith charSequence
@@ -179,7 +180,7 @@ class StringsKtTest {
         }
     }
 
-    @Test fun random_string() = tests {
+    @Test fun random_string() = test {
         randomString() shouldHaveLength 16
         randomString(7) shouldHaveLength 7
 
@@ -189,7 +190,40 @@ class StringsKtTest {
         randomString(100, 'A', 'B').forAll { listOf('A', 'B') shouldContain it }
     }
 
-    @Test fun as_string() = tests {
+    @Test fun index_of_or_null() = test {
+        charSequence.indexOfOrNull('h') shouldBe 1
+        string.indexOfOrNull('t') shouldBe 1
+
+        charSequence.indexOfOrNull('x') shouldBe null
+        string.indexOfOrNull('x') shouldBe null
+
+        charSequence.indexOfOrNull("seq") shouldBe 5
+        string.indexOfOrNull("ring") shouldBe 2
+
+        charSequence.indexOfOrNull("xyz") shouldBe null
+        string.indexOfOrNull("xyz") shouldBe null
+    }
+
+    @Test fun is_multiline() = test {
+        "".isMultiline shouldBe false
+        "foo".isMultiline shouldBe false
+        LineSeparators.Common.forAll {
+            it.isMultiline shouldBe true
+            "${it}foo".isMultiline shouldBe true
+            "foo${it}".isMultiline shouldBe true
+            "foo${it}bar".isMultiline shouldBe true
+            "foo${it}bar${it}baz".isMultiline shouldBe true
+        }
+        LineSeparators.Uncommon.forAll {
+            it.isMultiline shouldBe false
+            "${it}foo".isMultiline shouldBe false
+            "foo${it}".isMultiline shouldBe false
+            "foo${it}bar".isMultiline shouldBe false
+            "foo${it}bar${it}baz".trimIndent().isMultiline shouldBe false
+        }
+    }
+
+    @Test fun as_string() = test {
         OrdinaryClass().asString() shouldBe when (Platform.Current) {
             JS -> """
                 OrdinaryClass {

@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Kotlin Script (*.kts)" pattern="file:*.kts" />
+</component>

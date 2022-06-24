@@ -21,7 +21,7 @@ public actual val CodePoint.isWhitespace: Boolean
 /** Returns a sequence yielding the [CodePoint] instances this string consists of. */
 public actual fun String.asCodePointSequence(): Sequence<CodePoint> {
     var pos = 0
-    return sequence {
+    return sequence<CodePoint> {
         while (pos < this@asCodePointSequence.length) {
             yield(CodePoint(this@asCodePointSequence.codePointAt(pos)))
             pos = this@asCodePointSequence.offsetByCodePoints(pos, 1)

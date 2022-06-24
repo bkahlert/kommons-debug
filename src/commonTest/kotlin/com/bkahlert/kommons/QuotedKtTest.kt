@@ -1,11 +1,12 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.test.test
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class QuotedKtTest {
 
-    @Test fun test_quotes() = tests {
+    @Test fun test_quotes() = test {
         "".quoted shouldBe "\"\""
         "foo".quoted shouldBe "\"foo\""
         "{ bar: \"baz\" }".quoted shouldBe "\"{ bar: \\\"baz\\\" }\""
@@ -13,27 +14,27 @@ class QuotedKtTest {
         '"'.quoted shouldBe "\"\\\"\""
     }
 
-    @Test fun test_escaped_backslash() = tests {
+    @Test fun test_escaped_backslash() = test {
         "\\".quoted shouldBe "\"\\\\\""
         '\\'.quoted shouldBe "\"\\\\\""
     }
 
-    @Test fun test_escaped_line_feed() = tests {
+    @Test fun test_escaped_line_feed() = test {
         "\n".quoted shouldBe "\"\\n\""
         '\n'.quoted shouldBe "\"\\n\""
     }
 
-    @Test fun test_escaped_carriage_return() = tests {
+    @Test fun test_escaped_carriage_return() = test {
         "\r".quoted shouldBe "\"\\r\""
         '\r'.quoted shouldBe "\"\\r\""
     }
 
-    @Test fun test_escaped_tab() = tests {
+    @Test fun test_escaped_tab() = test {
         "\t".quoted shouldBe "\"\\t\""
         '\t'.quoted shouldBe "\"\\t\""
     }
 
-    @Test fun test_escaped_double_quote() = tests {
+    @Test fun test_escaped_double_quote() = test {
         "\"".quoted shouldBe "\"\\\"\""
         '"'.quoted shouldBe "\"\\\"\""
     }

@@ -24,7 +24,7 @@ import com.bkahlert.kommons.isMultiline
  *
  * will be printed.
  */
-@Suppress("GrazieInspection", "DEPRECATION")
+@Suppress("GrazieInspection", "DEPRECATION", "unused")
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
 public inline val <T> T.traceJs: T get(): T = traceJs()
 
@@ -49,7 +49,8 @@ public inline val <T> T.traceJs: T get(): T = traceJs()
  *
  * will be printed.
  */
-@Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this")) @Suppress("GrazieInspection", "DEPRECATION")
+@Suppress("GrazieInspection", "DEPRECATION", "unused")
+@Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
 public inline fun <T> T.traceJs(
     caption: CharSequence? = null,
     includeCallSite: Boolean = true,

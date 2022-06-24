@@ -1,5 +1,6 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.test.test
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -8,7 +9,7 @@ import kotlin.test.Test
 
 class CollectionsKtTest {
 
-    @Test fun require_not_empty() = tests {
+    @Test fun require_not_empty() = test {
         requireNotEmpty(collection) shouldBe collection
         requireNotEmpty(collection) { "error" } shouldBe collection
         requireNotEmpty(array) shouldBe array
@@ -19,7 +20,7 @@ class CollectionsKtTest {
         shouldThrow<IllegalArgumentException> { requireNotEmpty(emptyArray) { "error" } } shouldHaveMessage "error"
     }
 
-    @Test fun check_not_empty() = tests {
+    @Test fun check_not_empty() = test {
         checkNotEmpty(collection) shouldBe collection
         checkNotEmpty(collection) { "error" } shouldBe collection
         checkNotEmpty(array) shouldBe array
@@ -30,31 +31,31 @@ class CollectionsKtTest {
         shouldThrow<IllegalStateException> { checkNotEmpty(emptyArray) { "error" } } shouldHaveMessage "error"
     }
 
-    @Test fun take_if_not_empty() = tests {
+    @Test fun take_if_not_empty() = test {
         collection.takeIfNotEmpty() shouldBe collection
         array.takeIfNotEmpty() shouldBe array
         emptyCollection.takeIfNotEmpty() shouldBe null
         emptyArray.takeIfNotEmpty() shouldBe null
     }
 
-    @Test fun take_unless_empty() = tests {
+    @Test fun take_unless_empty() = test {
         collection.takeUnlessEmpty() shouldBe collection
         array.takeUnlessEmpty() shouldBe array
         emptyCollection.takeUnlessEmpty() shouldBe null
         emptyArray.takeUnlessEmpty() shouldBe null
     }
 
-    @Test fun head() = tests {
+    @Test fun head() = test {
         collection.head shouldBe "array"
         shouldThrow<NoSuchElementException> { emptyCollection.head }
     }
 
-    @Test fun head_or_null() = tests {
+    @Test fun head_or_null() = test {
         collection.headOrNull shouldBe "array"
         emptyCollection.headOrNull.shouldBeNull()
     }
 
-    @Test fun tail() = tests {
+    @Test fun tail() = test {
         listOf("head", "tail").tail shouldBe listOf("tail")
         collection.tail shouldBe emptyList()
         emptyCollection.tail shouldBe emptyList()

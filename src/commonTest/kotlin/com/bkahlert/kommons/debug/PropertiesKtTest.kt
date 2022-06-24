@@ -4,7 +4,7 @@ import com.bkahlert.kommons.Current
 import com.bkahlert.kommons.Platform
 import com.bkahlert.kommons.Platform.JS
 import com.bkahlert.kommons.Platform.JVM
-import com.bkahlert.kommons.tests
+import com.bkahlert.kommons.test.test
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -12,7 +12,7 @@ import kotlin.test.Test
 
 class PropertiesTest {
 
-    @Test fun properties() = tests {
+    @Test fun properties() = test {
         nativeObject().properties shouldBe mapOf(
             "property" to "Function-property",
         )
@@ -109,7 +109,7 @@ class PropertiesTest {
         )
     }
 
-    @Test fun get_or_else() = tests {
+    @Test fun get_or_else() = test {
         val instance = DataClass()
         listOf(
             instance::baseProperty,
@@ -120,7 +120,7 @@ class PropertiesTest {
         )
     }
 
-    @Test fun get_or_else_0() = tests {
+    @Test fun get_or_else_0() = test {
         DataClass().kProperties0().associate { prop -> prop.name to prop.getOrElse { it } } shouldBe mapOf(
             "baseProperty" to "base-property",
             "openBaseProperty" to 37,
@@ -136,7 +136,7 @@ class PropertiesTest {
         )
     }
 
-    @Test fun get_or_else_1() = tests {
+    @Test fun get_or_else_1() = test {
         DataClass.kProperties1().associate { prop -> prop.name to prop.getOrElse(DataClass()) { it } } shouldBe mapOf(
             "baseProperty" to "base-property",
             "openBaseProperty" to 37,

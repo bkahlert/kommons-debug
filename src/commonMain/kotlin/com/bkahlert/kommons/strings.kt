@@ -27,78 +27,104 @@ public fun <T : CharSequence> CharSequence.containsAny(vararg others: T, ignoreC
 
 
 /** Throws an [IllegalArgumentException] if the specified [charSequence] [isEmpty]. */
-public fun requireNotEmpty(charSequence: CharSequence): CharSequence = charSequence.also { require(it.isNotEmpty()) }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun requireNotEmpty(charSequence: CharSequence): CharSequence = charSequence.also { require(it.isNotEmpty()) }
 
 /** Throws an [IllegalArgumentException] if the specified [string] [isEmpty]. */
-public fun requireNotEmpty(string: String): String = string.also { require(it.isNotEmpty()) }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun requireNotEmpty(string: String): String = string.also { require(it.isNotEmpty()) }
 
 /** Throws an [IllegalArgumentException] with the result of calling [lazyMessage] if the specified [charSequence] [isEmpty]. */
-public fun requireNotEmpty(charSequence: CharSequence, lazyMessage: () -> Any): CharSequence = charSequence.also { require(it.isNotEmpty(), lazyMessage) }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun requireNotEmpty(charSequence: CharSequence, lazyMessage: () -> Any): CharSequence =
+    charSequence.also { require(it.isNotEmpty(), lazyMessage) }
 
 /** Throws an [IllegalArgumentException] with the result of calling [lazyMessage] if the specified [string] [isEmpty]. */
-public fun requireNotEmpty(string: String, lazyMessage: () -> Any): String = string.also { require(it.isNotEmpty(), lazyMessage) }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun requireNotEmpty(string: String, lazyMessage: () -> Any): String = string.also { require(it.isNotEmpty(), lazyMessage) }
 
 /** Throws an [IllegalArgumentException] if the specified [charSequence] [isBlank]. */
-public fun requireNotBlank(charSequence: CharSequence): CharSequence = charSequence.also { require(charSequence.isNotBlank()) }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun requireNotBlank(charSequence: CharSequence): CharSequence = charSequence.also { require(charSequence.isNotBlank()) }
 
 /** Throws an [IllegalArgumentException] if the specified [string] [isBlank]. */
-public fun requireNotBlank(string: String): String = string.also { require(string.isNotBlank()) }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun requireNotBlank(string: String): String = string.also { require(string.isNotBlank()) }
 
 /** Throws an [IllegalArgumentException] with the result of calling [lazyMessage] if the specified [charSequence] [isBlank]. */
-public fun requireNotBlank(charSequence: CharSequence, lazyMessage: () -> Any): CharSequence = charSequence.also { require(it.isNotBlank(), lazyMessage) }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun requireNotBlank(charSequence: CharSequence, lazyMessage: () -> Any): CharSequence =
+    charSequence.also { require(it.isNotBlank(), lazyMessage) }
 
 /** Throws an [IllegalArgumentException] with the result of calling [lazyMessage] if the specified [string] [isBlank]. */
-public fun requireNotBlank(string: String, lazyMessage: () -> Any): String = string.also { require(it.isNotBlank(), lazyMessage) }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun requireNotBlank(string: String, lazyMessage: () -> Any): String = string.also { require(it.isNotBlank(), lazyMessage) }
 
 
 /** Throws an [IllegalStateException] if the specified [charSequence] [isEmpty]. */
-public fun checkNotEmpty(charSequence: CharSequence): CharSequence = charSequence.also { check(it.isNotEmpty()) }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun checkNotEmpty(charSequence: CharSequence): CharSequence = charSequence.also { check(it.isNotEmpty()) }
 
 /** Throws an [IllegalStateException] if the specified [string] [isEmpty]. */
-public fun checkNotEmpty(string: String): String = string.also { check(it.isNotEmpty()) }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun checkNotEmpty(string: String): String = string.also { check(it.isNotEmpty()) }
 
 /** Throws an [IllegalStateException] with the result of calling [lazyMessage] if the specified [charSequence] [isEmpty]. */
-public fun checkNotEmpty(charSequence: CharSequence, lazyMessage: () -> Any): CharSequence = charSequence.also { check(it.isNotEmpty(), lazyMessage) }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun checkNotEmpty(charSequence: CharSequence, lazyMessage: () -> Any): CharSequence = charSequence.also { check(it.isNotEmpty(), lazyMessage) }
 
 /** Throws an [IllegalStateException] with the result of calling [lazyMessage] if the specified [string] [isEmpty]. */
-public fun checkNotEmpty(string: String, lazyMessage: () -> Any): String = string.also { check(it.isNotEmpty(), lazyMessage) }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun checkNotEmpty(string: String, lazyMessage: () -> Any): String = string.also { check(it.isNotEmpty(), lazyMessage) }
 
 /** Throws an [IllegalStateException] if the specified [charSequence] [isBlank]. */
-public fun checkNotBlank(charSequence: CharSequence): CharSequence = charSequence.also { check(it.isNotBlank()) }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun checkNotBlank(charSequence: CharSequence): CharSequence = charSequence.also { check(it.isNotBlank()) }
 
 /** Throws an [IllegalStateException] if the specified [string] [isBlank]. */
-public fun checkNotBlank(string: String): String = string.also { check(it.isNotBlank()) }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun checkNotBlank(string: String): String = string.also { check(it.isNotBlank()) }
 
 /** Throws an [IllegalStateException] with the result of calling [lazyMessage] if the specified [charSequence] [isBlank]. */
-public fun checkNotBlank(charSequence: CharSequence, lazyMessage: () -> Any): CharSequence = charSequence.also { check(it.isNotBlank(), lazyMessage) }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun checkNotBlank(charSequence: CharSequence, lazyMessage: () -> Any): CharSequence = charSequence.also { check(it.isNotBlank(), lazyMessage) }
 
 /** Throws an [IllegalStateException] with the result of calling [lazyMessage] if the specified [string] [isBlank]. */
-public fun checkNotBlank(string: String, lazyMessage: () -> Any): String = string.also { check(it.isNotBlank(), lazyMessage) }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun checkNotBlank(string: String, lazyMessage: () -> Any): String = string.also { check(it.isNotBlank(), lazyMessage) }
 
 
 /** Returns this character sequence if it [isNotEmpty] or `null`, if it is. */
-public fun CharSequence.takeIfNotEmpty(): CharSequence? = takeIf { it.isNotEmpty() }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun CharSequence.takeIfNotEmpty(): CharSequence? = takeIf { it.isNotEmpty() }
 
 /** Returns this string if it [isNotEmpty] or `null`, if it is. */
-public fun String.takeIfNotEmpty(): String? = takeIf { it.isNotEmpty() }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun String.takeIfNotEmpty(): String? = takeIf { it.isNotEmpty() }
 
 /** Returns this character sequence if it [isNotBlank] or `null`, if it is. */
-public fun CharSequence.takeIfNotBlank(): CharSequence? = takeIf { it.isNotBlank() }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun CharSequence.takeIfNotBlank(): CharSequence? = takeIf { it.isNotBlank() }
 
 /** Returns this string if it [isNotBlank] or `null`, if it is. */
-public fun String.takeIfNotBlank(): String? = takeIf { it.isNotBlank() }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun String.takeIfNotBlank(): String? = takeIf { it.isNotBlank() }
 
 /** Returns this character sequence if it [isNotEmpty] or `null`, if it is. */
-public fun CharSequence.takeUnlessEmpty(): CharSequence? = takeUnless { it.isEmpty() }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun CharSequence.takeUnlessEmpty(): CharSequence? = takeUnless { it.isEmpty() }
 
 /** Returns this string if it [isNotEmpty] or `null`, if it is. */
-public fun String.takeUnlessEmpty(): String? = takeUnless { it.isEmpty() }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun String.takeUnlessEmpty(): String? = takeUnless { it.isEmpty() }
 
 /** Returns this character sequence if it [isNotBlank] or `null`, if it is. */
-public fun CharSequence.takeUnlessBlank(): CharSequence? = takeUnless { it.isBlank() }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun CharSequence.takeUnlessBlank(): CharSequence? = takeUnless { it.isBlank() }
 
 /** Returns this string if it [isNotBlank] or `null`, if it is. */
-public fun String.takeUnlessBlank(): String? = takeUnless { it.isBlank() }
+@Suppress("NOTHING_TO_INLINE")
+public inline fun String.takeUnlessBlank(): String? = takeUnless { it.isBlank() }
 
 private val ansiPatterns = listOf(
     @Suppress("RegExpRedundantEscape") // otherwise "lone quantifier brackets in JS"
@@ -155,6 +181,28 @@ public fun String.withRandomSuffix(): String =
 /** Creates a random string of the specified [length] made up of the specified [allowedCharacters]. */
 public fun randomString(length: Int = 16, vararg allowedCharacters: Char = (('0'..'9') + ('a'..'z') + ('A'..'Z')).toCharArray()): String =
     buildString(length) { repeat(length) { append(allowedCharacters[Random.nextInt(0, allowedCharacters.size)]) } }
+
+
+/**
+ * Returns the index within this string of the first occurrence of the specified character,
+ * starting from the specified [startIndex].
+ *
+ * @param ignoreCase `true` to ignore character case when matching a character. By default `false`.
+ * @return An index of the first occurrence of [char] or `null` if none is found.
+ */
+public fun CharSequence.indexOfOrNull(char: Char, startIndex: Int = 0, ignoreCase: Boolean = false): Int? =
+    indexOf(char, startIndex, ignoreCase).takeIf { it >= 0 }
+
+/**
+ * Returns the index within this char sequence of the first occurrence of the specified [string],
+ * starting from the specified [startIndex].
+ *
+ * @param ignoreCase `true` to ignore character case when matching a string. By default `false`.
+ * @return An index of the first occurrence of [string] or `null` if none is found.
+ */
+public fun CharSequence.indexOfOrNull(string: String, startIndex: Int = 0, ignoreCase: Boolean = false): Int? =
+    indexOf(string, startIndex, ignoreCase).takeIf { it >= 0 }
+
 
 /** Whether this string consists of more than one line. */
 public val CharSequence.isMultiline: Boolean get() = lineSequence().take(2).count() > 1

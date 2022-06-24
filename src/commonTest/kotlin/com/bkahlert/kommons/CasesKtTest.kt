@@ -1,5 +1,6 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.test.test
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.test.Test
@@ -7,7 +8,7 @@ import kotlin.test.Test
 class CasesKtTest {
 
     @Test
-    fun is_lower_case() = tests {
+    fun is_lower_case() = test {
         'a'.isLowerCase() shouldBe true
         'A'.isLowerCase() shouldBe false
         '9'.isLowerCase() shouldBe false
@@ -15,7 +16,7 @@ class CasesKtTest {
     }
 
     @Test
-    fun is_upper_case() = tests {
+    fun is_upper_case() = test {
         'a'.isUpperCase() shouldBe false
         'A'.isUpperCase() shouldBe true
         '9'.isUpperCase() shouldBe false
@@ -23,7 +24,7 @@ class CasesKtTest {
     }
 
     @Test
-    fun capitalize_char_sequence() = tests {
+    fun capitalize_char_sequence() = test {
         charSequence_aa.capitalize() shouldBe "Aa"
         charSequence_aA.capitalize() shouldBe "AA"
         charSequence_a9.capitalize() shouldBe "A9"
@@ -43,7 +44,7 @@ class CasesKtTest {
     }
 
     @Test
-    fun capitalize_string() = tests {
+    fun capitalize_string() = test {
         string_aa.capitalize() shouldBe "Aa"
         string_aA.capitalize() shouldBe "AA"
         string_a9.capitalize() shouldBe "A9"
@@ -64,7 +65,7 @@ class CasesKtTest {
 
     @Suppress("SpellCheckingInspection")
     @Test
-    fun decapitalize_char_sequence() = tests {
+    fun decapitalize_char_sequence() = test {
         charSequence_aa.decapitalize() shouldBeSameInstanceAs charSequence_aa
         charSequence_aA.decapitalize() shouldBeSameInstanceAs charSequence_aA
         charSequence_a9.decapitalize() shouldBeSameInstanceAs charSequence_a9
@@ -85,7 +86,7 @@ class CasesKtTest {
 
     @Suppress("SpellCheckingInspection")
     @Test
-    fun decapitalize_string() = tests {
+    fun decapitalize_string() = test {
         string_aa.decapitalize() shouldBeSameInstanceAs string_aa
         string_aA.decapitalize() shouldBeSameInstanceAs string_aA
         string_a9.decapitalize() shouldBeSameInstanceAs string_a9

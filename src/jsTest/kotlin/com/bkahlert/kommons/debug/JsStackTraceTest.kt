@@ -1,6 +1,6 @@
 package com.bkahlert.kommons.debug
 
-import com.bkahlert.kommons.tests
+import com.bkahlert.kommons.test.test
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.should
@@ -10,7 +10,7 @@ import kotlin.test.Test
 
 class JsStackTraceTest {
 
-    @Test fun find_by_last_known_call_null() = tests {
+    @Test fun find_by_last_known_call_null() = test {
         foo { bar { StackTrace.get().findByLastKnownCallsOrNull("bar") } } should { it?.demangledFunction shouldBe "foo" }
         foo { bar { StackTrace.get().findByLastKnownCallsOrNull(::bar) } } should { it?.demangledFunction shouldBe "foo" }
 
@@ -21,7 +21,7 @@ class JsStackTraceTest {
         foo { bar { StackTrace.get().findByLastKnownCallsOrNull(String::toString) } }.shouldBeNull()
     }
 
-    @Test fun parse() = tests {
+    @Test fun parse() = test {
         JsStackTraceElement.parseOrNull("").shouldBeNull()
         JsStackTraceElement.parseOrNull("AnyReceiver.anyFun_hash_k\$ ($file:5:20)") shouldBe stackTraceElementWithReceiverAndFunction
         JsStackTraceElement.parseOrNull("AnyReceiver.<anonymous> ($file:5:20)") shouldBe stackTraceElementWithReceiverAndAnonymousFunction
@@ -29,7 +29,7 @@ class JsStackTraceTest {
         JsStackTraceElement.parseOrNull("$file:5:20") shouldBe stackTraceElement
     }
 
-    @Test fun get_firefox_stack_trace() = tests {
+    @Test fun get_firefox_stack_trace() = test {
         StackTrace.get { firefoxStackTrace.lineSequence() }.shouldContainExactly(
             JsStackTraceElement(null, "trace", "webpack-internal:///./kotlin/hello.js", 1949, 35),
             JsStackTraceElement(null, "trace\$default", "webpack-internal:///./kotlin/hello.js", 2149, 12),
@@ -46,7 +46,7 @@ class JsStackTraceTest {
         )
     }
 
-    @Test fun get_chrome_stack_trace() = tests {
+    @Test fun get_chrome_stack_trace() = test {
         StackTrace.get { chromeStackTrace.lineSequence() }.shouldContainExactly(
             JsStackTraceElement(null, "trace", "webpack-internal:///./kotlin/hello.js", 1949, 35),
             JsStackTraceElement(null, "trace\$default", "webpack-internal:///./kotlin/hello.js", 2149, 12),
@@ -62,7 +62,7 @@ class JsStackTraceTest {
     }
 
     @Suppress("SpellCheckingInspection")
-    @Test fun get_headless_chrome_stack_trace() = tests {
+    @Test fun get_headless_chrome_stack_trace() = test {
         StackTrace.get { headlessChromeStackTrace.lineSequence() }.shouldContainExactly(
             JsStackTraceElement(null, "trace", "http://localhost:9876/absolute/karma/commons.js?16bb", 40617, 35),
             JsStackTraceElement(null, "trace\$default", "http://localhost:9876/absolute/karma/commons.js?16bb", 40817, 12),
@@ -77,12 +77,12 @@ class JsStackTraceTest {
         )
     }
 
-    @Test fun equality() = tests {
+    @Test fun equality() = test {
         stackTraceElementWithFunction shouldNotBe JsStackTraceElement(null, null, file, 5, 20)
         stackTraceElement shouldBe JsStackTraceElement(null, null, file, 5, 20)
     }
 
-    @Test fun to_string() = tests {
+    @Test fun to_string() = test {
         stackTraceElementWithReceiverAndFunction.toString() shouldBe "AnyReceiver.anyFun_hash_k\$ ($file:5:20)"
         stackTraceElementWithReceiverAndAnonymousFunction.toString() shouldBe "AnyReceiver.<anonymous> ($file:5:20)"
         stackTraceElementWithFunction.toString() shouldBe "anyFun ($file:5:20)"

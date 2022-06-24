@@ -51,19 +51,13 @@ public interface Locations {
          */
         public val Default: Locations = object : Locations {
 
-            /**
-             * Working directory, that is, the directory in which this binary is located.
-             */
+            /** Working directory, that is, the directory in which this binary is located. */
             override val Work: Path = FileSystems.getDefault().getPath("").toAbsolutePath()
 
-            /**
-             * Home directory of the currently logged-in user.
-             */
+            /** Home directory of the currently logged-in user. */
             override val Home: Path = Paths.get(System.getProperty("user.home"))
 
-            /**
-             * Directory in which temporary data can be stored.
-             */
+            /** Directory in which temporary data can be stored. */
             override val Temp: Path = Paths.get(System.getProperty("java.io.tmpdir"))
 
             /** Directory of the currently running Java distribution. */

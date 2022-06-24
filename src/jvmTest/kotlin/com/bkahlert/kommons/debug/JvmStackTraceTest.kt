@@ -1,6 +1,6 @@
 package com.bkahlert.kommons.debug
 
-import com.bkahlert.kommons.tests
+import com.bkahlert.kommons.test.test
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 
 class JvmStackTraceTest {
 
-    @Test fun find_by_last_known_call_null() = tests {
+    @Test fun find_by_last_known_call_null() = test {
         val receiver = "com.bkahlert.kommons.debug.StackTraceKtTestKt"
         foo { bar { StackTrace.get().findByLastKnownCallsOrNull(receiver to "bar") } } should { it?.function shouldBe "foo" }
         foo { bar { StackTrace.get().findByLastKnownCallsOrNull("bar") } } should { it?.function shouldBe "foo" }
@@ -24,12 +24,12 @@ class JvmStackTraceTest {
         foo { bar { StackTrace.get().findByLastKnownCallsOrNull(String::toString) } }.shouldBeNull()
     }
 
-    @Test fun equality() = tests {
+    @Test fun equality() = test {
         stackTraceElementWithColumn shouldNotBe JvmStackTraceElement("any.package.AnyReceiver", "anyFun", file, 5, null)
         stackTraceElement shouldBe JvmStackTraceElement("any.package.AnyReceiver", "anyFun", file, 5, null)
     }
 
-    @Test fun to_string() = tests {
+    @Test fun to_string() = test {
         stackTraceElementWithColumn.toString() shouldBe "any.package.AnyReceiver.anyFun($file:5:20)"
         stackTraceElementWithNegativeLine.toString() shouldBe "any.package.AnyReceiver.anyFun($file:-5)"
         stackTraceElement.toString() shouldBe "any.package.AnyReceiver.anyFun($file:5)"

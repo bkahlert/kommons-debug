@@ -7,7 +7,7 @@ import kotlin.js.json
  * Special version of [inspectJs] that inspects the structure of
  * each object, no matter if a custom [Any.toString] exists or not.
  */
-@Suppress("GrazieInspection", "DEPRECATION")
+@Suppress("GrazieInspection", "DEPRECATION", "unused")
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
 public inline val <T> T.inspectJs: T get(): T = inspectJs()
 
@@ -33,7 +33,7 @@ public inline val <T> T.inspectJs: T get(): T = inspectJs()
  * will be printed.
  */
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
-@Suppress("GrazieInspection", "DEPRECATION")
+@Suppress("GrazieInspection", "DEPRECATION", "unused")
 public inline fun <T> T.inspectJs(
     caption: CharSequence? = null,
     includeCallSite: Boolean = true,
