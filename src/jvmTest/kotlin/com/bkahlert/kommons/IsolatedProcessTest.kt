@@ -43,7 +43,7 @@ class TestClass {
         fun main(vararg args: String) {
             kotlin.runCatching {
                 val file = Paths.get(args.first())
-                require(file.isSubPathOf(Locations.Default.Temp))
+                require(file.isSubPathOf(SystemLocations.Temp))
                 file.writeText("foo")
             }.onFailure { exitProcess(1) }
         }

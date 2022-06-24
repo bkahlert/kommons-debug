@@ -1,6 +1,8 @@
 package com.bkahlert.kommons
 
 import com.bkahlert.kommons.test.junit.testEach
+import com.bkahlert.kommons.test.tempDir
+import com.bkahlert.kommons.test.tempFile
 import com.bkahlert.kommons.test.test
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -23,16 +25,16 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
-class LocationsKtTest {
+class DefaultLocationsTest {
 
     @Nested
     inner class DefaultLocations {
 
         @TestFactory fun paths() = testEach(
-            Locations.Default.Work,
-            Locations.Default.Home,
-            Locations.Default.Temp,
-            Locations.Default.JavaHome,
+            SystemLocations.Work,
+            SystemLocations.Home,
+            SystemLocations.Temp,
+            SystemLocations.JavaHome,
         ) {
             it.shouldBeAbsolute()
             it.shouldExist()
@@ -41,13 +43,13 @@ class LocationsKtTest {
     }
 
     @Nested
-    inner class RunWithTempDir {
+    inner class WithTempDirectory {
 
         @Test
         fun `should run inside temp dir`() {
-            val tempDir: Path = runWithTempDir {
+            val tempDir: Path = withTempDirectory {
                 this should {
-                    it.isSubPathOf(Locations.Default.Temp) shouldBe true
+                    it.isSubPathOf(SystemLocations.Temp) shouldBe true
                     it.shouldBeADirectory()
                 }
                 this

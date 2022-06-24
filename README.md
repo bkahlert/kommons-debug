@@ -13,14 +13,14 @@
 
 Kommons Debug is hosted on GitHub with releases provided on Maven Central.
 
-* **Gradle** `implementation("com.bkahlert.kommons:kommons-debug:0.6.1")`
+* **Gradle** `implementation("com.bkahlert.kommons:kommons-debug:0.7.0")`
 
 * **Maven**
   ```xml
   <dependency>
       <groupId>com.bkahlert.kommons</groupId>
       <artifactId>kommons-debug</artifactId>
-      <version>0.6.1</version>
+      <version>0.7.0</version>
   </dependency>
   ```
 
@@ -179,17 +179,24 @@ Compute `MD5`, `SHA-1`, and `SHA-256` checksums for arbitrary files.
 #### Examples
 
 ```kotlin
-val file = Locations.Default.Home / ".gitconfig"
-file.computeMd5Checksum()
-file.computeSha1Checksum()
-file.computeSha256Checksum()
+val file = SystemLocations.Home / ".gitconfig"
+file.md5Checksum()
+file.sha1Checksum()
+file.sha256Checksum()
 ```
 
 ### File Handling \[only JVM\]
 
-Easily access your working directory with `Locations.Default.Work`,
-your home directory with `Locations.Default.Home` and your system's
-temporary directory with `Locations.Default.Temp`.
+Easily access your working directory with `SystemLocations.Work`,
+your home directory with `SystemLocations.Home` and your system's
+temporary directory with `SystemLocations.Temp`.
+
+Create files with contents in one call using
+
+- `createTextFile`
+- `createBinaryFile`
+- `createTempTextFile`
+- `createTempBinaryFile`
 
 Safely read files with
 `useInputStream`, `useBufferedInputStream`, `useReader`, and `useBufferedReader`,
@@ -223,7 +230,7 @@ Access a class path resource like any other NIO 2 path using `ClassPath`.
 ```kotlin
 ClassPath("dir/to/resource").readText()
 ClassPath("dir/to/resource").readBytes()
-ClassPath("dir/to/resource").copyToDirectory(Locations.Default.Temp)
+ClassPath("dir/to/resource").copyToDirectory(SystemLocations.Temp)
 ClassPath("dir/to/resource").useBufferedReader { it.readLine() }
 ```
 
@@ -333,8 +340,8 @@ Iterate any type of closed ranges using `asIterable`.
 
 ```kotlin
 (-4.2..42.0)
-  .asIterable { it + 9 }
-  .map { it.toInt() } // [-4, 4, 13, 22, 31, 40]
+    .asIterable { it + 9 }
+    .map { it.toInt() } // [-4, 4, 13, 22, 31, 40]
 ```
 
 ### Time Operations

@@ -31,9 +31,8 @@ import java.nio.file.StandardOpenOption.READ
 import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
 import java.nio.file.StandardOpenOption.WRITE
 import java.nio.file.attribute.BasicFileAttributeView
+import java.nio.file.attribute.FileAttribute
 import java.nio.file.attribute.FileTime
-import java.security.DigestInputStream
-import java.security.MessageDigest
 import java.time.Instant
 import java.util.concurrent.locks.ReentrantLock
 import java.util.stream.Stream
@@ -43,6 +42,9 @@ import kotlin.io.path.bufferedReader
 import kotlin.io.path.bufferedWriter
 import kotlin.io.path.copyTo
 import kotlin.io.path.createDirectories
+import kotlin.io.path.createFile
+import kotlin.io.path.createTempDirectory
+import kotlin.io.path.createTempFile
 import kotlin.io.path.exists
 import kotlin.io.path.forEachDirectoryEntry
 import kotlin.io.path.getLastModifiedTime
@@ -52,10 +54,132 @@ import kotlin.io.path.outputStream
 import kotlin.io.path.pathString
 import kotlin.io.path.reader
 import kotlin.io.path.setLastModifiedTime
+import kotlin.io.path.writeBytes
+import kotlin.io.path.writeText
 import kotlin.io.path.writer
 import kotlin.streams.asSequence
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+
+/**
+ * Creates an empty file in the directory specified by this path, using
+ * the given [prefix] and [suffix] to generate its name.
+ *
+ * @see createTempFile
+ */
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IOException::class)
+public inline fun Path.createTempFile(prefix: String? = null, suffix: String? = null, vararg attributes: FileAttribute<*>): Path =
+    createTempFile(this, prefix, suffix, *attributes)
+
+/**
+ * Creates a new directory in the directory specified by this path, using
+ * the given [prefix] to generate its name.
+ *
+ * @see createTempDirectory
+ */
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IOException::class)
+public inline fun Path.createTempDirectory(prefix: String? = null, vararg attributes: FileAttribute<*>): Path =
+    createTempDirectory(this, prefix, *attributes)
+
+/**
+ * Creates a new file in the default temp directory, using
+ * the given [prefix] and [suffix] to generate its name,
+ * the specified [attributes] and [text] encoded using UTF-8 or the specified [charset].
+ *
+ * @see createTempFile
+ */
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IOException::class)
+public inline fun createTempTextFile(
+    text: CharSequence,
+    charset: Charset = Charsets.UTF_8,
+    prefix: String? = null,
+    suffix: String? = null,
+    vararg attributes: FileAttribute<*>
+): Path = createTempFile(prefix, suffix, *attributes).apply { writeText(text, charset) }
+
+/**
+ * Creates a new file in the default temp directory, using
+ * the given [prefix] and [suffix] to generate its name,
+ * the specified [attributes] and [bytes].
+ *
+ * @see createTempFile
+ */
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IOException::class)
+public inline fun createTempBinaryFile(
+    bytes: ByteArray,
+    prefix: String? = null,
+    suffix: String? = null,
+    vararg attributes: FileAttribute<*>
+): Path = createTempFile(prefix, suffix, *attributes).apply { writeBytes(bytes) }
+
+/**
+ * Creates a new file in the directory specified by this path, using
+ * the given [prefix] and [suffix] to generate its name,
+ * the specified [attributes] and [text] encoded using UTF-8 or the specified [charset].
+ *
+ * @see createTempFile
+ */
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IOException::class)
+public inline fun Path.createTempTextFile(
+    text: CharSequence,
+    charset: Charset = Charsets.UTF_8,
+    prefix: String? = null,
+    suffix: String? = null,
+    vararg attributes: FileAttribute<*>
+): Path = createTempFile(prefix, suffix, *attributes).apply { writeText(text, charset) }
+
+/**
+ * Creates a new file in the directory specified by this path, using
+ * the given [prefix] and [suffix] to generate its name,
+ * the specified [attributes] and [bytes].
+ *
+ * @see createTempFile
+ */
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IOException::class)
+public inline fun Path.createTempBinaryFile(
+    bytes: ByteArray,
+    prefix: String? = null,
+    suffix: String? = null,
+    vararg attributes: FileAttribute<*>
+): Path = createTempFile(prefix, suffix, *attributes).apply { writeBytes(bytes) }
+
+/**
+ * Creates a new file specified by this path, using
+ * the specified [attributes] and [text] encoded using UTF-8 or the specified [charset],
+ * failing if the file already exists.
+ *
+ * @see createFile
+ * @see writeText
+ */
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IOException::class)
+public inline fun Path.createTextFile(
+    text: CharSequence,
+    charset: Charset = Charsets.UTF_8,
+    vararg attributes: FileAttribute<*>
+): Path = createFile(*attributes).apply { writeText(text, charset) }
+
+/**
+ * Creates a new file specified by this path, using
+ * the specified [attributes] and [bytes],
+ * failing if the file already exists.
+ *
+ * @see createFile
+ * @see writeBytes
+ */
+@Suppress("NOTHING_TO_INLINE")
+@Throws(IOException::class)
+public inline fun Path.createBinaryFile(
+    bytes: ByteArray,
+    vararg attributes: FileAttribute<*>
+): Path = createFile(*attributes).apply { writeBytes(bytes) }
+
 
 /**
  * Checks if the file located by the **normalized** path is a directory.
@@ -67,47 +191,45 @@ import kotlin.time.Duration.Companion.milliseconds
  * @see Files.isDirectory
  */
 @Suppress("NOTHING_TO_INLINE")
-public inline fun Path.isDirectoryNormalized(vararg options: LinkOption): Boolean =
+public inline fun Path.isNormalizedDirectory(vararg options: LinkOption): Boolean =
     Files.isDirectory(normalize(), *options)
 
 /**
- * Checks if the file located by the **normalized** path is a directory,
+ * Checks if the [file] located by the **normalized** path is a directory,
  * or throws an [IllegalArgumentException] otherwise.
  */
-public fun Path.requireDirectoryNormalized(vararg options: LinkOption): Path =
-    apply { require(isDirectoryNormalized(*options)) { "${normalize()} is no directory" } }
+public fun requireNormalizedDirectory(file: Path, vararg options: LinkOption): Path =
+    file.apply { require(isNormalizedDirectory(*options)) { "${normalize()} is no directory" } }
 
 /**
- * Checks if the file located by the **normalized** path is a directory,
+ * Checks if the [file] located by the **normalized** path is a directory,
  * or throws an [IllegalStateException] otherwise.
  */
-public fun Path.checkDirectoryNormalized(vararg options: LinkOption): Path =
-    apply { check(isDirectoryNormalized(*options)) { "${normalize()} is no directory" } }
+public fun checkNormalizedDirectory(file: Path, vararg options: LinkOption): Path =
+    file.apply { check(isNormalizedDirectory(*options)) { "${normalize()} is no directory" } }
 
 /**
- * Checks if the file located by the **normalized** path is **no** directory,
+ * Checks if the [file] located by the **normalized** path is **no** directory,
  * or throws an [IllegalArgumentException] otherwise.
  */
-public fun Path.requireNoDirectoryNormalized(vararg options: LinkOption): Path =
-    apply { require(!isDirectoryNormalized(*options)) { "${normalize()} is a directory" } }
+public fun requireNoDirectoryNormalized(file: Path, vararg options: LinkOption): Path =
+    file.apply { require(!isNormalizedDirectory(*options)) { "${normalize()} is a directory" } }
 
 /**
- * Checks if the file located by the **normalized** path is **no** directory,
+ * Checks if the [file] located by the **normalized** path is **no** directory,
  * or throws an [IllegalStateException] otherwise.
  */
-public fun Path.checkNoDirectoryNormalized(vararg options: LinkOption): Path =
-    apply { check(!isDirectoryNormalized(*options)) { "${normalize()} is a directory" } }
+public fun checkNoDirectoryNormalized(file: Path, vararg options: LinkOption): Path =
+    file.apply { check(!isNormalizedDirectory(*options)) { "${normalize()} is a directory" } }
 
-/**
- * Alias for [isSubPathOf].
- */
+
+/** Alias for [isSubPathOf]. */
 public fun Path.isInside(path: Path): Boolean = isSubPathOf(path)
 
-/**
- * Returns whether this path is a sub path of [path].
- */
+/** Returns whether this path is a sub path of [path]. */
 public fun Path.isSubPathOf(path: Path): Boolean =
     normalize().toAbsolutePath().startsWith(path.normalize().toAbsolutePath())
+
 
 /**
  * Returns this [Path] with all parent directories created.
@@ -153,44 +275,6 @@ public var Path.lastModified: FileTime
         Files.setLastModifiedTime(this, fileTime)
     }
 
-/** Provider for [MessageDigest] implementations safe to use on all Java platforms. */
-public enum class MessageDigestProvider : () -> MessageDigest {
-    MD5, @Suppress("EnumEntryName") `SHA-1`, @Suppress("EnumEntryName") `SHA-256`;
-
-    public override operator fun invoke(): MessageDigest =
-        checkNotNull(MessageDigest.getInstance(name)) { "Failed to instantiate $name message digest" }
-}
-
-/** Computes the hash of this file using the specified [messageDigestProvider]. */
-public fun Path.computeHash(messageDigestProvider: () -> MessageDigest = MessageDigestProvider.`SHA-256`): ByteArray =
-    DigestInputStream(inputStream(), messageDigestProvider()).use {
-        while (it.read() != -1) {
-            // clear data
-        }
-        it.messageDigest.digest()
-    }
-
-/**
- * Computes the hash of this file using the specified [messageDigestProvider]
- * and returns it formatted as a checksum.
- */
-public fun Path.computeChecksum(messageDigestProvider: () -> MessageDigest = MessageDigestProvider.`SHA-256`): String =
-    computeHash(messageDigestProvider).toHexadecimalString()
-
-/**
- * Computes the [MessageDigestProvider.MD5] hash of this file and returns it formatted as a checksum.
- */
-public fun Path.computeMd5Checksum(): String = computeChecksum(MessageDigestProvider.MD5)
-
-/**
- * Computes the [MessageDigests.SHA-1] hash of this file and returns it formatted as a checksum.
- */
-public fun Path.computeSha1Checksum(): String = computeChecksum(MessageDigestProvider.`SHA-1`)
-
-/**
- * Computes the [MessageDigests.SHA-256] hash of this file and returns it formatted as a checksum.
- */
-public fun Path.computeSha256Checksum(): String = computeChecksum(MessageDigestProvider.`SHA-256`)
 
 /**
  * Resolves the specified [path] against this path
@@ -213,6 +297,24 @@ public fun Path.resolveBetweenFileSystems(path: Path): Path =
         else -> path.fold(this) { acc, segment -> acc.resolve("$segment") }
     }
 
+
+/**
+ * Returns this [Path] with a path segment added.
+ *
+ * The path segment is created based on [prefix] and [suffix],
+ * joined with a random string.
+ *
+ * The newly created [Path] is guaranteed to not already exist.
+ */
+public tailrec fun Path.resolveRandom(prefix: String = randomString(4), suffix: String = ""): Path {
+    val minLength = 6
+    val length = prefix.length + suffix.length
+    val randomSuffix = randomString((minLength - length).coerceAtLeast(3))
+    val randomPath = resolve("${prefix.takeUnlessEmpty()?.let { "$it--" } ?: ""}$randomSuffix$suffix")
+    return randomPath.takeUnless { it.exists() } ?: resolveRandom(prefix, suffix)
+}
+
+
 /**
  * Returns a path based on the following rules:
  * - If this path **is no directory** it is returned.
@@ -221,7 +323,7 @@ public fun Path.resolveBetweenFileSystems(path: Path): Path =
  * Use [options] to control how symbolic links are handled.
  */
 public fun Path.resolveFile(vararg options: LinkOption, computeFileName: () -> Path): Path =
-    if (isDirectoryNormalized(*options)) resolve(computeFileName()).checkNoDirectoryNormalized(*options) else this
+    if (isNormalizedDirectory(*options)) checkNoDirectoryNormalized(resolve(computeFileName()), *options) else this
 
 /**
  * Returns a path based on the following rules:
@@ -231,7 +333,7 @@ public fun Path.resolveFile(vararg options: LinkOption, computeFileName: () -> P
  * Use [options] to control how symbolic links are handled.
  */
 public fun Path.resolveFile(fileName: Path, vararg options: LinkOption): Path =
-    if (isDirectoryNormalized(*options)) resolve(fileName).checkNoDirectoryNormalized(*options) else this
+    if (isNormalizedDirectory(*options)) checkNoDirectoryNormalized(resolve(fileName), *options) else this
 
 /**
  * Returns a path based on the following rules:
@@ -241,7 +343,7 @@ public fun Path.resolveFile(fileName: Path, vararg options: LinkOption): Path =
  * Use [options] to control how symbolic links are handled.
  */
 public fun Path.resolveFile(fileName: String, vararg options: LinkOption): Path =
-    if (isDirectoryNormalized(*options)) resolve(fileName).checkNoDirectoryNormalized(*options) else this
+    if (isNormalizedDirectory(*options)) checkNoDirectoryNormalized(resolve(fileName), *options) else this
 
 
 private fun Path.getPathMatcher(glob: String): PathMatcher? {

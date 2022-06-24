@@ -21,10 +21,11 @@ import io.kotest.matchers.paths.shouldNotBeEmptyDirectory
 import io.kotest.matchers.paths.shouldNotExist
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldEndWith
+import io.kotest.matchers.string.shouldStartWith
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
-import java.io.IOException
 import java.net.URI
 import java.net.URL
 import java.nio.file.DirectoryNotEmptyException
@@ -44,11 +45,11 @@ import kotlin.io.path.createFile
 import kotlin.io.path.div
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
+import kotlin.io.path.isRegularFile
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.pathString
 import kotlin.io.path.readBytes
 import kotlin.io.path.readText
-import kotlin.io.path.writeBytes
 import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
@@ -56,34 +57,86 @@ import kotlin.time.Duration.Companion.seconds
 
 class PathsKtTest {
 
-    @Test fun is_directory_normalized(@TempDir tempDir: Path) = test {
-        tempDir.isDirectoryNormalized() shouldBe true
-        (tempDir / "foo" / "..").isDirectoryNormalized() shouldBe true
-        (tempDir / "foo").isDirectoryNormalized() shouldBe false
+    @Test fun create_temp_file(@TempDir tempDir: Path) = test {
+        tempDir.createTempFile() should {
+            it.shouldExist()
+            it.isRegularFile()
+            it.parent.pathString shouldBe kotlin.io.path.createTempFile(tempDir).parent.pathString
+        }
     }
 
-    @Test fun require_directory_normalized(@TempDir tempDir: Path) = test {
-        tempDir should { it.requireDirectoryNormalized() shouldBe it }
-        tempDir / "foo" / ".." should { it.requireDirectoryNormalized() shouldBe it }
-        shouldThrow<IllegalArgumentException> { (tempDir / "foo").requireDirectoryNormalized() }
+    @Test fun create_temp_directory(@TempDir tempDir: Path) = test {
+        tempDir.createTempDirectory() should {
+            it.shouldExist()
+            it.isDirectory()
+            it.parent.pathString shouldBe kotlin.io.path.createTempDirectory(tempDir).parent.pathString
+        }
     }
 
-    @Test fun check_directory_normalized(@TempDir tempDir: Path) = test {
-        tempDir should { it.checkDirectoryNormalized() shouldBe it }
-        tempDir / "foo" / ".." should { it.checkDirectoryNormalized() shouldBe it }
-        shouldThrow<IllegalStateException> { (tempDir / "foo").checkDirectoryNormalized() }
+    @Test fun create_temp_text_file(@TempDir tempDir: Path) = test {
+        createTempTextFile("text") should {
+            it.shouldExist()
+            it.readText() shouldBe "text"
+        }
+        tempDir.createTempTextFile("text") should {
+            it.shouldExist()
+            it.readText() shouldBe "text"
+        }
     }
 
-    @Test fun require_no_directory_normalized(@TempDir tempDir: Path) = test {
-        shouldThrow<IllegalArgumentException> { tempDir.requireNoDirectoryNormalized() }
-        shouldThrow<IllegalArgumentException> { (tempDir / "foo" / "..").requireNoDirectoryNormalized() }
-        tempDir / "foo" should { it.requireNoDirectoryNormalized() shouldBe it }
+    @Test fun create_temp_binary_file(@TempDir tempDir: Path) = test {
+        createTempBinaryFile(bytes) should {
+            it.shouldExist()
+            it.readBytes() shouldBe bytes
+        }
+        tempDir.createTempBinaryFile(bytes) should {
+            it.shouldExist()
+            it.readBytes() shouldBe bytes
+        }
     }
 
-    @Test fun check_no_directory_normalized(@TempDir tempDir: Path) = test {
-        shouldThrow<IllegalStateException> { tempDir.checkNoDirectoryNormalized() }
-        shouldThrow<IllegalStateException> { (tempDir / "foo" / "..").checkNoDirectoryNormalized() }
-        tempDir / "foo" should { it.checkNoDirectoryNormalized() shouldBe it }
+    @Test fun create_text_file(@TempDir tempDir: Path) = test {
+        tempDir.resolve("file.txt").createTextFile("text") should {
+            it.shouldExist()
+            it.readText() shouldBe "text"
+        }
+    }
+
+    @Test fun create_binary_file(@TempDir tempDir: Path) = test {
+        tempDir.resolve("file").createBinaryFile(bytes) should {
+            it.shouldExist()
+            it.readBytes() shouldBe bytes
+        }
+    }
+
+    @Test fun is_normalized_directory(@TempDir tempDir: Path) = test {
+        tempDir.isNormalizedDirectory() shouldBe true
+        (tempDir / "foo" / "..").isNormalizedDirectory() shouldBe true
+        (tempDir / "foo").isNormalizedDirectory() shouldBe false
+    }
+
+    @Test fun require_normalized_directory(@TempDir tempDir: Path) = test {
+        tempDir should { requireNormalizedDirectory(it) shouldBe it }
+        tempDir / "foo" / ".." should { requireNormalizedDirectory(it) shouldBe it }
+        shouldThrow<IllegalArgumentException> { requireNormalizedDirectory(tempDir / "foo") }
+    }
+
+    @Test fun check_normalized_directory(@TempDir tempDir: Path) = test {
+        tempDir should { checkNormalizedDirectory(it) shouldBe it }
+        tempDir / "foo" / ".." should { checkNormalizedDirectory(it) shouldBe it }
+        shouldThrow<IllegalStateException> { checkNormalizedDirectory(tempDir / "foo") }
+    }
+
+    @Test fun require_normalized_no_directory(@TempDir tempDir: Path) = test {
+        shouldThrow<IllegalArgumentException> { requireNoDirectoryNormalized(tempDir) }
+        shouldThrow<IllegalArgumentException> { requireNoDirectoryNormalized(tempDir / "foo" / "..") }
+        tempDir / "foo" should { requireNoDirectoryNormalized(it) shouldBe it }
+    }
+
+    @Test fun check_normalized_no_directory(@TempDir tempDir: Path) = test {
+        shouldThrow<IllegalStateException> { checkNoDirectoryNormalized(tempDir) }
+        shouldThrow<IllegalStateException> { checkNoDirectoryNormalized(tempDir / "foo" / "..") }
+        tempDir / "foo" should { checkNoDirectoryNormalized(it) shouldBe it }
     }
 
     @Nested
@@ -153,7 +206,7 @@ class PathsKtTest {
 
         @Test
         fun `should read created`(@TempDir tempDir: Path) = test {
-            tempDir.randomFile().created.toInstant() should {
+            tempDir.createTempFile().created.toInstant() should {
                 it shouldBeLessThan (Now + 1.minutes)
                 it shouldBeGreaterThan (Now - 1.minutes)
             }
@@ -161,7 +214,7 @@ class PathsKtTest {
 
         @Test
         fun `should write created`(@TempDir tempDir: Path) = test {
-            tempDir.randomFile().apply {
+            tempDir.createTempFile().apply {
                 created = (Now - 20.minutes).toFileTime()
             }.created should {
                 it shouldBeLessThan (Now + 21.minutes).toFileTime()
@@ -175,7 +228,7 @@ class PathsKtTest {
 
         @Test
         fun `should read last accessed`(@TempDir tempDir: Path) = test {
-            tempDir.randomFile().lastAccessed.toInstant() should {
+            tempDir.createTempFile().lastAccessed.toInstant() should {
                 it shouldBeLessThan (Now + 1.minutes)
                 it shouldBeGreaterThan (Now - 1.minutes)
             }
@@ -183,7 +236,7 @@ class PathsKtTest {
 
         @Test
         fun `should write last accessed`(@TempDir tempDir: Path) = test {
-            tempDir.randomFile().apply {
+            tempDir.createTempFile().apply {
                 lastAccessed = FileTime.from(Now - 20.minutes)
             }.lastAccessed.toInstant() should {
                 it shouldBeLessThan (Now + 21.minutes)
@@ -197,7 +250,7 @@ class PathsKtTest {
 
         @Test
         fun `should read last modified`(@TempDir tempDir: Path) = test {
-            tempDir.randomFile().lastModified.toInstant() should {
+            tempDir.createTempFile().lastModified.toInstant() should {
                 it shouldBeLessThan (Now + 1.minutes)
                 it shouldBeGreaterThan (Now - 1.minutes)
             }
@@ -205,7 +258,7 @@ class PathsKtTest {
 
         @Test
         fun `should write last modified`(@TempDir tempDir: Path) = test {
-            tempDir.randomFile().apply {
+            tempDir.createTempFile().apply {
                 lastModified = FileTime.from(Now - 20.minutes)
             }.lastModified.toInstant() should {
                 it shouldBeLessThan (Now + 21.minutes)
@@ -214,83 +267,17 @@ class PathsKtTest {
         }
     }
 
-    @Nested
-    inner class ComputeHash {
-
-        private fun byteArrayOf(vararg bytes: Int) =
-            bytes.map { it.toByte() }.toByteArray()
-
-        private val bytes = byteArrayOf(Byte.MIN_VALUE, -1, 0, 1, Byte.MAX_VALUE)
-
-        @Test
-        fun `should compute hash`(@TempDir tempDir: Path) = test {
-            val file = (tempDir / "md5").apply { writeBytes(bytes) }
-            file.computeHash(MessageDigestProvider.MD5) shouldBe byteArrayOf(
-                0x0A, 0x12, 0xF1, 0xE7, 0xD3, 0x46, 0xDE, 0x6D,
-                0x51, 0xE7, 0x78, 0x8F, 0xE8, 0x7E, 0xCC, 0xD3,
-            )
-            file.computeHash(MessageDigestProvider.`SHA-1`) shouldBe byteArrayOf(
-                0x44, 0x5D, 0x11, 0xBD, 0xF8, 0x71, 0x3F, 0x3D, 0x7F, 0xA1,
-                0x33, 0x5B, 0x14, 0x1A, 0x77, 0x98, 0x27, 0x2C, 0xF7, 0x81,
-            )
-            file.computeHash(MessageDigestProvider.`SHA-256`) shouldBe byteArrayOf(
-                0xFE, 0xDA, 0xBE, 0x10, 0xE6, 0x1B, 0x00, 0xD9, 0x13, 0x00, 0x50, 0x16, 0x9D, 0x67, 0x96, 0xDD,
-                0x86, 0xFC, 0x72, 0xAE, 0xB4, 0xE8, 0x95, 0xCC, 0x0F, 0x8E, 0xF1, 0x90, 0x1B, 0xED, 0x58, 0x27,
-            )
-        }
-
-        @Test
-        fun `should throw on missing file`(@TempDir tempDir: Path) {
-            shouldThrow<NoSuchFileException> { tempDir.resolve("i-dont-exist").computeHash() }
-        }
-
-        @Test
-        fun `should throw on directory`(@TempDir tempDir: Path) {
-            shouldThrow<IOException> { tempDir.computeHash() }
-        }
-    }
-
-    @Nested
-    inner class ComputeChecksum {
-
-        private val bytes = byteArrayOf(Byte.MIN_VALUE, -1, 0, 1, Byte.MAX_VALUE)
-
-        @Suppress("SpellCheckingInspection")
-        @Test
-        fun `should compute checksum`(@TempDir tempDir: Path) = test {
-            val file = (tempDir / "md5").apply { writeBytes(bytes) }
-            file.computeChecksum(MessageDigestProvider.MD5) shouldBe "0a12f1e7d346de6d51e7788fe87eccd3"
-            file.computeChecksum(MessageDigestProvider.`SHA-1`) shouldBe "445d11bdf8713f3d7fa1335b141a7798272cf781"
-            file.computeChecksum(MessageDigestProvider.`SHA-256`) shouldBe "fedabe10e61b00d9130050169d6796dd86fc72aeb4e895cc0f8ef1901bed5827"
-
-            file.computeMd5Checksum() shouldBe "0a12f1e7d346de6d51e7788fe87eccd3"
-            file.computeSha1Checksum() shouldBe "445d11bdf8713f3d7fa1335b141a7798272cf781"
-            file.computeSha256Checksum() shouldBe "fedabe10e61b00d9130050169d6796dd86fc72aeb4e895cc0f8ef1901bed5827"
-        }
-
-        @Test
-        fun `should throw on missing file`(@TempDir tempDir: Path) {
-            shouldThrow<NoSuchFileException> { tempDir.resolve("i-dont-exist").computeChecksum() }
-        }
-
-        @Test
-        fun `should throw on directory`(@TempDir tempDir: Path) {
-            shouldThrow<IOException> { tempDir.computeChecksum() }
-        }
-    }
-
-
     @Test fun resolve_between_file_systems(@TempDir tempDir: Path) {
         // same filesystem
         tempDir.tempJarFileSystem().use { jarFileSystem ->
-            val receiverJarPath: Path = jarFileSystem.rootDirectories.first().randomDirectory().randomDirectory()
+            val receiverJarPath: Path = jarFileSystem.rootDirectories.first().createTempDirectory().createTempDirectory()
             val relativeJarPath: Path = receiverJarPath.parent.relativize(receiverJarPath)
             receiverJarPath.resolveBetweenFileSystems(relativeJarPath)
                 .shouldBe(receiverJarPath.resolve(receiverJarPath.last()))
         }
         // same filesystem
-        with(tempDir.randomDirectory()) {
-            val receiverFilePath = randomDirectory()
+        with(tempDir.createTempDirectory()) {
+            val receiverFilePath = createTempDirectory()
             val relativeFilePath: Path = receiverFilePath.parent.relativize(receiverFilePath)
             receiverFilePath.resolveBetweenFileSystems(relativeFilePath)
                 .shouldBe(receiverFilePath.resolve(receiverFilePath.last()))
@@ -298,38 +285,38 @@ class PathsKtTest {
 
         // absolute other path
         tempDir.tempJarFileSystem().use { jarFileSystem ->
-            val receiverJarPath: Path = jarFileSystem.rootDirectories.first().randomDirectory().randomFile()
+            val receiverJarPath: Path = jarFileSystem.rootDirectories.first().createTempDirectory().createTempFile()
             val absoluteJarPath: Path = jarFileSystem.rootDirectories.first()
             receiverJarPath.resolveBetweenFileSystems(absoluteJarPath)
                 .shouldBe(absoluteJarPath)
         }
         // absolute other path
         tempDir.tempJarFileSystem().use { jarFileSystem ->
-            val receiverFilePath_: Path = tempDir.randomDirectory().randomFile()
+            val receiverFilePath_: Path = tempDir.createTempDirectory().createTempFile()
             val absoluteJarPath: Path = jarFileSystem.rootDirectories.first()
             receiverFilePath_.resolveBetweenFileSystems(absoluteJarPath)
                 .shouldBe(absoluteJarPath)
         }
         // absolute other path
         tempDir.tempJarFileSystem().use { jarFileSystem ->
-            val receiverJarPath: Path = jarFileSystem.rootDirectories.first().randomDirectory().randomFile()
-            val otherFileAbsPath: Path = tempDir.randomDirectory()
+            val receiverJarPath: Path = jarFileSystem.rootDirectories.first().createTempDirectory().createTempFile()
+            val otherFileAbsPath: Path = tempDir.createTempDirectory()
             receiverJarPath.resolveBetweenFileSystems(otherFileAbsPath)
                 .shouldBe(otherFileAbsPath)
         }
         // absolute other path
         with(tempDir) {
-            val receiverFilePath = randomDirectory().randomFile()
-            val otherFileAbsPath: Path = randomDirectory()
+            val receiverFilePath = createTempDirectory().createTempFile()
+            val otherFileAbsPath: Path = createTempDirectory()
             receiverFilePath.resolveBetweenFileSystems(otherFileAbsPath)
                 .shouldBe(otherFileAbsPath)
         }
 
         // relative other path
         with(tempDir) {
-            val receiverFilePath: Path = randomDirectory().randomFile()
+            val receiverFilePath: Path = createTempDirectory().createTempFile()
             tempJarFileSystem().use { jarFileSystem ->
-                val relativeJarPath: Path = jarFileSystem.rootDirectories.first().randomDirectory().randomFile()
+                val relativeJarPath: Path = jarFileSystem.rootDirectories.first().createTempDirectory().createTempFile()
                     .let { absPath -> absPath.parent.relativize(absPath) }
                 receiverFilePath.resolveBetweenFileSystems(relativeJarPath)
                     .shouldBe(receiverFilePath.resolve(relativeJarPath.first().toString()))
@@ -337,13 +324,25 @@ class PathsKtTest {
         }
         // relative other path
         with(tempDir) {
-            val relativeFilePath: Path = randomDirectory().randomFile()
+            val relativeFilePath: Path = createTempDirectory().createTempFile()
                 .let { absPath -> absPath.parent.relativize(absPath) }
             tempJarFileSystem().use { jarFileSystem ->
-                val receiverJarPath: Path = jarFileSystem.rootDirectories.first().randomDirectory().randomFile()
+                val receiverJarPath: Path = jarFileSystem.rootDirectories.first().createTempDirectory().createTempFile()
                 receiverJarPath.resolveBetweenFileSystems(relativeFilePath)
                     .shouldBe(receiverJarPath.resolve(relativeFilePath.first().toString()))
             }
+        }
+    }
+
+    @Test
+    fun resolve_random(@TempDir tempDir: Path) = test {
+        tempDir.resolveRandom() should {
+            it.shouldNotExist()
+        }
+        tempDir.resolveRandom("prefix", "suffix") should {
+            it.shouldNotExist()
+            it.fileName.pathString shouldStartWith "prefix"
+            it.fileName.pathString shouldEndWith "suffix"
         }
     }
 
@@ -374,7 +373,7 @@ class PathsKtTest {
             dir.resolve("sub-dir/config.txt").pathString,
         )
 
-        shouldThrow<NotDirectoryException> { tempDir.randomFile().listDirectoryEntriesRecursively() }
+        shouldThrow<NotDirectoryException> { tempDir.createTempFile().listDirectoryEntriesRecursively() }
     }
 
     @Nested
@@ -415,7 +414,7 @@ class PathsKtTest {
         dir.useDirectoryEntriesRecursively("**/*.*") { seq -> seq.map { it.fileName.pathString }.sorted().joinToString() }
             .shouldBe("config.txt, example.html")
 
-        shouldThrow<NotDirectoryException> { tempDir.randomFile().useDirectoryEntriesRecursively { } }
+        shouldThrow<NotDirectoryException> { tempDir.createTempFile().useDirectoryEntriesRecursively { } }
     }
 
     @Test
@@ -435,7 +434,7 @@ class PathsKtTest {
             dir.resolve("sub-dir/config.txt").pathString,
         )
 
-        shouldThrow<NotDirectoryException> { tempDir.randomFile().forEachDirectoryEntryRecursively { } }
+        shouldThrow<NotDirectoryException> { tempDir.createTempFile().forEachDirectoryEntryRecursively { } }
     }
 
     @Test fun copy_to_directory(@TempDir tempDir: Path) = test {
@@ -614,42 +613,42 @@ class PathsKtTest {
 
     @Test fun use_input_stream(@TempDir tempDir: Path) = test {
         tempDir.singleFile(content = "abc").useInputStream { it.readBytes().decodeToString() } shouldBe "abc"
-        shouldThrow<NoSuchFileException> { tempDir.randomPath().useInputStream {} }
+        shouldThrow<NoSuchFileException> { tempDir.resolveRandom().useInputStream {} }
     }
 
     @Test fun use_buffered_input_stream(@TempDir tempDir: Path) = test {
         tempDir.singleFile(content = "abc").useBufferedInputStream { it.readBytes().decodeToString() } shouldBe "abc"
-        shouldThrow<NoSuchFileException> { tempDir.randomPath().useBufferedInputStream {} }
+        shouldThrow<NoSuchFileException> { tempDir.resolveRandom().useBufferedInputStream {} }
     }
 
     @Test fun use_reader(@TempDir tempDir: Path) = test {
         tempDir.singleFile(content = "abc").useReader { it.readText() } shouldBe "abc"
-        shouldThrow<NoSuchFileException> { tempDir.randomPath().useReader {} }
+        shouldThrow<NoSuchFileException> { tempDir.resolveRandom().useReader {} }
     }
 
     @Test fun use_buffered_reader(@TempDir tempDir: Path) = test {
         tempDir.singleFile(content = "abc").useBufferedReader { it.readText() } shouldBe "abc"
-        shouldThrow<NoSuchFileException> { tempDir.randomPath().useBufferedReader {} }
+        shouldThrow<NoSuchFileException> { tempDir.resolveRandom().useBufferedReader {} }
     }
 
     @Test fun use_output_stream(@TempDir tempDir: Path) = test {
         tempDir.resolve("file").useOutputStream { it.write("abc".encodeToByteArray()) }.readText() shouldBe "abc"
-        shouldThrow<NoSuchFileException> { tempDir.randomPath().useOutputStream(TRUNCATE_EXISTING) {} }
+        shouldThrow<NoSuchFileException> { tempDir.resolveRandom().useOutputStream(TRUNCATE_EXISTING) {} }
     }
 
     @Test fun use_buffered_output_stream(@TempDir tempDir: Path) = test {
         tempDir.resolve("file").useBufferedOutputStream { it.write("abc".encodeToByteArray()) }.readText() shouldBe "abc"
-        shouldThrow<NoSuchFileException> { tempDir.randomPath().useBufferedOutputStream(TRUNCATE_EXISTING) {} }
+        shouldThrow<NoSuchFileException> { tempDir.resolveRandom().useBufferedOutputStream(TRUNCATE_EXISTING) {} }
     }
 
     @Test fun use_writer(@TempDir tempDir: Path) = test {
         tempDir.resolve("file").useWriter { it.write("abc") }.readText() shouldBe "abc"
-        shouldThrow<NoSuchFileException> { tempDir.randomPath().useWriter(TRUNCATE_EXISTING) {} }
+        shouldThrow<NoSuchFileException> { tempDir.resolveRandom().useWriter(TRUNCATE_EXISTING) {} }
     }
 
     @Test fun use_buffered_writer(@TempDir tempDir: Path) = test {
         tempDir.resolve("file").useBufferedWriter { it.write("abc") }.readText() shouldBe "abc"
-        shouldThrow<NoSuchFileException> { tempDir.randomPath().useBufferedWriter(TRUNCATE_EXISTING) {} }
+        shouldThrow<NoSuchFileException> { tempDir.resolveRandom().useBufferedWriter(TRUNCATE_EXISTING) {} }
     }
 }
 
@@ -680,14 +679,14 @@ class DeleteOnExecTestHelper {
             kotlin.runCatching {
                 val operation = Variant.valueOf(args.first())::deleteOnExit
                 val file = Paths.get(args.last())
-                require(file.isSubPathOf(Locations.Default.Temp))
+                require(file.isSubPathOf(SystemLocations.Temp))
                 operation(file)
             }.onFailure { exitProcess(1) }
         }
     }
 }
 
-public fun Path.symbolicLink(): Path = randomPath().apply {
-    Files.createSymbolicLink(this, randomPath())
+public fun Path.symbolicLink(): Path = resolveRandom().apply {
+    Files.createSymbolicLink(this, resolveRandom())
     check(exists(NOFOLLOW_LINKS)) { "Failed to create symbolic link $this." }
 }

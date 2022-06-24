@@ -13,7 +13,7 @@ public object IsolatedProcess {
     /**
      * The location of the binary of the currently running Java distribution.
      */
-    private val JavaBinary: Path by lazy { Locations.Default.JavaHome / "bin" / "java" }
+    private val JavaBinary: Path by lazy { SystemLocations.JavaHome / "bin" / "java" }
 
     /**
      * The class path used to locate classes and other resources.
