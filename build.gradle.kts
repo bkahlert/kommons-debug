@@ -49,7 +49,7 @@ kotlin {
         val commonMain by getting
         val commonTest by getting {
             dependencies {
-                implementation("com.bkahlert.kommons:kommons-test:0.2.0")
+                implementation("com.bkahlert.kommons:kommons-test:0.3.0")
             }
         }
         val jvmMain by getting {

@@ -1,8 +1,7 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.test.createAnyFile
 import com.bkahlert.kommons.test.junit.testEach
-import com.bkahlert.kommons.test.tempDir
-import com.bkahlert.kommons.test.tempFile
 import com.bkahlert.kommons.test.test
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -25,21 +24,17 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
-class DefaultLocationsTest {
+class SystemLocationsTest {
 
-    @Nested
-    inner class DefaultLocations {
-
-        @TestFactory fun paths() = testEach(
-            SystemLocations.Work,
-            SystemLocations.Home,
-            SystemLocations.Temp,
-            SystemLocations.JavaHome,
-        ) {
-            it.shouldBeAbsolute()
-            it.shouldExist()
-            it.shouldBeADirectory()
-        }
+    @TestFactory fun locations() = testEach(
+        SystemLocations.Work,
+        SystemLocations.Home,
+        SystemLocations.Temp,
+        SystemLocations.JavaHome,
+    ) {
+        it.shouldBeAbsolute()
+        it.shouldExist()
+        it.shouldBeADirectory()
     }
 
     @Nested
@@ -68,23 +63,23 @@ class DefaultLocationsTest {
 
         @Test
         fun `should keep at most specified number of files`(@TempDir tempDir: Path) = test {
-            (1..10).forEach { _ -> tempDir.tempFile() }
+            (1..10).forEach { i -> tempDir.createAnyFile("file-$i") }
             tempDir.listDirectoryEntriesRecursively() shouldHaveSize 10
             tempDir.cleanUp(Duration.ZERO, 5).listDirectoryEntriesRecursively() shouldHaveSize 5
         }
 
         @Test
         fun `should not delete if less files than maximum`(@TempDir tempDir: Path) = test {
-            (1..10).forEach { _ -> tempDir.tempFile() }
+            (1..10).forEach { i -> tempDir.createAnyFile("file-$i") }
             tempDir.listDirectoryEntriesRecursively() shouldHaveSize 10
             tempDir.cleanUp(Duration.ZERO, 100).listDirectoryEntriesRecursively() shouldHaveSize 10
         }
 
         @Test
         fun `should not delete files younger than specified age`(@TempDir tempDir: Path) = test {
-            val a = tempDir.tempFile("a").apply { age = 30.minutes }
-            val b = tempDir.tempFile("b").apply { age = 1.5.hours }
-            tempDir.tempFile("c").apply { age = 1.days }
+            val a = tempDir.createAnyFile("a").apply { age = 30.minutes }
+            val b = tempDir.createAnyFile("b").apply { age = 1.5.hours }
+            tempDir.createAnyFile("c").apply { age = 1.days }
             tempDir.cleanUp(2.hours, 0).listDirectoryEntriesRecursively().map { it.pathString }.shouldContainExactlyInAnyOrder(
                 a.pathString,
                 b.pathString
@@ -93,8 +88,8 @@ class DefaultLocationsTest {
 
         @Test
         fun `should delete empty directories`(@TempDir tempDir: Path) = test {
-            val emptyDir = tempDir.tempDir("empty")
-            val file = tempDir.tempFile()
+            val emptyDir = tempDir.createTempDirectory("empty")
+            val file = tempDir.createAnyFile()
             tempDir.cleanUp(2.hours, 0).listDirectoryEntriesRecursively().map { it.pathString } should {
                 it shouldNotContain emptyDir.pathString
                 it shouldContain file.pathString
