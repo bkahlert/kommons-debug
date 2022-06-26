@@ -39,4 +39,12 @@ class GraphemeTest {
         Grapheme("𝕓").toString() shouldBe "𝕓"
         Grapheme("a̳").toString() shouldBe "a̳"
     }
+
+    @Test fun code_points() = test {
+        Grapheme("a").codePoints shouldBe "a".toCodePointList()
+        Grapheme("¶").codePoints shouldBe "¶".toCodePointList()
+        Grapheme("☰").codePoints shouldBe "☰".toCodePointList()
+        Grapheme("𝕓").codePoints shouldBe "𝕓".toCodePointList()
+        Grapheme("a̳").codePoints shouldBe "a̳".toCodePointList()
+    }
 }

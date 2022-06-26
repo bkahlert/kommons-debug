@@ -13,14 +13,14 @@
 
 Kommons Debug is hosted on GitHub with releases provided on Maven Central.
 
-* **Gradle** `implementation("com.bkahlert.kommons:kommons-debug:0.7.2")`
+* **Gradle** `implementation("com.bkahlert.kommons:kommons-debug:0.8.0")`
 
 * **Maven**
   ```xml
   <dependency>
       <groupId>com.bkahlert.kommons</groupId>
       <artifactId>kommons-debug</artifactId>
-      <version>0.7.2</version>
+      <version>0.8.0</version>
   </dependency>
   ```
 
@@ -118,17 +118,15 @@ foo().properties                  // { bar: "baz" }
 foo(foo()).properties             // { bar: { bar: "baz" } }
 ```
 
-### Platform.Current
+### Platform
 
-Reflects the platform the program runs on, e.g. `Platform.JVM`
+Reflects the platform the program runs on, e.g. `Platform.JVM`.
 
-### Platform.isIntelliJ
+The platform type provides access to some interesting aspects:
+- `Platform.ansiSupport`
+- `Platform.isDebugging`
+- `Platform.isIntelliJ`
 
-Tries to find out if the program is currently run inside IDEA IntelliJ
-
-### Platform.isDebugging
-
-Tries to find out if the program is currently in debug mode
 
 ### Stack Trace
 

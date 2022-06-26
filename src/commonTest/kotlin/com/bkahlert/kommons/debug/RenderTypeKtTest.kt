@@ -1,6 +1,5 @@
 package com.bkahlert.kommons.debug
 
-import com.bkahlert.kommons.Current
 import com.bkahlert.kommons.Platform
 import com.bkahlert.kommons.Platform.JS
 import com.bkahlert.kommons.Platform.JVM
@@ -15,6 +14,7 @@ import kotlin.reflect.KFunction0
 import kotlin.reflect.KFunction1
 import kotlin.reflect.KFunction2
 import kotlin.test.Test
+import kotlin.test.fail
 
 class RenderTypeTest {
 
@@ -68,6 +68,7 @@ class RenderTypeTest {
                     "kotlin.Array",
                 )
             }
+            else -> fail("untested platform")
         }
     }
 
@@ -89,6 +90,7 @@ class RenderTypeTest {
                     "<object>", "kotlin.collections.EmptySet", "java.util.Arrays.ArrayList", "java.util.ArrayList",
                 )
             }
+            else -> fail("untested platform")
         }
     }
 
@@ -146,6 +148,7 @@ class RenderTypeTest {
                     "kotlin.reflect.jvm.internal.KClassImpl"
                 )
             }
+            else -> fail("untested platform")
         }
     }
 
@@ -193,6 +196,7 @@ class RenderTypeTest {
                 )
                 ({}).renderFunctionType(simplified = false) shouldBe "() -> kotlin.Unit"
             }
+            else -> fail("untested platform")
         }
     }
 }

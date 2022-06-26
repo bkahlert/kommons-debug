@@ -13,11 +13,20 @@ class JvmPlatformTest {
     }
 
     @Test fun context_class_loader() = test {
-        Platform.contextClassLoader shouldNotBe null
+        JVM.contextClassLoader shouldNotBe null
     }
 
     @Test fun load_class_or_null() = test {
-        Platform.contextClassLoader.loadClassOrNull(randomString()) shouldBe null
-        Platform.contextClassLoader.loadClassOrNull("java.lang.String") shouldBe String::class.java
+        JVM.contextClassLoader.loadClassOrNull(randomString()) shouldBe null
+        JVM.contextClassLoader.loadClassOrNull("java.lang.String") shouldBe String::class.java
+    }
+
+    @Test fun is_debugging() = test {
+        Platform.Current.isDebugging shouldBe false
+    }
+
+    @Test fun ansi_support() = test {
+        if (JVM.isIntelliJ) Platform.Current.ansiSupport shouldNotBe AnsiSupport.NONE
+        else Platform.Current.ansiSupport shouldNotBe AnsiSupport.ANSI24
     }
 }

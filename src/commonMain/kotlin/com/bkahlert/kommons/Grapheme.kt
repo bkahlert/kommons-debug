@@ -9,6 +9,8 @@ import kotlin.jvm.JvmInline
  */
 @JvmInline
 public value class Grapheme(public val string: String) {
+    /** The [CodePoint] instances this grapheme consists of. */
+    public val codePoints: List<CodePoint> get() = string.toCodePointList()
     override fun toString(): String = string
 }
 

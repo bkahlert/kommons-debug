@@ -1,6 +1,5 @@
 package com.bkahlert.kommons.debug
 
-import com.bkahlert.kommons.Current
 import com.bkahlert.kommons.Platform
 import com.bkahlert.kommons.Platform.JS
 import com.bkahlert.kommons.Platform.JVM
@@ -16,6 +15,7 @@ import io.kotest.matchers.string.shouldEndWith
 import io.kotest.matchers.string.shouldNotStartWith
 import io.kotest.matchers.string.shouldStartWith
 import kotlin.test.Test
+import kotlin.test.fail
 
 class StackTraceTest {
 
@@ -53,6 +53,7 @@ class StackTraceTest {
                     it.line shouldBeGreaterThan 0
                     it.column.shouldBeNull()
                 }
+                else -> fail("untested platform")
             }
         }
     }

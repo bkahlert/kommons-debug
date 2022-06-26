@@ -1,6 +1,5 @@
 package com.bkahlert.kommons.debug
 
-import com.bkahlert.kommons.Current
 import com.bkahlert.kommons.Platform
 import com.bkahlert.kommons.Platform.JS
 import com.bkahlert.kommons.Platform.JVM
@@ -11,6 +10,7 @@ import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldMatch
 import kotlin.test.Test
+import kotlin.test.fail
 
 @Suppress("DEPRECATION")
 class TraceTest {
@@ -58,6 +58,7 @@ class TraceTest {
             is JVM -> """
                 [1;36mcaption[0m [1;36m⟨[0m [96m"subject"[0m [1;36m⟩[0m [1;36m{[0m [96m"7"[0m [1;36m}[0m
             """.trimIndent()
+            else -> fail("untested platform")
         }
     }
 
@@ -71,11 +72,12 @@ class TraceTest {
                     .ͭ \(.*/commons\.js.*\) ⟨ "subject" ⟩ \{ "7" \}
                 """.trimIndent().toRegex()
                 JS.NodeJS -> it shouldMatch """
-                    .ͭ \(.*TraceKtTest\.kt:66\) ⟨ "subject" ⟩ \{ "7" \}
+                    .ͭ \(.*TraceKtTest\.kt:67\) ⟨ "subject" ⟩ \{ "7" \}
                 """.trimIndent().toRegex()
                 JVM -> it shouldBe """
-                    .ͭ (TraceKtTest.kt:66) ⟨ "subject" ⟩ { "7" }
+                    .ͭ (TraceKtTest.kt:67) ⟨ "subject" ⟩ { "7" }
                 """.trimIndent()
+                else -> fail("untested platform")
             }
         }
     }
@@ -201,11 +203,12 @@ class TraceTest {
                     .ͭ \(.*/commons\.js.*\) ⟨ !String "subject" ⟩
                 """.trimIndent().toRegex()
                 JS.NodeJS -> it shouldMatch """
-                    .ͭ \(.*/TraceKtTest\.kt:196\) ⟨ !String "subject" ⟩
+                    .ͭ \(.*/TraceKtTest\.kt:198\) ⟨ !String "subject" ⟩
                 """.trimIndent().toRegex()
                 JVM -> it shouldBe """
-                    .ͭ (TraceKtTest.kt:196) ⟨ !String "subject" ⟩
+                    .ͭ (TraceKtTest.kt:198) ⟨ !String "subject" ⟩
                 """.trimIndent()
+                else -> fail("untested platform")
             }
         }
     }

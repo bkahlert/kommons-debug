@@ -1,7 +1,9 @@
 package com.bkahlert.kommons
 
 import com.bkahlert.kommons.test.test
-import io.kotest.assertions.withClue
+import io.kotest.assertions.throwables.shouldNotThrowAny
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.inspectors.forAll
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.comparables.shouldBeEqualComparingTo
 import io.kotest.matchers.comparables.shouldBeGreaterThan
@@ -19,6 +21,56 @@ class CodePointTest {
         "☰".toCodePointList().shouldContainExactly(CodePoint(0x2630))
         "𝕓".toCodePointList().shouldContainExactly(CodePoint(0x1D553))
         "a̳o".toCodePointList().shouldContainExactly(CodePoint('a'.code), CodePoint('̳'.code), CodePoint('o'.code))
+    }
+
+    @Test fun code_point_count() = test {
+        "a".codePointCount() shouldBe 1
+        "¶".codePointCount() shouldBe 1
+        "☰".codePointCount() shouldBe 1
+        "𝕓".codePointCount() shouldBe 1
+        "a̳o".codePointCount() shouldBe 3
+        "a̳o".codePointCount(beginIndex = 1) shouldBe 2
+        "a̳o".codePointCount(beginIndex = 2) shouldBe 1
+        "a̳o".codePointCount(beginIndex = 3) shouldBe 0
+        "a̳o".codePointCount(endIndex = 1) shouldBe 1
+        "a̳o".codePointCount(endIndex = 2) shouldBe 2
+        "a̳o".codePointCount(endIndex = 3) shouldBe 3
+    }
+
+    @Test fun instantiate() = test {
+        shouldThrow<IndexOutOfBoundsException> { CodePoint(CodePoint.MIN_INDEX - 1) }
+        shouldNotThrowAny { CodePoint(CodePoint.MIN_INDEX) }
+        shouldNotThrowAny { CodePoint(0x61) }
+        shouldNotThrowAny { CodePoint(CodePoint.MAX_INDEX) }
+        shouldThrow<IndexOutOfBoundsException> { CodePoint(CodePoint.MAX_INDEX + 1) }
+    }
+
+    @Test fun plus() = test {
+        CodePoint(0x61) + 0 shouldBe CodePoint(0x61)
+        CodePoint(0x61) + 1 shouldBe CodePoint(0x62)
+        CodePoint(0x61) + 2 shouldBe CodePoint(0x63)
+        shouldThrow<IndexOutOfBoundsException> { CodePoint(0x61) + CodePoint.MAX_INDEX + 1 }
+    }
+
+    @Test fun minus() = test {
+        shouldThrow<IndexOutOfBoundsException> { CodePoint(0x61) - 0x62 }
+        CodePoint(0x61) - 0 shouldBe CodePoint(0x61)
+        CodePoint(0x61) - 1 shouldBe CodePoint(0x60)
+        CodePoint(0x61) - 2 shouldBe CodePoint(0x5F)
+    }
+
+    @Test fun inc() = test {
+        var codePoint = CodePoint(0x61)
+        ++codePoint shouldBe CodePoint(0x61) + 1
+    }
+
+    @Test fun dec() = test {
+        var codePoint = CodePoint(0x61)
+        --codePoint shouldBe CodePoint(0x61) - 1
+    }
+
+    @Test fun range_to() = test {
+        CodePoint(0x61)..CodePoint(0xB6) shouldBe CodePointRange(CodePoint(0x61), CodePoint(0xB6))
     }
 
     @Test fun equality() = test {
@@ -63,6 +115,20 @@ class CodePointTest {
         CodePoint(0xB6).char shouldBe '¶'
         CodePoint(0x2630).char shouldBe '☰'
         CodePoint(0x1D553).char shouldBe null
+    }
+
+    @Test fun chars() = test {
+        CodePoint(0x61).chars shouldBe "a".toCharArray()
+        CodePoint(0xB6).chars shouldBe "¶".toCharArray()
+        CodePoint(0x2630).chars shouldBe "☰".toCharArray()
+        CodePoint(0x1D553).chars shouldBe "𝕓".toCharArray()
+    }
+
+    @Test fun char_count() = test {
+        CodePoint(0x61).charCount shouldBe 1
+        CodePoint(0xB6).charCount shouldBe 1
+        CodePoint(0x2630).charCount shouldBe 1
+        CodePoint(0x1D553).charCount shouldBe 2
     }
 
     @Test fun code_point() = test {
@@ -120,7 +186,15 @@ class CodePointTest {
     }
 
     @Test fun is_whitespace() = test {
-        listOf(' ', '\u2000').forEach { withClue(it.codePoint.index.toByte().toHexadecimalString()) { it.codePoint.isWhitespace shouldBe true } }
+        listOf(' ', '\u2000').forAll { it.codePoint.isWhitespace shouldBe true }
         "Az09Αω𝌀𝍖षि🜃🜂🜁🜄".asCodePointSequence().forEach { it.isWhitespace shouldBe false }
+    }
+
+    @Test fun code_point_range() = test {
+        CodePointRange(CodePoint(0x61), CodePoint(0x6A)) should {
+            it.start shouldBe CodePoint(0x61)
+            it.endInclusive shouldBe CodePoint(0x6A)
+            it.iterator().asSequence().joinToString { it.index.toString() } shouldBe (0x61..0x6A).map { it.toString() }.joinToString()
+        }
     }
 }

@@ -1,12 +1,12 @@
 package com.bkahlert.kommons.debug
 
-import com.bkahlert.kommons.Current
 import com.bkahlert.kommons.Platform
 import com.bkahlert.kommons.Platform.JS
 import com.bkahlert.kommons.Platform.JVM
 import com.bkahlert.kommons.test.test
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
+import kotlin.test.fail
 
 class ToCustomStringOrNullTest {
 
@@ -28,6 +28,7 @@ class ToCustomStringOrNullTest {
             is JVM -> """
                 () -> kotlin.Unit
             """.trimIndent()
+            else -> fail("untested platform")
         }
     }
 

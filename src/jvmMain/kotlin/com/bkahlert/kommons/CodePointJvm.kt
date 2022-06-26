@@ -1,5 +1,7 @@
 package com.bkahlert.kommons
 
+import kotlin.text.codePointCount as kotlinCodePointCount
+
 /**
  * Contains the character pointed to and represented by a [String].
  */
@@ -28,3 +30,6 @@ public actual fun String.asCodePointSequence(): Sequence<CodePoint> {
         }
     }
 }
+
+/** Returns the number of Unicode code points in the specified text range of this string. */
+public actual fun String.codePointCount(beginIndex: Int, endIndex: Int): Int = kotlinCodePointCount(beginIndex, endIndex)

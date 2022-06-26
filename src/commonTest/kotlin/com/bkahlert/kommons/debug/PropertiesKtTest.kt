@@ -1,6 +1,5 @@
 package com.bkahlert.kommons.debug
 
-import com.bkahlert.kommons.Current
 import com.bkahlert.kommons.Platform
 import com.bkahlert.kommons.Platform.JS
 import com.bkahlert.kommons.Platform.JVM
@@ -9,6 +8,7 @@ import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlin.test.Test
+import kotlin.test.fail
 
 class PropertiesTest {
 
@@ -41,6 +41,7 @@ class PropertiesTest {
             when (Platform.Current) {
                 is JS -> put("privateBaseProperty", "private-base-property")
                 is JVM -> put("size", 2)
+                else -> fail("untested platform")
             }
             put("singletonProperty", "singleton-property")
             put("privateSingletonProperty", "private-singleton-property")
@@ -62,6 +63,7 @@ class PropertiesTest {
                     put("values", MapImplementingSingleton.values)
                     put("entries", MapImplementingSingleton.entries)
                 }
+                else -> fail("untested platform")
             }
             put("singletonProperty", "singleton-property")
             put("privateSingletonProperty", "private-singleton-property")

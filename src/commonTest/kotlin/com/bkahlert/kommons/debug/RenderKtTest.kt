@@ -1,6 +1,5 @@
 package com.bkahlert.kommons.debug
 
-import com.bkahlert.kommons.Current
 import com.bkahlert.kommons.Platform
 import com.bkahlert.kommons.Platform.JS
 import com.bkahlert.kommons.Platform.JVM
@@ -14,6 +13,7 @@ import com.bkahlert.kommons.test.test
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import kotlin.test.Test
+import kotlin.test.fail
 
 class RenderTest {
 
@@ -47,6 +47,15 @@ class RenderTest {
             line 2
             "${"\""}"
         """.trimIndent()
+    }
+
+    @Test fun render_char_sequence() = test {
+        val charSequenceWithNoCustomToString = object : CharSequence by "string" {}
+        val charSequenceWithCustomToString = object : CharSequence by "string" {
+            override fun toString(): String = "custom"
+        }
+        renderString(charSequenceWithNoCustomToString) shouldBe "\"string\""
+        renderString(charSequenceWithCustomToString) shouldBe "\"string\""
     }
 
     @Test fun render_primitive() = test {
@@ -547,6 +556,7 @@ class RenderTest {
             is JVM -> """
                 () -> kotlin.Unit
             """.trimIndent()
+            else -> fail("untested platform")
         }
     }
 }

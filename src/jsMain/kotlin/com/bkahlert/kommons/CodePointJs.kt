@@ -62,3 +62,7 @@ public actual fun String.asCodePointSequence(): Sequence<CodePoint> {
         }
     }
 }
+
+/** Returns the number of Unicode code points in the specified text range of this string. */
+public actual fun String.codePointCount(beginIndex: Int, endIndex: Int): Int =
+    substring(beginIndex, endIndex).asCodePointSequence().count()
