@@ -49,15 +49,20 @@ kotlin {
         val commonMain by getting
         val commonTest by getting {
             dependencies {
-                implementation("com.bkahlert.kommons:kommons-test:0.3.0")
+                implementation("com.bkahlert.kommons:kommons-test:0.3.1")
             }
         }
         val jvmMain by getting {
             dependencies {
+                implementation("org.slf4j:slf4j-api:1.7.36")
                 implementation(kotlin("reflect"))
             }
         }
-        val jvmTest by getting
+        val jvmTest by getting {
+            dependencies {
+                implementation("org.slf4j:slf4j-simple:1.7.36")
+            }
+        }
         val jsMain by getting {
             dependencies {
                 @Suppress("SpellCheckingInspection")

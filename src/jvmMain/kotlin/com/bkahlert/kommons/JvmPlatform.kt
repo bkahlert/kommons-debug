@@ -3,7 +3,21 @@ package com.bkahlert.kommons
 import com.bkahlert.kommons.AnsiSupport.ANSI24
 import com.bkahlert.kommons.AnsiSupport.ANSI4
 import com.bkahlert.kommons.AnsiSupport.ANSI8
+import com.bkahlert.kommons.LineSeparators.LF
+import com.bkahlert.kommons.Platform.JVM
+import com.bkahlert.kommons.debug.StackTrace
+import com.bkahlert.kommons.debug.get
+import com.bkahlert.kommons.debug.highlighted
+import com.bkahlert.kommons.debug.render
+import com.bkahlert.kommons.debug.renderType
+import org.slf4j.LoggerFactory
+import java.io.PrintWriter
+import java.nio.file.Path
+import java.security.AccessControlException
 import java.util.Locale
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.thread
+import kotlin.concurrent.withLock
 
 /** Platforms this program can be run on. */
 public actual sealed interface Platform {
@@ -14,18 +28,23 @@ public actual sealed interface Platform {
     /** Supported level for [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). */
     public actual val ansiSupport: AnsiSupport
 
+    /** Registers the specified [handler] as to be called when this program is about to stop. */
+    public actual fun onExit(handler: () -> Unit)
+
     /** JavaScript based platform, e.g. browser. */
     public actual sealed interface JS : Platform {
         /** Browser platform */
         public actual object Browser : JS {
             override val isDebugging: Boolean = false
             override val ansiSupport: AnsiSupport = AnsiSupport.NONE
+            override fun onExit(handler: () -> Unit): Unit = Unit
         }
 
         /** NodeJS platform */
         public actual object NodeJS : JS {
             override val isDebugging: Boolean = false
             override val ansiSupport: AnsiSupport = AnsiSupport.NONE
+            override fun onExit(handler: () -> Unit): Unit = Unit
         }
     }
 
@@ -84,6 +103,18 @@ public actual sealed interface Platform {
                 else -> AnsiSupport.NONE
             }
         }
+
+        /** Registers the specified [handler] as a new virtual-machine shutdown hook. */
+        override fun onExit(handler: () -> Unit): Unit = addShutDownHook(handler.toHook())
+
+        /** Registers the given [thread] as a new virtual-machine shutdown hook. */
+        public fun addShutDownHook(thread: Thread): Unit = Runtime.getRuntime().addShutdownHook(thread)
+
+        /** Unregisters the given [thread] from the virtual-machine shutdown hooks. */
+        public fun removeShutdownHook(thread: Thread): Any =
+            runCatching { Runtime.getRuntime().removeShutdownHook(thread) }.onFailure {
+                if (it !is IllegalStateException && it !is AccessControlException) throw it else Unit
+            }
     }
 
     public actual companion object {
@@ -99,3 +130,41 @@ public actual sealed interface Platform {
  * Returns `null` if the class can't be loaded.
  */
 public fun ClassLoader.loadClassOrNull(name: String): Class<*>? = kotlin.runCatching { loadClass(name) }.getOrNull()
+
+private val logger = LoggerFactory.getLogger(JVM::class.java)
+private val onExitLogLock = ReentrantLock()
+private var onExitLog: Path? = null
+private fun (() -> Unit).toHook(): Thread {
+    val stackTrace = StackTrace.get()
+    return thread(start = false) {
+        runCatching {
+            invoke()
+        }.onFailure { exception ->
+            onExitLogLock.withLock {
+                val exitLog = onExitLog ?: SystemLocations.Temp.createTempFile("kommons.", ".onexit.log").apply { delete() }
+                onExitLog = exitLog
+                exitLog.useWriter { out ->
+                    out.appendLine(
+                        "An exception occurred during shutdown.$LF" +
+                            "The shutdown hook was registered by:$LF" +
+                            "$stackTrace$LF"
+                    )
+                    exception.printStackTrace(PrintWriter(out, true))
+                }
+            }
+            if (exception !is IllegalStateException &&
+                exception !is AccessControlException &&
+                System.getenv("com.bkahlert.kommons.testing-shutdown") != "true"
+            ) {
+                logger.info(logger.renderType(), exception)
+                logger.error(System.getenv().render(), exception)
+                logger.error(
+                    "An exception occurred during shutdown.$LF" +
+                        "The shutdown hook was registered by:$LF" +
+                        stackTrace.joinToString("$LF\t${"at".highlighted} ", postfix = LF),
+                    exception
+                )
+            }
+        }
+    }
+}

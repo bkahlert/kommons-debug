@@ -30,11 +30,14 @@ public object IsolatedProcess {
     /**
      * Synchronously executes the `main` method of the specified [mainClass]
      * with the specified [args] in a separate [Process] and returns its exit code.
+     *
+     * Use [customize] to make any adaptions to the [ProcessBuilder] right before execution.
      */
-    public fun exec(mainClass: KClass<*>, vararg args: String): Int {
+    public fun exec(mainClass: KClass<*>, vararg args: String, customize: (ProcessBuilder) -> Unit = {}): Int {
         require(kotlin.runCatching { mainClass.java.getMethod("main", Array<String>::class.java) }.isSuccess) { "missing main method" }
         return builder(mainClass, *args)
             .inheritIO()
+            .apply(customize)
             .start()
             .waitFor()
     }

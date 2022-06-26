@@ -137,10 +137,11 @@ foo(foo()).properties             // { bar: { bar: "baz" } }
 
 Reflects the platform the program runs on, e.g. `Platform.JVM`.
 
-The platform type provides access to some interesting aspects:
-- `Platform.ansiSupport`
-- `Platform.isDebugging`
-- `Platform.isIntelliJ`
+The platform type provides access to some useful features:
+- `Platform.ansiSupport`: To what extent ANSI escape codes are supported.
+- `Platform.isDebugging`: Whether the program is running in debug mode.
+- `Platform.isIntelliJ`: Whether the program is running in IntelliJ.
+- `Platform.onExit`: Allows registering callbacks that are invoked when the program exits.
 
 
 ### Stack Trace
