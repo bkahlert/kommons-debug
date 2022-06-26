@@ -92,15 +92,30 @@ Renders any object depending on whether its `toString()` is overridden:
 #### Examples
 
 ```kotlin
-"string".render()                            // string
+"string".render()                              // string
 
 class Foo(val bar: Any = "baz")
 
-foo().render()                               // { bar: "baz" }
-foo(foo()).render(typed = true)              // Foo { bar: Foo { bar: "baz" } }
+foo().render()                                 // { bar: "baz" }
+foo(foo()).render(typed = true)                // Foo { bar: Foo { bar: "baz" } }
 
-foo().asString()                             // { bar: "baz" }
+foo().asString()                               // { bar: "baz" }
 foo(null).asString(excludeNullValues = false)  // { }
+```
+
+### Any?.asEmoji()
+
+Renders any object as an emoji.
+
+#### Examples
+
+```kotlin
+null.asEmoji()       //  "❔"
+true.asEmoji()       //  "✅"
+false.asEmoji()      //  "❌"
+Now.asEmoji()        //  "🕝"
+Now.asEmoji(Floor)   //  "🕑"
+"other".asEmoji()    //  "🔣"
 ```
 
 ### Any.properties

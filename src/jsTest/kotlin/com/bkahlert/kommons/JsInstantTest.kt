@@ -2,6 +2,7 @@ package com.bkahlert.kommons
 
 import com.bkahlert.kommons.test.test
 import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
+import io.kotest.matchers.comparables.shouldBeLessThan
 import io.kotest.matchers.comparables.shouldBeLessThanOrEqualTo
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -14,7 +15,24 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.nanoseconds
 import kotlin.time.Duration.Companion.seconds
 
-class TimeOperationsKtTest {
+class JsInstantTest {
+
+    @Test fun local_date() = test {
+        LocalDate(2007, 11, 3) should {
+            it.fullYear shouldBe 2007
+            it.month shouldBe 11
+            it.date shouldBe 3
+
+            it.instant should { instant ->
+                instant.compareTo(Date(2007, 11, 3, 0, 0, 0, 0)) shouldBeLessThanOrEqualTo 0
+                instant.compareTo(Date(2007, 11, 3, 0, 0, 0, 0) - 1.seconds) shouldBeGreaterThanOrEqualTo 0
+            }
+        }
+
+        LocalDate(2007, 11, 3) shouldBe LocalDate(2007, 11, 3)
+        LocalDate(2007, 11, 1) shouldBeLessThan LocalDate(2007, 11, 3)
+        LocalDate(2007, 11, 3).toString() shouldBe "2007-12-03"
+    }
 
     private val duration = 2.days + 3.hours + 4.minutes + 5.seconds + 6.nanoseconds
 
@@ -32,10 +50,6 @@ class TimeOperationsKtTest {
             it.fullYear shouldBe Now.fullYear
             it.month shouldBe Now.month
             it.date shouldBe Now.date
-            it.hours shouldBe 0
-            it.minutes shouldBe 0
-            it.seconds shouldBe 0
-            it.milliseconds shouldBe 0
         }
     }
 
@@ -45,10 +59,6 @@ class TimeOperationsKtTest {
             it.fullYear shouldBe Now.fullYear
             it.month shouldBe Now.month
             it.date shouldBe Now.date - 1
-            it.hours shouldBe 0
-            it.minutes shouldBe 0
-            it.seconds shouldBe 0
-            it.milliseconds shouldBe 0
         }
     }
 
@@ -58,18 +68,14 @@ class TimeOperationsKtTest {
             it.fullYear shouldBe Now.fullYear
             it.month shouldBe Now.month
             it.date shouldBe Now.date + 1
-            it.hours shouldBe 0
-            it.minutes shouldBe 0
-            it.seconds shouldBe 0
-            it.milliseconds shouldBe 0
         }
     }
 
     @Test
     fun timestamp() = test {
         Timestamp should {
-            it shouldBeLessThanOrEqualTo Date().getTime()
-            it shouldBeGreaterThanOrEqualTo Date().getTime() - 1
+            it shouldBeLessThanOrEqualTo Date().getTime().toLong()
+            it shouldBeGreaterThanOrEqualTo Date().getTime().toLong() - 1
         }
     }
 
@@ -102,18 +108,27 @@ class TimeOperationsKtTest {
     @Test
     fun add() = test {
         (Date("August 19, 1975 23:15:30 GMT-11:00") + duration).time shouldBe Date("Fri Aug 22 1975 02:19:35 GMT-11:00").time
+        LocalDate(1975, 7, 19) + duration shouldBe LocalDate(1975, 7, 21)
     }
 
     @Test
     fun subtract() = test {
         (Date("August 19, 1975 23:15:30 GMT-11:00") - duration).time shouldBe Date("Mon Aug 18 1975 08:11:25 GMT+0100").time
+        LocalDate(1975, 7, 19) - duration shouldBe LocalDate(1975, 7, 17)
     }
 
     @Test
-    fun subtract_date() = test {
+    fun subtract_self() = test {
         (Now - Now) should {
+            it shouldBeLessThanOrEqualTo ZERO
+            it shouldBeGreaterThanOrEqualTo ZERO - 1.seconds
+        }
+        (Today - Today) should {
             it shouldBeLessThanOrEqualTo ZERO
             it shouldBeGreaterThanOrEqualTo ZERO - 1.seconds
         }
     }
 }
+
+internal actual val instant0202: Instant = Date("February 02, 2020 02:02:02 UTC")
+internal actual val instant2232: Instant = Date("February 02, 2020 22:32:02 UTC")

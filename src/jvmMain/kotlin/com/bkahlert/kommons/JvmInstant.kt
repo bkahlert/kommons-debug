@@ -1,38 +1,47 @@
 package com.bkahlert.kommons
 
 import java.nio.file.attribute.FileTime
-import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.OffsetTime
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.toJavaDuration
 
+/** An instantaneous point on the time-line. */
+public actual typealias Instant = java.time.Instant
+
+/** A date without a time-zone in the ISO-8601 calendar system, such as 2007-12-03. */
+public actual typealias LocalDate = java.time.LocalDate
+
+
 /** The current date and time in Coordinated Universal Time (UTC). */
-public inline val Now: Instant get() = Instant.now()
+public actual inline val Now: Instant get() = Instant.now()
 
 /** The current local date. */
-public inline val Today: LocalDate get() = LocalDate.now()
+public actual inline val Today: LocalDate get() = LocalDate.now()
 
 /** The current local date but 1 day in the past. */
-public inline val Yesterday: LocalDate get() = LocalDate.now().minusDays(1)
+public actual inline val Yesterday: LocalDate get() = LocalDate.now().minusDays(1)
 
 /** The current local date but 1 day in the future. */
-public inline val Tomorrow: LocalDate get() = LocalDate.now().plusDays(1)
+public actual inline val Tomorrow: LocalDate get() = LocalDate.now().plusDays(1)
 
 /** The passed seconds since 1970-01-01T00:00:00Z. */
-public inline val Timestamp: Long get() = Instant.now().toEpochMilli()
+public actual inline val Timestamp: Long get() = Instant.now().toEpochMilli()
+
 
 @Suppress("NOTHING_TO_INLINE")
 /** Returns a copy of this [Instant] with the specified [duration] added. */
-public inline operator fun Instant.plus(duration: Duration): Instant = this.plus(duration.toJavaDuration())
+public actual inline operator fun Instant.plus(duration: Duration): Instant = this.plus(duration.toJavaDuration())
 
 @Suppress("NOTHING_TO_INLINE")
-/** Returns a copy of this [LocalTime] with the whole days of the specified [duration] added. */
-public inline operator fun LocalDate.plus(duration: Duration): LocalDate = this.plusDays(duration.inWholeDays)
+/** Returns a copy of this [LocalDate] with the whole days of the specified [duration] added. */
+public actual inline operator fun LocalDate.plus(duration: Duration): LocalDate = this.plusDays(duration.inWholeDays)
 
 @Suppress("NOTHING_TO_INLINE")
 /** Returns a copy of this [LocalTime] with the specified [duration] added. */
@@ -60,11 +69,11 @@ public inline operator fun FileTime.plus(duration: Duration): FileTime = FileTim
 
 @Suppress("NOTHING_TO_INLINE")
 /** Returns a copy of this [Instant] with the specified [duration] subtracted. */
-public inline operator fun Instant.minus(duration: Duration): Instant = this.minus(duration.toJavaDuration())
+public actual inline operator fun Instant.minus(duration: Duration): Instant = this.minus(duration.toJavaDuration())
 
 @Suppress("NOTHING_TO_INLINE")
-/** Returns a copy of this [LocalTime] with the whole days of the specified [duration] subtracted. */
-public inline operator fun LocalDate.minus(duration: Duration): LocalDate = this.minusDays(duration.inWholeDays)
+/** Returns a copy of this [LocalDate] with the whole days of the specified [duration] subtracted. */
+public actual inline operator fun LocalDate.minus(duration: Duration): LocalDate = this.minusDays(duration.inWholeDays)
 
 @Suppress("NOTHING_TO_INLINE")
 /** Returns a copy of this [LocalTime] with the specified [duration] subtracted. */
@@ -93,3 +102,19 @@ public inline operator fun FileTime.minus(duration: Duration): FileTime = FileTi
 @Suppress("NOTHING_TO_INLINE")
 /** Returns a [FileTime] representing the same point of time value on the time-line as this instant. */
 public fun Instant.toFileTime(): FileTime = FileTime.from(this)
+
+
+@Suppress("NOTHING_TO_INLINE")
+/** Returns the [Duration] between this and the specified [other]. */
+public actual inline operator fun Instant.minus(other: Instant): Duration = (toEpochMilli() - other.toEpochMilli()).milliseconds
+
+@Suppress("NOTHING_TO_INLINE")
+/** Returns the [Duration] between this and the specified [other]. */
+public actual inline operator fun LocalDate.minus(other: LocalDate): Duration = (toEpochDay() - other.toEpochDay()).days
+
+
+/** The hour of the month according to universal time. */
+public actual val Instant.utcHours: Int get() = atZone(ZoneOffset.UTC).hour
+
+/** The minutes of the month according to universal time. */
+public actual val Instant.utcMinutes: Int get() = atZone(ZoneOffset.UTC).minute
