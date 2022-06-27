@@ -21,40 +21,43 @@ public fun Any.renderType(simplified: Boolean = true): String = buildString { th
  * @see renderType
  */
 public fun Any.renderTypeTo(out: StringBuilder, simplified: Boolean = true) {
-    if (simplified) when (this) {
-        is UByteArray -> out.append("UByteArray")
-        is UShortArray -> out.append("UShortArray")
-        is UIntArray -> out.append("UIntArray")
-        is ULongArray -> out.append("ULongArray")
+    if (simplified) {
+        when (this) {
+            // specific types
+            is UByteArray -> out.append("UByteArray")
+            is UShortArray -> out.append("UShortArray")
+            is UIntArray -> out.append("UIntArray")
+            is ULongArray -> out.append("ULongArray")
 
-        is Map<*, *> -> if (isPlain) out.append("Map") else out.append(this::class.simpleName.sanitize())
-        is Set<*> -> if (isPlain) out.append("Set") else out.append(this::class.simpleName.sanitize())
-        is List<*> -> if (isPlain) out.append("List") else out.append(this::class.simpleName.sanitize())
-        is Collection<*> -> if (isPlain) out.append("Collection") else out.append(this::class.simpleName.sanitize())
-        is Iterable<*> -> out.append("Iterable")
+            is Map<*, *> -> if (isPlain) out.append("Map") else out.append(this::class.simplifiedName)
+            is Set<*> -> if (isPlain) out.append("Set") else out.append(this::class.simplifiedName)
+            is List<*> -> if (isPlain) out.append("List") else out.append(this::class.simplifiedName)
+            is Collection<*> -> if (isPlain) out.append("Collection") else out.append(this::class.simplifiedName)
+            is Iterable<*> -> out.append("Iterable")
 
-        is KClassifier -> out.append(this::class.simpleName.sanitize())
-        is KProperty<*> -> out.append(this::class.simpleName.sanitize())
-        is KFunction<*> -> renderFunctionTypeTo(out)
-        is Function<*> -> renderFunctionTypeTo(out)
-        else -> out.append(this::class.simpleName.sanitize())
-    } else this::class.renderQualifiedTypeTo(out)
+            // KCallable
+            is KProperty<*> -> out.append(this::class.simplifiedName)
+            is KFunction<*> -> renderFunctionTypeTo(out, simplified)
+            is Function<*> -> renderFunctionTypeTo(out, simplified)
+
+            else -> this::class.renderKClassifierTo(out, simplified)
+        }
+    } else this::class.renderKClassifierTo(out, simplified)
 }
 
 private val objectRegex = "\\$\\d+$".toRegex()
-private fun String?.sanitize() =
-    this?.takeUnless { objectRegex.containsMatchIn(it) }?.removeSuffix("Impl") ?: "<object>"
+internal val KClass<*>.simplifiedName get() = simpleName?.takeUnless { objectRegex.containsMatchIn(it) }?.removeSuffix("Impl") ?: "<object>"
 
 /**
- * Renders the qualified type of this class.
+ * Renders this [KClassifier].
  */
-internal fun KClass<*>.renderQualifiedType(): String = buildString { this@renderQualifiedType.renderQualifiedTypeTo(this) }
+internal fun KClassifier.renderKClassifier(simplified: Boolean = true): String = buildString { this@renderKClassifier.renderKClassifierTo(this, simplified) }
 
 /**
- * Renders the qualified type of this class to the specified [out].
- * @see renderQualifiedType
+ * Renders this [KClassifier] to the specified [out].
+ * @see renderKClassifier
  */
-internal expect fun KClass<*>.renderQualifiedTypeTo(out: StringBuilder)
+internal expect fun KClassifier.renderKClassifierTo(out: StringBuilder, simplified: Boolean = true)
 
 /**
  * Renders the type of this function.

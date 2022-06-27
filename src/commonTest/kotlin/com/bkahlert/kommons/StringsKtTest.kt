@@ -149,6 +149,21 @@ class StringsKtTest {
         ansiOscString.ansiRemoved shouldBe "↗ link"
     }
 
+    @Test fun space() = test {
+        charSequence.spaced shouldBe " $charSequence "
+        charSequence.spaced.spaced shouldBe " $charSequence "
+        charSequence.startSpaced shouldBe " $charSequence"
+        charSequence.startSpaced.startSpaced shouldBe " $charSequence"
+        charSequence.endSpaced shouldBe "$charSequence "
+        charSequence.endSpaced.endSpaced shouldBe "$charSequence "
+        string.spaced shouldBe " $string "
+        string.spaced.spaced shouldBe " $string "
+        string.startSpaced shouldBe " $string"
+        string.startSpaced.startSpaced shouldBe " $string"
+        string.endSpaced shouldBe "$string "
+        string.endSpaced.endSpaced shouldBe "$string "
+    }
+
     @Test fun with_prefix() = test {
         charSequence.withPrefix(charSequence) shouldBe charSequence
         charSequence.withPrefix("char") shouldBe charSequence

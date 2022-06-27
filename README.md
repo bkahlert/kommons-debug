@@ -13,14 +13,14 @@
 
 Kommons Debug is hosted on GitHub with releases provided on Maven Central.
 
-* **Gradle** `implementation("com.bkahlert.kommons:kommons-debug:0.8.0")`
+* **Gradle** `implementation("com.bkahlert.kommons:kommons-debug:0.8.1")`
 
 * **Maven**
   ```xml
   <dependency>
       <groupId>com.bkahlert.kommons</groupId>
       <artifactId>kommons-debug</artifactId>
-      <version>0.8.0</version>
+      <version>0.8.1</version>
   </dependency>
   ```
 
@@ -138,11 +138,11 @@ foo(foo()).properties             // { bar: { bar: "baz" } }
 Reflects the platform the program runs on, e.g. `Platform.JVM`.
 
 The platform type provides access to some useful features:
+
 - `Platform.ansiSupport`: To what extent ANSI escape codes are supported.
 - `Platform.isDebugging`: Whether the program is running in debug mode.
 - `Platform.isIntelliJ`: Whether the program is running in IntelliJ.
 - `Platform.onExit`: Allows registering callbacks that are invoked when the program exits.
-
 
 ### Stack Trace
 
@@ -278,8 +278,10 @@ or create a random string using `randomString`.
 ```kotlin
 "string".quoted
 // returns "string"
+
 """{ bar: "baz" }""".quoted
 // returns "{ bar: \"baz\" }"
+
 """
 line 1
 "line 2"

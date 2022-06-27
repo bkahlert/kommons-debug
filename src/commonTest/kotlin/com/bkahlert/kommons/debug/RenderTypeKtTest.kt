@@ -105,6 +105,9 @@ class RenderTypeTest {
                     "MapImplementingSingleton",
                     "<object>",
                     "OrdinaryClass",
+                    "NestedClass",
+                    "InnerNestedClass",
+                    "NestedObject",
                     "Pair",
                     "Triple",
                     "KClass"
@@ -117,6 +120,9 @@ class RenderTypeTest {
                     "MapImplementingSingleton",
                     "<object>",
                     "OrdinaryClass",
+                    "NestedClass",
+                    "InnerNestedClass",
+                    "NestedObject",
                     "Pair",
                     "Triple",
                     "KClass"
@@ -131,6 +137,9 @@ class RenderTypeTest {
                     "MapImplementingSingleton",
                     "<object>",
                     "OrdinaryClass",
+                    "OrdinaryClass.NestedClass",
+                    "NestedClass.InnerNestedClass",
+                    "SealedClass.NestedObject",
                     "Pair",
                     "Triple",
                     "KClass"
@@ -143,6 +152,9 @@ class RenderTypeTest {
                     "com.bkahlert.kommons.debug.MapImplementingSingleton",
                     "<object>",
                     "com.bkahlert.kommons.debug.OrdinaryClass",
+                    "com.bkahlert.kommons.debug.OrdinaryClass.NestedClass",
+                    "com.bkahlert.kommons.debug.OrdinaryClass.NestedClass.InnerNestedClass",
+                    "com.bkahlert.kommons.debug.SealedClass.NestedObject",
                     "kotlin.Pair",
                     "kotlin.Triple",
                     "kotlin.reflect.jvm.internal.KClassImpl"
@@ -278,6 +290,9 @@ internal object ClassTypes : TypeMap() {
     val mapImplementingAnonymousSingleton: Any = MapImplementingAnonymousSingleton
 
     val `class`: OrdinaryClass = OrdinaryClass()
+    val nestedClass: OrdinaryClass.NestedClass = OrdinaryClass.NestedClass()
+    val innerNestedClass: OrdinaryClass.NestedClass.InnerNestedClass = OrdinaryClass.NestedClass().InnerNestedClass()
+    val sealedClass: SealedClass = SealedClass.NestedObject
     val pair: Pair<Any?, Any?> = PrimitiveTypes.byte to PrimitiveTypes.short
     val triple: Triple<Any?, Any?, Any?> = Triple(PrimitiveTypes.byte, PrimitiveTypes.short, PrimitiveTypes.int)
     val map: Map<Any, Any?> = mapOf("foo" to "bar", "baz" to null)
@@ -290,6 +305,9 @@ internal object ClassTypes : TypeMap() {
         mapImplementingSingleton,
         mapImplementingAnonymousSingleton,
         `class`,
+        nestedClass,
+        innerNestedClass,
+        sealedClass,
         pair,
         triple,
         reflect,

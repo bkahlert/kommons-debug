@@ -37,6 +37,6 @@ class ToCustomStringOrNullTest {
     }
 
     @Test fun test_object_with_custom_tostring() = test {
-        ClassWithCustomToString().render() shouldBe "custom toString"
+        ClassWithCustomToString().toCustomStringOrNull() shouldBe "custom toString"
     }
 }

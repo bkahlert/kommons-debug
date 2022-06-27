@@ -71,6 +71,19 @@ val MapImplementingAnonymousSingleton = object : Map<String, Any?> by mapOf("foo
 internal class OrdinaryClass : BaseClass() {
     val ordinaryProperty: String = "ordinary-property"
     private val privateOrdinaryProperty: String = "private-ordinary-property"
+
+    class NestedClass {
+        val nestedProperty: String = "nested-property"
+
+        inner class InnerNestedClass {
+            val innerNestedProperty: String = "inner-nested-property"
+        }
+    }
+}
+
+internal sealed class SealedClass {
+    @Suppress("unused", "CanSealedSubClassBeObject") class NestedClass : SealedClass()
+    @Suppress("unused") object NestedObject : SealedClass()
 }
 
 internal data class DataClass(
