@@ -7,10 +7,12 @@ import com.bkahlert.kommons.debug.OrdinaryClass
 import com.bkahlert.kommons.debug.ThrowingClass
 import com.bkahlert.kommons.test.test
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.withClue
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldHaveLength
 import io.kotest.matchers.string.shouldMatch
 import io.kotest.matchers.string.shouldStartWith
@@ -170,6 +172,165 @@ class StringsKtTest {
         string.startSpaced.startSpaced shouldBe " $string"
         string.endSpaced shouldBe "$string "
         string.endSpaced.endSpaced shouldBe "$string "
+    }
+
+
+    @Test fun truncate() = test {
+        withClue("should truncate from center") {
+            "12345678901234567890".truncate() shouldBe "123456 … 567890"
+        }
+
+        withClue("should truncate using code points") {
+            "👨🏾👨🏾👨🏾👨🏾👨🏾".truncate(6) shouldBe "👨🏾 … 🏾"
+        }
+
+        withClue("should not truncate if not necessary") {
+            "1234567890".truncate() shouldBe "1234567890"
+        }
+
+        withClue("should truncate using custom marker") {
+            "12345678901234567890".truncate(marker = "...") shouldBe "123456...567890"
+        }
+
+        withClue("should truncate long text") {
+            longString.truncate() shouldBe "123456 … 567890"
+        }
+
+        withClue("should throw if marker is wider than max length") {
+            shouldThrow<IllegalArgumentException> {
+                "1234567890".truncate(maxCodePoints = 1, marker = "XX")
+            }
+        }
+    }
+
+    @Test fun truncate_start() = test {
+
+        withClue("should truncate from start") {
+            "12345678901234567890".truncateStart() shouldBe " … 901234567890"
+        }
+
+        withClue("should truncate using code points") {
+            "👨🏾👨🏾👨🏾👨🏾👨🏾".truncateStart(4) shouldBe " … 🏾"
+        }
+
+        withClue("should not truncate if not necessary") {
+            "1234567890".truncateStart() shouldBe "1234567890"
+        }
+
+        withClue("should truncate using custom marker") {
+            "12345678901234567890".truncateStart(marker = "...") shouldBe "...901234567890"
+        }
+
+        withClue("should truncate long text") {
+            longString.truncateStart() shouldBe " … 901234567890"
+        }
+
+        withClue("should throw if marker is wider than max length") {
+            shouldThrow<IllegalArgumentException> {
+                "1234567890".truncateStart(maxCodePoints = 1, marker = "XX")
+            }
+        }
+    }
+
+    @Test fun truncate_end() = test {
+
+        withClue("should truncate from end") {
+            "12345678901234567890".truncateEnd() shouldBe "123456789012 … "
+        }
+
+        withClue("should truncate using columns") {
+            "👨🏾👨🏾👨🏾👨🏾👨🏾".truncateEnd(4) shouldBe "👨 … "
+        }
+
+        withClue("should not truncate if not necessary") {
+            "1234567890".truncateEnd() shouldBe "1234567890"
+        }
+
+        withClue("should truncate using custom marker") {
+            "12345678901234567890".truncateEnd(marker = "...") shouldBe "123456789012..."
+        }
+
+        withClue("should truncate long text") {
+            longString.truncateEnd() shouldBe "123456789012 … "
+        }
+
+        withClue("should throw if marker is wider than max length") {
+            shouldThrow<IllegalArgumentException> {
+                "1234567890".truncateEnd(maxCodePoints = 1, marker = "XX")
+            }
+        }
+    }
+
+    @Test fun truncate_by() = test {
+        withClue("should remove whitespaces from the right") {
+            "a   b   c".truncateBy(3) shouldBe "a  b c"
+        }
+
+        withClue("should use whitespaces on the right") {
+            "a   b   c    ".truncateBy(3) shouldBe "a   b   c "
+        }
+
+        withClue("should use single whitespace on the right") {
+            "a   b   c ".truncateBy(1) shouldBe "a   b   c"
+        }
+
+        withClue("should not merge words") {
+            "a   b   c".truncateBy(10) shouldBe "a b c"
+        }
+
+        withClue("should consider different whitespaces") {
+            val differentWhitespaces = "\u0020\u00A0\u2000\u2003"
+            "a ${differentWhitespaces}b".truncateBy(differentWhitespaces.length) shouldBe "a b"
+        }
+
+        withClue("should leave area before startIndex unchanged") {
+            "a   b   c".truncateBy(10, startIndex = 5) shouldBe "a   b c"
+        }
+
+        withClue("should leave whitespace sequence below minimal length unchanged") {
+            "a      b   c".truncateBy(3, minWhitespaceLength = 3) shouldBe "a   b   c"
+        }
+
+        withClue("regression") {
+            val x = "│   nested 1                                                                                            ▮▮"
+            val y = "│   nested 1                                                                                      ▮▮"
+            val z = "│   nested 1                                                                                         ▮▮"
+            x.truncateBy(3, minWhitespaceLength = 3) should {
+                it shouldBe z
+                it shouldNotBe y
+            }
+        }
+    }
+
+    @Test fun truncate_to() = test {
+        withClue("should remove whitespaces from the right") {
+            "a   b   c".truncateTo(6) shouldBe "a  b c"
+        }
+
+        withClue("should use whitespaces on the right") {
+            "a   b   c    ".truncateTo(10) shouldBe "a   b   c "
+        }
+
+        withClue("should use single whitespace on the right") {
+            "a   b   c ".truncateTo(9) shouldBe "a   b   c"
+        }
+
+        withClue("should not merge words") {
+            "a   b   c".truncateTo(0) shouldBe "a b c"
+        }
+
+        withClue("should consider different whitespaces") {
+            val differentWhitespaces = "\u0020\u00A0\u2000\u2003"
+            "a ${differentWhitespaces}b".truncateTo(0) shouldBe "a b"
+        }
+
+        withClue("should leave area before startIndex unchanged") {
+            "a   b   c".truncateTo(0, startIndex = 5) shouldBe "a   b c"
+        }
+
+        withClue("should leave whitespace sequence below minimal length unchanged") {
+            "a      b   c".truncateTo(9, minWhitespaceLength = 3) shouldBe "a   b   c"
+        }
     }
 
     @Test fun with_prefix() = test {
@@ -336,6 +497,7 @@ internal const val string: String = "string"
 internal const val emptyString: String = ""
 internal const val blankString: String = "   "
 
+internal val longString = "1234567890".repeat(1000)
 
 /** [String] containing CSI (`control sequence intro`) escape sequences */
 internal const val ansiCsiString: String = "[1mbold [34mand blue[0m"

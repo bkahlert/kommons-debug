@@ -204,8 +204,93 @@ public inline val String.startSpaced: String get() = withPrefix(" ")
 public inline val String.endSpaced: String get() = withSuffix(" ")
 
 
+// truncate ------------------------------------------------------------------------------------------------------------
+
+private fun requirePositiveCodePoints(maxCodePoints: Int) {
+    require(maxCodePoints > 0) {
+        "maxCodePoints ${maxCodePoints.quoted} must be positive"
+    }
+}
+
+private fun targetCodePoints(maxCodePoints: Int, marker: String): Int {
+    requirePositiveCodePoints(maxCodePoints)
+    val markerCodePointCount = marker.codePointCount()
+    require(maxCodePoints >= markerCodePointCount) {
+        "maxCodePoints ${maxCodePoints.quoted} must not be less than ${markerCodePointCount.quoted}/${marker.quoted}"
+    }
+    return maxCodePoints - markerCodePointCount
+}
 
 
+/** Returns this string truncated from the center to [maxCodePoints] including the [marker]. */
+public fun String.truncate(maxCodePoints: Int = 15, marker: String = Unicode.ELLIPSIS.spaced): String {
+    requirePositiveCodePoints(maxCodePoints)
+    return if (length > 2 * maxCodePoints || codePointCount() > maxCodePoints) {
+        val targetCodePoints = targetCodePoints(maxCodePoints, marker)
+        val left = truncateEnd(-(-targetCodePoints).floorDiv(2), "")
+        val right = truncateStart(targetCodePoints.floorDiv(2), "")
+        "$left$marker$right"
+    } else {
+        this
+    }
+}
+
+/** Returns this string truncated from the start to [maxCodePoints] including the [marker]. */
+public fun String.truncateStart(maxCodePoints: Int = 15, marker: String = Unicode.ELLIPSIS.spaced): String {
+    requirePositiveCodePoints(maxCodePoints)
+    if (codePointCount() <= maxCodePoints) return this
+
+    val targetCodePoints = targetCodePoints(maxCodePoints, marker)
+    val codePoints = toCodePointList().takeLast(targetCodePoints)
+    return "$marker${codePoints.joinToString("")}"
+}
+
+/** Returns this string truncated from the end to [maxCodePoints] including the [marker]. */
+public fun String.truncateEnd(maxCodePoints: Int = 15, marker: String = Unicode.ELLIPSIS.spaced): String {
+    requirePositiveCodePoints(maxCodePoints)
+    if (codePointCount() <= maxCodePoints) return this
+
+    val targetCodePoints = targetCodePoints(maxCodePoints, marker)
+    val codePoints = toCodePointList().take(targetCodePoints)
+    return "${codePoints.joinToString("")}$marker"
+}
+
+
+/**
+ * Truncates this character sequence by [numberOfWhitespaces] by strategically removing whitespaces.
+ *
+ * The algorithm guarantees that word borders are respected, that is, two words never become one
+ * (unless [minWhitespaceLength] is set to 0).
+ * Therefore, the truncated string might not be fully truncated than envisioned.
+ */
+public fun String.truncateBy(numberOfWhitespaces: Int, startIndex: Int = 0, minWhitespaceLength: Int = 1): String =
+    truncateTo(length - numberOfWhitespaces, startIndex, minWhitespaceLength)
+
+/**
+ * Truncates this string to [maxLength] by strategically removing whitespaces.
+ *
+ * The algorithm guarantees that word borders are respected, that is, two words never become one
+ * (unless [minWhitespaceLength] is set to 0).
+ * Therefore, the truncated string might not be fully truncated than envisioned.
+ */
+public fun String.truncateTo(maxLength: Int, startIndex: Int = 0, minWhitespaceLength: Int = 1): String {
+    val difference = length - maxLength
+    if (difference <= 0) return this
+    val trailingWhitespaces = takeLastWhile { it.isWhitespace() }
+    if (trailingWhitespaces.isNotEmpty()) {
+        val trimmed = this.take(length - trailingWhitespaces.length.coerceAtMost(difference))
+        return if (trimmed.length <= maxLength) trimmed else trimmed.truncateTo(maxLength, startIndex, minWhitespaceLength)
+    }
+    val regex = Regex("\\p{Z}{${minWhitespaceLength + 1}}")
+    val longestWhitespace = regex.findAll(this, startIndex).toList().reversed().maxByOrNull { it.value.length } ?: return this
+    val whitespaceStart = longestWhitespace.range.first
+    val truncated = replaceRange(whitespaceStart, whitespaceStart + 2, " ")
+    if (truncated.length >= length) return truncated
+    return truncated.truncateTo(maxLength, startIndex, minWhitespaceLength).toString()
+}
+
+
+// withPrefix / withSuffix ---------------------------------------------------------------------------------------------
 
 /** Returns this char with the [prefix] prepended if it is not already present. */
 public fun Char.withPrefix(prefix: CharSequence): String =
