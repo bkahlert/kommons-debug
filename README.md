@@ -139,9 +139,9 @@ Reflects the platform the program runs on, e.g. `Platform.JVM`.
 
 The platform type provides access to some useful features:
 
-- `Platform.ansiSupport`: To what extent ANSI escape codes are supported.
-- `Platform.isDebugging`: Whether the program is running in debug mode.
-- `Platform.isIntelliJ`: Whether the program is running in IntelliJ.
+- `Platform.ansiSupport`: Returns to what extent ANSI escape codes are supported.
+- `Platform.isDebugging`: Returns whether the program is running in debug mode.
+- `Platform.isIntelliJ`: Returns whether the program is running in IntelliJ.
 - `Platform.onExit`: Allows registering callbacks that are invoked when the program exits.
 
 ### Stack Trace
@@ -268,10 +268,11 @@ Decode any string to a sequence or list of graphemes using `String.asGraphemeSeq
 
 ### String Handling
 
-Quote and escape an existing string using `quoted`,
-remote ANSI escape sequences from it using `ansiRemoved`,
-create an identifier from it using `CharSequence?.toIdentifier`,
-or create a random string using `randomString`.
+- `quoted`: Quotes and escapes an existing string.
+- `ansiRemoved`: Removes ANSI escape sequences.
+- `spaced`/`startSpaced`/`endSpaced`: Adds a space before and/or after a string if there is not already one.
+- `toIdentifier`: Create an identifier from any string that resembles it.
+- `randomString`: Create a random string.
 
 #### Examples
 
@@ -292,6 +293,9 @@ line 1
 // returns "bold and blue"
 "\u001B[34m↗\u001B(B\u001B[m \u001B]8;;https://example.com\u001B\\link\u001B]8;;\u001B\\".ansiRemoved
 // returns "↗ link"
+
+"string".spaced
+// returns " string "
 
 "1👋 xy-z".toIdentifier()
 // returns "i__xy-z3" (filled up to configurable minimum length)

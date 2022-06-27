@@ -1,5 +1,6 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.debug.ClassWithCustomToString
 import com.bkahlert.kommons.test.test
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -12,6 +13,9 @@ class QuotedKtTest {
         "{ bar: \"baz\" }".quoted shouldBe "\"{ bar: \\\"baz\\\" }\""
         'a'.quoted shouldBe "\"a\""
         '"'.quoted shouldBe "\"\\\"\""
+        ClassWithCustomToString().quoted shouldBe "\"custom toString\""
+        @Suppress("CAST_NEVER_SUCCEEDS")
+        (null as? ClassWithCustomToString).quoted shouldBe "null"
     }
 
     @Test fun test_escaped_backslash() = test {

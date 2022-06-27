@@ -149,13 +149,21 @@ class StringsKtTest {
         ansiOscString.ansiRemoved shouldBe "↗ link"
     }
 
-    @Test fun space() = test {
+    @Test fun spaced() = test {
+        char.spaced shouldBe " $char "
+        blankChar.spaced shouldBe " "
+        char.startSpaced shouldBe " $char"
+        blankChar.startSpaced shouldBe " "
+        char.endSpaced shouldBe "$char "
+        blankChar.endSpaced shouldBe " "
+
         charSequence.spaced shouldBe " $charSequence "
         charSequence.spaced.spaced shouldBe " $charSequence "
         charSequence.startSpaced shouldBe " $charSequence"
         charSequence.startSpaced.startSpaced shouldBe " $charSequence"
         charSequence.endSpaced shouldBe "$charSequence "
         charSequence.endSpaced.endSpaced shouldBe "$charSequence "
+
         string.spaced shouldBe " $string "
         string.spaced.spaced shouldBe " $string "
         string.startSpaced shouldBe " $string"
@@ -165,6 +173,9 @@ class StringsKtTest {
     }
 
     @Test fun with_prefix() = test {
+        char.withPrefix("c") shouldBe "c"
+        char.withPrefix("b") shouldBe "bc"
+        char.withPrefix("bc") shouldBe "bcc"
         charSequence.withPrefix(charSequence) shouldBe charSequence
         charSequence.withPrefix("char") shouldBe charSequence
         charSequence.withPrefix("char-") shouldBe "char-$charSequence"
@@ -174,6 +185,9 @@ class StringsKtTest {
     }
 
     @Test fun with_suffix() = test {
+        char.withSuffix("c") shouldBe "c"
+        char.withSuffix("d") shouldBe "cd"
+        char.withSuffix("cd") shouldBe "ccd"
         charSequence.withSuffix(charSequence) shouldBe charSequence
         charSequence.withSuffix("sequence") shouldBe charSequence
         charSequence.withSuffix("-sequence") shouldBe "$charSequence-sequence"
@@ -183,6 +197,11 @@ class StringsKtTest {
     }
 
     @Test fun with_random_suffix() = test {
+        char.withRandomSuffix() should {
+            it shouldMatch Regex("$char--[\\da-zA-Z]{4}")
+            it shouldStartWith "$char"
+            it.withRandomSuffix() shouldBe it
+        }
         charSequence.withRandomSuffix() should {
             it shouldMatch Regex("$charSequence--[\\da-zA-Z]{4}")
             it shouldStartWith charSequence
@@ -305,6 +324,9 @@ class StringsKtTest {
         } shouldBe """ClassWithDefaultToString { bar: "baz", baz: custom toString }"""
     }
 }
+
+internal val char: Char = 'c'
+internal val blankChar: Char = ' '
 
 internal val charSequence: CharSequence = StringBuilder("char sequence")
 internal val emptyCharSequence: CharSequence = StringBuilder()
