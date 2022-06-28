@@ -357,6 +357,48 @@ checkNotBlank("   ")    // throws IllegalStateException
 "   ".takeUnlessBlank() // returns null
 ```
 
+### Regular Expressions
+
+`Regex` can be authored as follows:
+
+```kotlin
+Regex("foo") + Regex("bar")      // Regex("foobar") 
+Regex("foo") + "bar"             // Regex("foobar")
+
+Regex("foo") or Regex("bar")     // Regex("foo|bar") 
+Regex("foo") or "bar"            // Regex("foo|bar")
+
+Regex("foo").optional()          // Regex("(?:foo)?") 
+Regex("foo").repeatAny()         // Regex("(?:foo)*") 
+Regex("foo").repeatAtLeastOnce() // Regex("(?:foo)+") 
+Regex("foo").repeat(2, 5)        // Regex("(?:foo){2,5}") 
+
+Regex("foo").group()             // Regex("(?:foo)") 
+Regex("foo").group("name")       // Regex("(?<name>foo)") 
+```
+
+Find matches easier:
+
+```kotlin
+// get group by name
+Regex("(?<name>ba.)")
+    .findAll("foo bar baz")
+    .mapNotNull { it.groups["name"]?.value } // "bar", "baz"
+
+// get group value by name
+Regex("(?<name>ba.)")
+    .findAll("foo bar baz")
+    .mapNotNull { it.groupValue("name") }    // "bar", "baz"
+
+// find all values
+Regex("(?<name>ba.)")
+    .findAllValues("foo bar baz")            // "bar", "baz"
+
+// match URLs / URIs
+Regex.UrlRegex.findAll(/* ... */)
+Regex.UriRegex.findAll(/* ... */)
+```
+
 ### Collections and Ranges
 
 Require or check emptiness of collections and arrays using `requireNotEmpty`
@@ -389,6 +431,7 @@ Generic either type that can be used as a replacement for `Result`,
 i.e. in cases where the alternative value does not necessarily mean failure.
 
 Available methods are:
+
 - `getLeftOrThrow` / `getRightOrThrow`
 - `getLeftOrElse` / `getRightOrElse`
 - `getLeftOrDefault` / `getRightOrDefault`

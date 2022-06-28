@@ -13,7 +13,6 @@ import com.bkahlert.kommons.debug.renderType
 import org.slf4j.LoggerFactory
 import java.io.PrintWriter
 import java.nio.file.Path
-import java.security.AccessControlException
 import java.util.Locale
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
@@ -113,7 +112,7 @@ public actual sealed interface Platform {
         /** Unregisters the given [thread] from the virtual-machine shutdown hooks. */
         public fun removeShutdownHook(thread: Thread): Any =
             runCatching { Runtime.getRuntime().removeShutdownHook(thread) }.onFailure {
-                if (it !is IllegalStateException && it !is AccessControlException) throw it else Unit
+                if (!it.ignore) throw it else Unit
             }
     }
 
@@ -123,6 +122,9 @@ public actual sealed interface Platform {
             get() = JVM
     }
 }
+
+private val Throwable.ignore: Boolean
+    get() = this::class.simpleName?.let { it == "AccessControlException" || it == "IllegalStateException" } ?: false
 
 /**
  * Attempts to load the [Class] with the given [name] using this [ClassLoader].
@@ -152,10 +154,7 @@ private fun (() -> Unit).toHook(): Thread {
                     exception.printStackTrace(PrintWriter(out, true))
                 }
             }
-            if (exception !is IllegalStateException &&
-                exception !is AccessControlException &&
-                System.getenv("com.bkahlert.kommons.testing-shutdown") != "true"
-            ) {
+            if (!exception.ignore && System.getenv("com.bkahlert.kommons.testing-shutdown") != "true") {
                 logger.info(logger.renderType(), exception)
                 logger.error(System.getenv().render(), exception)
                 logger.error(
