@@ -198,7 +198,7 @@ class StringsKtTest {
 
         withClue("should throw if marker is wider than max length") {
             shouldThrow<IllegalArgumentException> {
-                "1234567890".truncate(maxCodePoints = 1, marker = "XX")
+                "1234567890".truncate(length = 1, marker = "XX")
             }
         }
     }
@@ -227,7 +227,7 @@ class StringsKtTest {
 
         withClue("should throw if marker is wider than max length") {
             shouldThrow<IllegalArgumentException> {
-                "1234567890".truncateStart(maxCodePoints = 1, marker = "XX")
+                "1234567890".truncateStart(length = 1, marker = "XX")
             }
         }
     }
@@ -256,82 +256,84 @@ class StringsKtTest {
 
         withClue("should throw if marker is wider than max length") {
             shouldThrow<IllegalArgumentException> {
-                "1234567890".truncateEnd(maxCodePoints = 1, marker = "XX")
+                "1234567890".truncateEnd(length = 1, marker = "XX")
             }
         }
     }
 
-    @Test fun truncate_by() = test {
+
+    @Test fun consolidate_whitespaces_by() = test {
         withClue("should remove whitespaces from the right") {
-            "a   b   c".truncateBy(3) shouldBe "a  b c"
+            "a   b   c".consolidateWhitespacesBy(3) shouldBe "a  b c"
         }
 
         withClue("should use whitespaces on the right") {
-            "a   b   c    ".truncateBy(3) shouldBe "a   b   c "
+            "a   b   c    ".consolidateWhitespacesBy(3) shouldBe "a   b   c "
         }
 
         withClue("should use single whitespace on the right") {
-            "a   b   c ".truncateBy(1) shouldBe "a   b   c"
+            "a   b   c ".consolidateWhitespacesBy(1) shouldBe "a   b   c"
         }
 
         withClue("should not merge words") {
-            "a   b   c".truncateBy(10) shouldBe "a b c"
+            "a   b   c".consolidateWhitespacesBy(10) shouldBe "a b c"
         }
 
         withClue("should consider different whitespaces") {
             val differentWhitespaces = "\u0020\u00A0\u2000\u2003"
-            "a ${differentWhitespaces}b".truncateBy(differentWhitespaces.length) shouldBe "a b"
+            "a ${differentWhitespaces}b".consolidateWhitespacesBy(differentWhitespaces.length) shouldBe "a b"
         }
 
         withClue("should leave area before startIndex unchanged") {
-            "a   b   c".truncateBy(10, startIndex = 5) shouldBe "a   b c"
+            "a   b   c".consolidateWhitespacesBy(10, startIndex = 5) shouldBe "a   b c"
         }
 
         withClue("should leave whitespace sequence below minimal length unchanged") {
-            "a      b   c".truncateBy(3, minWhitespaceLength = 3) shouldBe "a   b   c"
+            "a      b   c".consolidateWhitespacesBy(3, minWhitespaceLength = 3) shouldBe "a   b   c"
         }
 
         withClue("regression") {
             val x = "│   nested 1                                                                                            ▮▮"
             val y = "│   nested 1                                                                                      ▮▮"
             val z = "│   nested 1                                                                                         ▮▮"
-            x.truncateBy(3, minWhitespaceLength = 3) should {
+            x.consolidateWhitespacesBy(3, minWhitespaceLength = 3) should {
                 it shouldBe z
                 it shouldNotBe y
             }
         }
     }
 
-    @Test fun truncate_to() = test {
+    @Test fun consolidate_whitespaces() = test {
         withClue("should remove whitespaces from the right") {
-            "a   b   c".truncateTo(6) shouldBe "a  b c"
+            "a   b   c".consolidateWhitespaces(6) shouldBe "a  b c"
         }
 
         withClue("should use whitespaces on the right") {
-            "a   b   c    ".truncateTo(10) shouldBe "a   b   c "
+            "a   b   c    ".consolidateWhitespaces(10) shouldBe "a   b   c "
         }
 
         withClue("should use single whitespace on the right") {
-            "a   b   c ".truncateTo(9) shouldBe "a   b   c"
+            "a   b   c ".consolidateWhitespaces(9) shouldBe "a   b   c"
         }
 
         withClue("should not merge words") {
-            "a   b   c".truncateTo(0) shouldBe "a b c"
+            "a   b   c".consolidateWhitespaces(0) shouldBe "a b c"
         }
 
         withClue("should consider different whitespaces") {
             val differentWhitespaces = "\u0020\u00A0\u2000\u2003"
-            "a ${differentWhitespaces}b".truncateTo(0) shouldBe "a b"
+            "a ${differentWhitespaces}b".consolidateWhitespaces(0) shouldBe "a b"
         }
 
         withClue("should leave area before startIndex unchanged") {
-            "a   b   c".truncateTo(0, startIndex = 5) shouldBe "a   b c"
+            "a   b   c".consolidateWhitespaces(0, startIndex = 5) shouldBe "a   b c"
         }
 
         withClue("should leave whitespace sequence below minimal length unchanged") {
-            "a      b   c".truncateTo(9, minWhitespaceLength = 3) shouldBe "a   b   c"
+            "a      b   c".consolidateWhitespaces(9, minWhitespaceLength = 3) shouldBe "a   b   c"
         }
     }
+
 
     @Test fun with_prefix() = test {
         char.withPrefix("c") shouldBe "c"

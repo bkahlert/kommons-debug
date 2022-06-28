@@ -13,14 +13,14 @@
 
 Kommons Debug is hosted on GitHub with releases provided on Maven Central.
 
-* **Gradle** `implementation("com.bkahlert.kommons:kommons-debug:0.8.1")`
+* **Gradle** `implementation("com.bkahlert.kommons:kommons-debug:0.9.0")`
 
 * **Maven**
   ```xml
   <dependency>
       <groupId>com.bkahlert.kommons</groupId>
       <artifactId>kommons-debug</artifactId>
-      <version>0.8.1</version>
+      <version>0.9.0</version>
   </dependency>
   ```
 
@@ -271,34 +271,42 @@ Decode any string to a sequence or list of graphemes using `String.asGraphemeSeq
 - `quoted`: Quotes and escapes an existing string.
 - `ansiRemoved`: Removes ANSI escape sequences.
 - `spaced`/`startSpaced`/`endSpaced`: Adds a space before and/or after a string if there is not already one.
+- `truncate`/`truncateStart`/`truncateEnd`: Truncates a string to a given length.
+- `consolidateWhitespaces`/`consolidateWhitespacesBy`: Intelligently consolidates whitespaces in order to reduce the length of a string.
 - `toIdentifier`: Create an identifier from any string that resembles it.
 - `randomString`: Create a random string.
 
 #### Examples
 
 ```kotlin
-"string".quoted
-// returns "string"
-
-"""{ bar: "baz" }""".quoted
-// returns "{ bar: \"baz\" }"
+"string".quoted              // "string"
+"""{ bar: "baz" }""".quoted  // "{ bar: \"baz\" }"
 
 """
 line 1
 "line 2"
-""".quoted
-// returns "line1\n\"line2\""
+""".quoted                   // "line1\n\"line2\""
 
 "\u001B[1mbold \u001B[34mand blue\u001B[0m".ansiRemoved
-// returns "bold and blue"
+// "bold and blue"
+
 "\u001B[34m↗\u001B(B\u001B[m \u001B]8;;https://example.com\u001B\\link\u001B]8;;\u001B\\".ansiRemoved
-// returns "↗ link"
+// "↗ link"
 
-"string".spaced
-// returns " string "
+"string".spaced              // " string "
 
-"1👋 xy-z".toIdentifier()
-// returns "i__xy-z3" (filled up to configurable minimum length)
+"bar".withPrefix("foo")      // "foobar"
+"foo bar".withPrefix("foo")  // "foo bar"
+"foo".withSuffix("bar")      // "foobar"
+
+"12345678901234567890".truncate()        // "123456 … 567890"
+"12345678901234567890".truncateStart()   // " … 901234567890"
+"12345678901234567890".truncateEnd()     // "123456789012 … "
+
+"a   b   c".consolidateWhitespacesBy(2)  // "a  b  c"
+"a   b   c".consolidateWhitespaces()     // "a b c"
+
+"1👋 xy-z".toIdentifier()     // "i__xy-z3"
 
 randomString()
 // returns "Ax-212kss0-xTzy5" (16 characters by default) 
