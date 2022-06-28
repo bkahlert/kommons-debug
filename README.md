@@ -383,6 +383,25 @@ Instant.parse("1910-06-22T13:00:00Z") + 5.minutes // 1910-06-22T12:05:00Z
 LocalDate.parse("1910-06-22") - 2.days            // 1910-06-20
 ```
 
+### Either
+
+Generic either type that can be used as a replacement for `Result`,
+i.e. in cases where the alternative value does not necessarily mean failure.
+
+Available methods are:
+- `getLeftOrThrow` / `getRightOrThrow`
+- `getLeftOrElse` / `getRightOrElse`
+- `getLeftOrDefault` / `getRightOrDefault`
+- `fold` / `mapLeft` / `mapRight`
+- `onLeft` / `onLeft`
+- `toResult` / `Result.toEither`
+
+```kotlin
+val foo: Either<Foo, Bar> = Left(Foo)
+foo.getLeftOrThrow()   // returns Foo
+foo.getRighttOrThrow() // throws an exception
+```
+
 ## Contributing
 
 Want to contribute? Awesome! The most basic way to show your support is to star the project, or to raise issues. You can also support this project by making

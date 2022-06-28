@@ -12,7 +12,7 @@ import kotlin.reflect.jvm.reflect
  * @see renderFunctionType
  */
 public actual fun Function<*>.renderFunctionTypeTo(out: StringBuilder, simplified: Boolean) {
-    when (val kFunction = if (this is KFunction<*>) this else reflect()) {
+    when (val kFunction = if (this is KFunction<*>) this else kotlin.runCatching { reflect() }.getOrNull()) {
         is KFunction<*> -> {
             val parametersByKind = kFunction.parameters.groupBy { it.kind }
             parametersByKind.getOrDefault(KParameter.Kind.INSTANCE, emptyList()).forEach {
