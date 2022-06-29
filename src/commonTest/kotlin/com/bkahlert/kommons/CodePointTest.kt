@@ -140,6 +140,18 @@ class CodePointTest {
     @Test fun as_code_point() = test {
         0x61.toByte().asCodePoint() shouldBe CodePoint(0x61)
         0xB6.toByte().asCodePoint() shouldBe CodePoint(0xB6)
+
+        "a".asCodePoint() shouldBe CodePoint(0x61)
+        "¶".asCodePoint() shouldBe CodePoint(0xB6)
+        "☰".asCodePoint() shouldBe CodePoint(0x2630)
+        "𝕓".asCodePoint() shouldBe CodePoint(0x1D553)
+        shouldThrow<IllegalArgumentException> { "a̳o".asCodePoint() }
+
+        "a".asCodePointOrNull() shouldBe CodePoint(0x61)
+        "¶".asCodePointOrNull() shouldBe CodePoint(0xB6)
+        "☰".asCodePointOrNull() shouldBe CodePoint(0x2630)
+        "𝕓".asCodePointOrNull() shouldBe CodePoint(0x1D553)
+        "a̳o".asCodePointOrNull() shouldBe null
     }
 
     @Test fun is_0to9() = test {

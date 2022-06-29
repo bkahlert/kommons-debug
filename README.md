@@ -257,6 +257,8 @@ Decode any string to a sequence or list of graphemes using `String.asGraphemeSeq
 #### Examples
 
 ```kotlin
+"a".asCodePoint().name // "LATIN SMALL LETTER A"
+
 "a".toCodePointList()  // CodePoint(0x61)
 "𝕓".toCodePointList()  // CodePoint(0x1D553)
 "a̳o".toCodePointList() // CodePoint('a'.code), CodePoint('̳'.code), CodePoint('o'.code)

@@ -97,6 +97,12 @@ public inline val Char.codePoint: CodePoint get() = CodePoint(code)
 /** Returns the Unicode code point with the same value. */
 public fun Byte.asCodePoint(): CodePoint = CodePoint(toInt() and 0xFF)
 
+/** Returns the Unicode code point with the same value, or throws an [IllegalArgumentException] otherwise. */
+public fun String.asCodePoint(): CodePoint = asCodePointOrNull() ?: throw IllegalArgumentException("invalid code point: $this")
+
+/** Returns the Unicode code point with the same value, or `null` otherwise. */
+public fun String.asCodePointOrNull(): CodePoint? = asCodePointSequence().singleOrNull()
+
 /** Whether this code point is a letter. */
 public expect val CodePoint.isLetter: Boolean
 

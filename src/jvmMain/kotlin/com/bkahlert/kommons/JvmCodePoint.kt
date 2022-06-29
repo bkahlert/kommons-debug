@@ -20,6 +20,10 @@ public actual val CodePoint.isDigit: Boolean
 public actual val CodePoint.isWhitespace: Boolean
     get() = Character.isWhitespace(index)
 
+/** The name of this code point. */
+public val CodePoint.name: String
+    get() = Character.getName(index)
+
 /** Returns a sequence yielding the [CodePoint] instances this string consists of. */
 public actual fun String.asCodePointSequence(): Sequence<CodePoint> {
     var pos = 0
