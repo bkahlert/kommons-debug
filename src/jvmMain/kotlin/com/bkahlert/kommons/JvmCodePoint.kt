@@ -22,7 +22,7 @@ public actual val CodePoint.isWhitespace: Boolean
 
 /** The name of this code point. */
 public val CodePoint.name: String
-    get() = Character.getName(index)
+    get() = Character.getName(index) ?: "0x${Integer.toHexString(index).uppercase()}"
 
 /** Returns a sequence yielding the [CodePoint] instances this string consists of. */
 public actual fun String.asCodePointSequence(): Sequence<CodePoint> {

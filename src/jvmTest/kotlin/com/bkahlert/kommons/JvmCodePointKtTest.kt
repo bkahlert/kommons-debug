@@ -11,5 +11,6 @@ class JvmCodePointKtTest {
         "¶".asCodePoint().name shouldBe "PILCROW SIGN"
         "☰".asCodePoint().name shouldBe "TRIGRAM FOR HEAVEN"
         "𝕓".asCodePoint().name shouldBe "MATHEMATICAL DOUBLE-STRUCK SMALL B"
+        "🫠".asCodePoint().name shouldBe "0x1FAE0"
     }
 }
