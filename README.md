@@ -232,9 +232,9 @@ Find the class directory, the source directory or the source file itself of a cl
 #### Example
 
 ```kotlin
-Foo::class.findClassesDirectoryOrNull()  // /Users/john.doe/dev/project/build/classes/kotlin/jvm/test
-Foo::class.findSourceDirectoryOrNull()   // /Users/john.doe/dev/project/src/jvmTest/kotlin
-Foo::class.findSourceFileOrNull()        // /Users/john.doe/dev/project/src/jvmTest/kotlin/packages/source.kt
+Foo::class.findClassesDirectoryOrNull()  // /home/john/dev/project/build/classes/kotlin/jvm/test
+Foo::class.findSourceDirectoryOrNull()   // /home/john/dev/project/src/jvmTest/kotlin
+Foo::class.findSourceFileOrNull()        // /home/john/dev/project/src/jvmTest/kotlin/packages/source.kt
 ```
 
 Access a class path resource like any other NIO 2 path using `ClassPath`.
@@ -425,6 +425,7 @@ Yesterday - 2.days  // 3 days in the past
 Tomorrow + 1.days   // the day after tomorrow
 Instant.parse("1910-06-22T13:00:00Z") + 5.minutes // 1910-06-22T12:05:00Z
 LocalDate.parse("1910-06-22") - 2.days            // 1910-06-20
+SystemLocations.Temp.createTempFile().age         // < 1ms
 ```
 
 ### Either
