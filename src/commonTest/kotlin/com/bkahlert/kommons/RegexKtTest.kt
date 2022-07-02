@@ -185,7 +185,7 @@ class RegexKtTest {
 
     @Test fun from_glob() = test {
         val input = """
-            foo.call()
+            foo.bar()
             bar[0]++
             baz did throw a RuntimeException
                 at SomeFile.kt:42
@@ -256,6 +256,65 @@ class RegexKtTest {
                 regex.matches(input) shouldBe true
             }
         }
+    }
+
+    @Test fun matches_glob() = test {
+        "foo.bar()".matchesGlob("foo.*") shouldBe true
+        "foo.bar()".matchesGlob("foo.{}", wildcard = "{}") shouldBe true
+
+        multilineGlobMatchInput.matchesGlob(
+            """
+            foo
+              .**()
+            """.trimIndent()
+        ) shouldBe true
+
+        multilineGlobMatchInput.matchesGlob(
+            """
+            foo
+              .{{}}()
+            """.trimIndent(),
+            multilineWildcard = "{{}}",
+        ) shouldBe true
+
+        multilineGlobMatchInput.matchesGlob(
+            """
+            foo${NEL}  .**()
+            """.trimIndent(),
+            lineSeparators = LineSeparators.Unicode,
+        ) shouldBe true
+
+        multilineGlobMatchInput.matchesGlob(
+            """
+            foo
+              .*()
+            """.trimIndent()
+        ) shouldBe false
+    }
+
+    @Test fun matches_curly() = test {
+        "foo.bar()".matchesCurly("foo.{}") shouldBe true
+
+        multilineGlobMatchInput.matchesCurly(
+            """
+            foo
+              .{{}}()
+            """.trimIndent()
+        ) shouldBe true
+
+        multilineGlobMatchInput.matchesCurly(
+            """
+            foo${NEL}  .{{}}()
+            """.trimIndent(),
+            lineSeparators = LineSeparators.Unicode,
+        ) shouldBe true
+
+        multilineGlobMatchInput.matchesCurly(
+            """
+            foo
+              .{}()
+            """.trimIndent()
+        ) shouldBe false
     }
 
 
@@ -391,3 +450,9 @@ class RegexKtTest {
         )
     }
 }
+
+internal val multilineGlobMatchInput = """
+foo
+  .bar()
+  .baz()
+""".trimIndent()

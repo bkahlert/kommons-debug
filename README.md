@@ -437,6 +437,9 @@ foo
 )
 ```
 
+Alternatively, you can use `matchesCurly` if you prefer SLF4J / Logback style
+wildcards `{}` and `{{}}`.
+
 ### Collections and Ranges
 
 Require or check emptiness of collections and arrays using `requireNotEmpty`
