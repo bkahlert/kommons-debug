@@ -372,6 +372,10 @@ Regex("foo") + "bar"             // Regex("foobar")
 Regex("foo") or Regex("bar")     // Regex("foo|bar") 
 Regex("foo") or "bar"            // Regex("foo|bar")
 
+Regex.fromLiteralAlternates(     // Regex("\\[foo\\]|bar\\?")
+    "[foo]", "bar?"
+)
+
 Regex("foo").optional()          // Regex("(?:foo)?") 
 Regex("foo").repeatAny()         // Regex("(?:foo)*") 
 Regex("foo").repeatAtLeastOnce() // Regex("(?:foo)+") 
@@ -392,7 +396,7 @@ Regex("(?<name>ba.)")
 // get group value by name
 Regex("(?<name>ba.)")
     .findAll("foo bar baz")
-    .mapNotNull { it.groupValue("name") }    // "bar", "baz"
+    .map { it.groupValue("name") }           // "bar", "baz"
 
 // find all values
 Regex("(?<name>ba.)")
@@ -401,6 +405,36 @@ Regex("(?<name>ba.)")
 // match URLs / URIs
 Regex.UrlRegex.findAll(/* ... */)
 Regex.UriRegex.findAll(/* ... */)
+```
+
+Match multiline strings with simple glob patterns:
+
+```kotlin
+// matching within lines with wildcard
+"foo.bar()".matchesGlob("foo.*")  // ✅
+
+// matching across lines with multiline wildcard
+"""
+foo
+  .bar()
+  .baz()
+""".matchesGlob(
+    """
+    foo
+      .**()
+    """.trimIndent()              // ✅
+)
+
+"""
+foo
+  .bar()
+  .baz()
+""".matchesGlob(
+    """
+    foo
+      .*()
+    """.trimIndent()              // ❌ (* does not match across lines)
+)
 ```
 
 ### Collections and Ranges

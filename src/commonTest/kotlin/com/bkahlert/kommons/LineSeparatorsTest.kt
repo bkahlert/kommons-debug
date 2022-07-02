@@ -69,6 +69,18 @@ class LineSeparatorsTest {
         LineSeparators.Uncommon.shouldContainExactly(NEL, PS, LS)
     }
 
+    @Test fun common_regex() = test {
+        stringWithAllLineSeparators.replace(LineSeparators.CommonRegex, "-") shouldBe "foo-foo-foo-foo${NEL}foo${PS}foo${LS}foo"
+    }
+
+    @Test fun unicode_regex() = test {
+        stringWithAllLineSeparators.replace(LineSeparators.UnicodeRegex, "-") shouldBe "foo-foo-foo-foo-foo-foo-foo"
+    }
+
+    @Test fun uncommon_regex() = test {
+        stringWithAllLineSeparators.replace(LineSeparators.UncommonRegex, "-") shouldBe "foo${CRLF}foo${LF}foo${CR}foo-foo-foo-foo"
+    }
+
 
     @Test fun get_first_line_separator_or_null() = test {
         LineSeparators.Unicode.forAll {

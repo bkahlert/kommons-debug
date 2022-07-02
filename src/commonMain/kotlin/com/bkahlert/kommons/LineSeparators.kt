@@ -70,14 +70,24 @@ public object LineSeparators : AbstractList<String>() {
 
     /**
      * All [Unicode® Technical Standard #18—Line Boundaries](https://www.unicode.org/reports/tr18/#RL1.6)
-     * that are not [CommonLineSeparatorsRegex].
+     * that are not [Common].
      */
     public val Uncommon: Array<String> = Unicode.subtract(Common.toSet()).toTypedArray()
 
 
+    /** A [Regex] that matches [Common] line separators. */
+    public val CommonRegex: Regex by lazy { Regex.fromLiteralAlternates(*Common) }
+
+    /** A [Regex] that matches [Unicode] line separators. */
+    public val UnicodeRegex: Regex by lazy { Regex.fromLiteralAlternates(*Unicode) }
+
+    /** A [Regex] that matches [Uncommon] line separators. */
+    public val UncommonRegex: Regex by lazy { Regex.fromLiteralAlternates(*Uncommon) }
+
+
     /**
      * Returns the first line separator in this character sequence which is also contained in
-     * the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]), or `null` otherwise.
+     * the specified [lineSeparators] (default: [Common]), or `null` otherwise.
      */
     public fun CharSequence.getFirstLineSeparatorOrNull(vararg lineSeparators: String = Common): String? =
         splitToSequence(delimiters = lineSeparators, keepDelimiters = true).firstOrNull()
@@ -85,14 +95,14 @@ public object LineSeparators : AbstractList<String>() {
 
     /**
      * Returns the length of the first line separator in this character sequence which is also contained in
-     * the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]), or `0` otherwise.
+     * the specified [lineSeparators] (default: [Common]), or `0` otherwise.
      */
     public fun CharSequence.getFirstLineSeparatorLength(vararg lineSeparators: String = Common): Int =
         getFirstLineSeparatorOrNull(lineSeparators = lineSeparators)?.length ?: 0
 
     /**
      * Returns the line separator used the most in this character sequence which is also contained in
-     * the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]), or [default] if none is found.
+     * the specified [lineSeparators] (default: [Common]), or [default] if none is found.
      */
     public fun CharSequence.getMostFrequentLineSeparatorOrDefault(vararg lineSeparators: String = Common, default: String = Default): String {
         val histogram: MutableMap<String, Int?> = lineSeparators.associateWith { null }.toMutableMap()
@@ -109,13 +119,13 @@ public object LineSeparators : AbstractList<String>() {
             ?.key ?: default
     }
 
-    /** Replaces all specified [lineSeparators] (default: [CommonLineSeparatorsRegex]) with the specified [lineSeparator] (default: [Default]). */
+    /** Replaces all specified [lineSeparators] (default: [Common]) with the specified [lineSeparator] (default: [Default]). */
     public fun CharSequence.unifyLineSeparators(vararg lineSeparators: String = Common, lineSeparator: String = Default): String =
         splitToSequence(delimiters = lineSeparators, keepDelimiters = false).joinToString(lineSeparator)
 
 
     /**
-     * Splits this character sequence to a sequence of lines delimited by the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]).
+     * Splits this character sequence to a sequence of lines delimited by the specified [lineSeparators] (default: [Common]).
      *
      * If the lines returned do include terminating line separators is specified by [keepDelimiters].
      */
@@ -123,7 +133,7 @@ public object LineSeparators : AbstractList<String>() {
         this?.splitToSequence(delimiters = lineSeparators, keepDelimiters = keepDelimiters) ?: emptySequence()
 
     /**
-     * Splits this character sequence to a list of lines delimited by the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]).
+     * Splits this character sequence to a list of lines delimited by the specified [lineSeparators] (default: [Common]).
      *
      * If the lines returned do include terminating line separators is specified by [keepDelimiters].
      */
@@ -131,7 +141,7 @@ public object LineSeparators : AbstractList<String>() {
         lineSequence(lineSeparators = lineSeparators, keepDelimiters = keepDelimiters).toList()
 
     /**
-     * Splits this character sequence to a sequence of chunked lines delimited by the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]),
+     * Splits this character sequence to a sequence of chunked lines delimited by the specified [lineSeparators] (default: [Common]),
      * each chunked line having a length of at most the specified [size],
      * and applies the specified [transform] to each of them.
      */
@@ -145,7 +155,7 @@ public object LineSeparators : AbstractList<String>() {
     }
 
     /**
-     * Splits this character sequence to a list of chunked lines delimited by the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]),
+     * Splits this character sequence to a list of chunked lines delimited by the specified [lineSeparators] (default: [Common]),
      * each chunked line having a length of at most the specified [size],
      * and applies the specified [transform] to each of them.
      */
@@ -168,43 +178,43 @@ public object LineSeparators : AbstractList<String>() {
             }
         }
 
-    /** Applies the specified [transform] to each line delimited by a [CommonLineSeparatorsRegex] line separator. */
+    /** Applies the specified [transform] to each line delimited by a [Common] line separator. */
     public fun CharSequence.mapLines(transform: (String) -> CharSequence): String =
         mapLines(lineSeparators = Common, transform = transform)
 
-    /** Whether this string consists of more than one line delimited by the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]). */
+    /** Whether this string consists of more than one line delimited by the specified [lineSeparators] (default: [Common]). */
     public fun CharSequence?.isMultiline(vararg lineSeparators: String = Common): Boolean =
         lineSequence(lineSeparators = lineSeparators).take(2).count() > 1
 
-    /** Whether this string consists of one line delimited by the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]). */
+    /** Whether this string consists of one line delimited by the specified [lineSeparators] (default: [Common]). */
     public fun CharSequence?.isSingleLine(vararg lineSeparators: String = Common): Boolean =
         lineSequence(lineSeparators = lineSeparators).take(2).count() == 1
 
 
     /**
      * Returns the line separator this character sequence starts with and is contained in
-     * the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]), or `null` otherwise.
+     * the specified [lineSeparators] (default: [Common]), or `null` otherwise.
      */
     public fun CharSequence.getLeadingLineSeparatorOrNull(vararg lineSeparators: String = Common): String? =
         lineSeparators.firstOrNull { startsWith(it) }
 
     /**
      * Returns `true` if this character sequence starts with one of
-     * the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]), or false otherwise.
+     * the specified [lineSeparators] (default: [Common]), or false otherwise.
      */
     public fun CharSequence.startsWithLineSeparator(vararg lineSeparators: String = Common): Boolean =
         getLeadingLineSeparatorOrNull(lineSeparators = lineSeparators) != null
 
     /**
      * Returns this character sequence with its leading line separator removed if it is contained in
-     * the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]), or returns this character sequence otherwise.
+     * the specified [lineSeparators] (default: [Common]), or returns this character sequence otherwise.
      */
     public fun CharSequence.removeLeadingLineSeparator(vararg lineSeparators: String = Common): CharSequence =
         getLeadingLineSeparatorOrNull(lineSeparators = lineSeparators)?.let { removePrefix(it) } ?: this
 
     /**
      * Returns this string with its leading line separator removed if it is contained in
-     * the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]), or returns this string otherwise.
+     * the specified [lineSeparators] (default: [Common]), or returns this string otherwise.
      */
     public fun String.removeLeadingLineSeparator(vararg lineSeparators: String = Common): String =
         getLeadingLineSeparatorOrNull(lineSeparators = lineSeparators)?.let { removePrefix(it) } ?: this
@@ -212,7 +222,7 @@ public object LineSeparators : AbstractList<String>() {
     /**
      * Returns this character sequence with the specified [lineSeparator] (default: any) prepended
      * if it is not already present and contained in
-     * the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]).
+     * the specified [lineSeparators] (default: [Common]).
      */
     public fun CharSequence.withLeadingLineSeparator(lineSeparator: String? = null, vararg lineSeparators: String = Common): CharSequence =
         when (lineSeparator) {
@@ -229,7 +239,7 @@ public object LineSeparators : AbstractList<String>() {
     /**
      * Returns this string with the specified [lineSeparator] (default: any) prepended
      * if it is not already present and contained in
-     * the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]).
+     * the specified [lineSeparators] (default: [Common]).
      */
     public fun String.withLeadingLineSeparator(lineSeparator: String? = null, vararg lineSeparators: String = Common): String =
         when (lineSeparator) {
@@ -246,28 +256,28 @@ public object LineSeparators : AbstractList<String>() {
 
     /**
      * Returns the line separator this character sequence ends with and is contained in
-     * the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]), or `null` otherwise.
+     * the specified [lineSeparators] (default: [Common]), or `null` otherwise.
      */
     public fun CharSequence.getTrailingLineSeparatorOrNull(vararg lineSeparators: String = Common): String? =
         lineSeparators.firstOrNull { endsWith(it) }
 
     /**
      * Returns `true` if this character sequence ends with one of
-     * the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]), or false otherwise.
+     * the specified [lineSeparators] (default: [Common]), or false otherwise.
      */
     public fun CharSequence.endsWithLineSeparator(vararg lineSeparators: String = Common): Boolean =
         getTrailingLineSeparatorOrNull(lineSeparators = lineSeparators) != null
 
     /**
      * Returns this character sequence with its trailing line separator removed if it is contained in
-     * the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]), or returns this character sequence otherwise.
+     * the specified [lineSeparators] (default: [Common]), or returns this character sequence otherwise.
      */
     public fun CharSequence.removeTrailingLineSeparator(vararg lineSeparators: String = Common): CharSequence =
         getTrailingLineSeparatorOrNull(lineSeparators = lineSeparators)?.let { removeSuffix(it) } ?: this
 
     /**
      * Returns this string with its trailing line separator removed if it is contained in
-     * the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]), or returns this string otherwise.
+     * the specified [lineSeparators] (default: [Common]), or returns this string otherwise.
      */
     public fun String.removeTrailingLineSeparator(vararg lineSeparators: String = Common): String =
         getTrailingLineSeparatorOrNull(lineSeparators = lineSeparators)?.let { removeSuffix(it) } ?: this
@@ -275,7 +285,7 @@ public object LineSeparators : AbstractList<String>() {
     /**
      * Returns this character sequence with the specified [lineSeparator] (default: any) appended
      * if it is not already present and contained in
-     * the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]).
+     * the specified [lineSeparators] (default: [Common]).
      */
     public fun CharSequence.withTrailingLineSeparator(lineSeparator: String? = null, vararg lineSeparators: String = Common): CharSequence =
         when (lineSeparator) {
@@ -292,7 +302,7 @@ public object LineSeparators : AbstractList<String>() {
     /**
      * Returns this string with the specified [lineSeparator] (default: any) appended
      * if it is not already present and contained in
-     * the specified [lineSeparators] (default: [CommonLineSeparatorsRegex]).
+     * the specified [lineSeparators] (default: [Common]).
      */
     public fun String.withTrailingLineSeparator(lineSeparator: String? = null, vararg lineSeparators: String = Common): String =
         when (lineSeparator) {

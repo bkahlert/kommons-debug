@@ -1,9 +1,5 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.LineSeparators.Common as CommonLineSeparators
-import com.bkahlert.kommons.LineSeparators.Uncommon as UncommonLineSeparators
-import com.bkahlert.kommons.LineSeparators.Unicode as UnicodeLineSeparators
-
 /** Whether this regular expression is a group—no matter if named, anonymous, or indexed. */
 public val Regex.isGroup: Boolean
     get() {
@@ -56,6 +52,98 @@ public infix fun Regex.or(other: Regex): Regex = Regex("$pattern|${other.pattern
 /** Returns a [Regex] consisting of this and the specified [otherPattern] concatenated with `|`. */
 public infix fun Regex.or(otherPattern: CharSequence): Regex = Regex("$pattern|$otherPattern")
 
+
+/** Returns a [Regex] that matches one of the specified [literals]. */
+public fun Regex.Companion.fromLiteralAlternates(vararg literals: String): Regex =
+    fromLiteralAlternates(literals.asList())
+
+/** Returns a [Regex] that matches one of the specified [literals]. */
+public fun Regex.Companion.fromLiteralAlternates(literals: Collection<String>): Regex =
+    Regex(literals.joinToString("|") { escape(it) })
+
+private const val anyCharacterPattern = "[\\s\\S]"
+private const val anyNonLineSeparatorPattern = "."
+
+/**
+ * Returns a [Regex] that matches the same way the specified glob-like [pattern],
+ * using the specified [wildcard] (default: `*`) to match within lines,
+ * and the specified [multilineWildcard] (default: `**`) to match across lines,
+ * would.
+ *
+ * The returned regex render all specified [lineSeparators] (default: [LineSeparators.Common])
+ * matchable by any of the specified [lineSeparators].
+ *
+ * @see [CharSequence.matchesGlob]
+ */
+public fun Regex.Companion.fromGlob(
+    pattern: CharSequence,
+    wildcard: String = "*",
+    multilineWildcard: String = "**",
+    vararg lineSeparators: String = LineSeparators.Common,
+): Regex {
+    val anyLineSepPattern = Regex.fromLiteralAlternates(*lineSeparators).group(null).pattern
+    val anyNumberLineSepPattern = "$anyLineSepPattern*"
+    val multilineWildcardRegex = Regex("$anyNumberLineSepPattern${escape(multilineWildcard)}$anyNumberLineSepPattern")
+    return pattern
+        .split(multilineWildcardRegex)
+        .joinToString("$anyCharacterPattern*") { multilineWildcardFenced ->
+            multilineWildcardFenced.split(wildcard).joinToString("$anyNonLineSeparatorPattern*") { wildcardFenced ->
+                wildcardFenced.splitToSequence(delimiters = lineSeparators, keepDelimiters = false).joinToString(anyLineSepPattern) {
+                    escape(it)
+                }
+            }
+        }.toRegex()
+}
+
+/**
+ * Returns `true` if this character sequence matches the given
+ * glob-like [pattern],
+ * using the specified [wildcard] (default: `*`) to match within lines,
+ * and the specified [multilineWildcard] (default: `**`) to match across lines.
+ *
+ * The specified [lineSeparators] (default: [LineSeparators.Common]) can
+ * be matches by any line separator, i.e. [LineSeparators.LF] / `\n`.
+ *
+ * **Example 1: matching within lines with wildcard**
+ * ```kotlin
+ * "foo.bar()".matchesGlob("foo.*")  // ✅
+ * ```
+ *
+ * **Example 2: matching across lines with multiline wildcard**
+ * ```kotlin
+ * """
+ * foo
+ *   .bar()
+ *   .baz()
+ * """.trimIndent().matchesGlob(
+ *     """
+ *     foo
+ *       .**()
+ *     """.trimIndent())             // ✅
+ * ```
+ *
+ * **Example 3: wildcard not matching across lines**
+ * ```kotlin
+ * """
+ * foo
+ *   .bar()
+ *   .baz()
+ * """.trimIndent().matchesGlob(
+ *     """
+ *     foo
+ *       .*()
+ *     """.trimIndent())             // ❌ (* does not match across lines)
+ * ```
+ *
+ * @see [Regex.Companion.fromGlob]
+ */
+public fun CharSequence.matchesGlob(
+    pattern: CharSequence,
+    wildcard: String = "*",
+    multilineWildcard: String = "**",
+    vararg lineSeparators: String = LineSeparators.Common,
+): Boolean = Regex.fromGlob(pattern, wildcard, multilineWildcard, *lineSeparators).matches(this)
+
 /**
  * Returns a [Regex] that groups this [Regex].
  *
@@ -69,6 +157,7 @@ public infix fun Regex.or(otherPattern: CharSequence): Regex = Regex("$pattern|$
 public fun Regex.group(name: String? = null): Regex {
     return when (name) {
         null -> {
+            @Suppress("RegExpUnnecessaryNonCapturingGroup")
             if (isGroup) this
             else Regex("(?:$pattern)")
         }
@@ -130,6 +219,7 @@ public fun Regex.repeat(min: Int? = 0, max: Int? = null): Regex {
     if (min == 1 && max == null) return repeatAtLeastOnce()
     val minString = min?.toString() ?: ""
     val maxString = max?.toString() ?: ""
+    @Suppress("RegExpSimplifiable")
     return Regex("${grouped.pattern}{$minString,$maxString}")
 }
 
@@ -164,31 +254,17 @@ public fun Regex.findAllValues(input: CharSequence, startIndex: Int = 0): Sequen
     findAll(input, startIndex).map { it.value }
 
 
-private val anyCharacterRegex = Regex("[\\s\\S]")
+private val anyCharacterRegex = Regex(anyCharacterPattern)
 
 /** A [Regex] that matches any character including line breaks. */
 public val Regex.Companion.AnyCharacterRegex: Regex get() = anyCharacterRegex
 
 
-private val urlRegex = Regex("(?<schema>https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]")
-private val uriRegex: Regex = Regex("\\w+:(?:/?/?)[^\\s]+")
+private val urlRegex = Regex("(?<schema>https?|ftp|file)://[-a-zA-Z\\d+&@#/%?=~_|!:,.;]*[-a-zA-Z\\d+&@#/%=~_|]")
+private val uriRegex = Regex("\\w+:/?/?\\S+")
 
 /** A [Regex] that matches URLs. */
 public val Regex.Companion.UrlRegex: Regex get() = urlRegex
 
 /** A [Regex] that matches URIs. */
 public val Regex.Companion.UriRegex: Regex get() = uriRegex
-
-
-private val commonLineSeparatorsRegex = Regex(CommonLineSeparators.joinToString("|"))
-private val uncommonLineSeparatorsRegex = Regex(UncommonLineSeparators.joinToString("|"))
-private val unicodeLineSeparatorsRegex = Regex(UnicodeLineSeparators.joinToString("|"))
-
-/** A [Regex] that matches [CommonLineSeparators]. */
-public val Regex.Companion.CommonLineSeparatorsRegex: Regex get() = commonLineSeparatorsRegex
-
-/** A [Regex] that matches [UncommonLineSeparators]. */
-public val Regex.Companion.UncommonLineSeparatorsRegex: Regex get() = uncommonLineSeparatorsRegex
-
-/** A [Regex] that matches [UnicodeLineSeparators]. */
-public val Regex.Companion.UnicodeLineSeparatorsRegex: Regex get() = unicodeLineSeparatorsRegex
