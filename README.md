@@ -277,6 +277,8 @@ Decode any string to a sequence or list of graphemes using `String.asGraphemeSeq
 - `consolidateWhitespaces`/`consolidateWhitespacesBy`: Intelligently consolidates whitespaces in order to reduce the length of a string.
 - `toIdentifier`: Create an identifier from any string that resembles it.
 - `randomString`: Create a random string.
+- [LineSeparators](src/commonMain/kotlin/com/bkahlert/kommons/LineSeparators.kt): Plethora extension function to work with everyday and exotic Unicode line
+  breaks.
 
 #### Examples
 

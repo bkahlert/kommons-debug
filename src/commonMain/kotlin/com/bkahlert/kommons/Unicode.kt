@@ -2,7 +2,7 @@ package com.bkahlert.kommons
 
 
 /**
- * Named Unicode code points, like [Unicode.LINE_FEED] or [Unicode.SYMBOL_FOR_START_OF_HEADING].
+ * Named Unicode code points, like [UnicodeLineSeparatorsRegex.LINE_FEED] or [UnicodeLineSeparatorsRegex.SYMBOL_FOR_START_OF_HEADING].
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 public object Unicode {

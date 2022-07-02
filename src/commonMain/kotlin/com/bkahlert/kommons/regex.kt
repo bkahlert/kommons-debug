@@ -1,5 +1,9 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.LineSeparators.Common as CommonLineSeparators
+import com.bkahlert.kommons.LineSeparators.Uncommon as UncommonLineSeparators
+import com.bkahlert.kommons.LineSeparators.Unicode as UnicodeLineSeparators
+
 /** Whether this regular expression is a group—no matter if named, anonymous, or indexed. */
 public val Regex.isGroup: Boolean
     get() {
@@ -160,6 +164,12 @@ public fun Regex.findAllValues(input: CharSequence, startIndex: Int = 0): Sequen
     findAll(input, startIndex).map { it.value }
 
 
+private val anyCharacterRegex = Regex("[\\s\\S]")
+
+/** A [Regex] that matches any character including line breaks. */
+public val Regex.Companion.AnyCharacterRegex: Regex get() = anyCharacterRegex
+
+
 private val urlRegex = Regex("(?<schema>https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]")
 private val uriRegex: Regex = Regex("\\w+:(?:/?/?)[^\\s]+")
 
@@ -168,3 +178,17 @@ public val Regex.Companion.UrlRegex: Regex get() = urlRegex
 
 /** A [Regex] that matches URIs. */
 public val Regex.Companion.UriRegex: Regex get() = uriRegex
+
+
+private val commonLineSeparatorsRegex = Regex(CommonLineSeparators.joinToString("|"))
+private val uncommonLineSeparatorsRegex = Regex(UncommonLineSeparators.joinToString("|"))
+private val unicodeLineSeparatorsRegex = Regex(UnicodeLineSeparators.joinToString("|"))
+
+/** A [Regex] that matches [CommonLineSeparators]. */
+public val Regex.Companion.CommonLineSeparatorsRegex: Regex get() = commonLineSeparatorsRegex
+
+/** A [Regex] that matches [UncommonLineSeparators]. */
+public val Regex.Companion.UncommonLineSeparatorsRegex: Regex get() = uncommonLineSeparatorsRegex
+
+/** A [Regex] that matches [UnicodeLineSeparators]. */
+public val Regex.Companion.UnicodeLineSeparatorsRegex: Regex get() = unicodeLineSeparatorsRegex

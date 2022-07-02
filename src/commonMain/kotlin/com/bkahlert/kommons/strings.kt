@@ -391,12 +391,6 @@ public fun CharSequence.indexOfOrNull(string: String, startIndex: Int = 0, ignor
     indexOf(string, startIndex, ignoreCase).takeIf { it >= 0 }
 
 
-// isMultiline ---------------------------------------------------------------------------------------------------------
-
-/** Whether this string consists of more than one line. */
-public val CharSequence.isMultiline: Boolean get() = lineSequence().take(2).count() > 1
-
-
 // asString ------------------------------------------------------------------------------------------------------------
 
 /**

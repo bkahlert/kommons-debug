@@ -1,5 +1,12 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.LineSeparators.CR
+import com.bkahlert.kommons.LineSeparators.CRLF
+import com.bkahlert.kommons.LineSeparators.LF
+import com.bkahlert.kommons.LineSeparators.LS
+import com.bkahlert.kommons.LineSeparators.NEL
+import com.bkahlert.kommons.LineSeparators.PS
+import com.bkahlert.kommons.Platform.JS
 import com.bkahlert.kommons.test.fixtures.GifImageFixture
 import com.bkahlert.kommons.test.test
 import io.kotest.assertions.throwables.shouldThrow
@@ -243,6 +250,14 @@ class RegexKtTest {
     }
 
 
+    @Test fun any_character_regex() = test {
+        stringWithAllLineSeparators.replace(Regex.AnyCharacterRegex, "-") shouldBe "----------------------------"
+        stringWithAllLineSeparators.replace(Regex("."), "-") shouldBe when (Platform.Current) {
+            is JS -> "---${CRLF}---${LF}---${CR}-------${PS}---${LS}---"
+            else -> "---${CRLF}---${LF}---${CR}---${NEL}---${PS}---${LS}---"
+        }
+    }
+
     @Test fun url_regex() = test {
         Regex.UrlRegex.findAllValues(
             """
@@ -285,5 +300,17 @@ class RegexKtTest {
             "abc://example.net",
             GifImageFixture.dataURI,
         )
+    }
+
+    @Test fun common_line_separators_regex() = test {
+        stringWithAllLineSeparators.replace(Regex.CommonLineSeparatorsRegex, "-") shouldBe "foo-foo-foo-foo${NEL}foo${PS}foo${LS}foo"
+    }
+
+    @Test fun uncommon_line_separators_regex() = test {
+        stringWithAllLineSeparators.replace(Regex.UncommonLineSeparatorsRegex, "-") shouldBe "foo${CRLF}foo${LF}foo${CR}foo-foo-foo-foo"
+    }
+
+    @Test fun unicode_line_separators_regex() = test {
+        stringWithAllLineSeparators.replace(Regex.UnicodeLineSeparatorsRegex, "-") shouldBe "foo-foo-foo-foo-foo-foo-foo"
     }
 }

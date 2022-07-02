@@ -402,25 +402,6 @@ class StringsKtTest {
         string.indexOfOrNull("xyz") shouldBe null
     }
 
-    @Test fun is_multiline() = test {
-        "".isMultiline shouldBe false
-        "foo".isMultiline shouldBe false
-        LineSeparators.Common.forAll {
-            it.isMultiline shouldBe true
-            "${it}foo".isMultiline shouldBe true
-            "foo${it}".isMultiline shouldBe true
-            "foo${it}bar".isMultiline shouldBe true
-            "foo${it}bar${it}baz".isMultiline shouldBe true
-        }
-        LineSeparators.Uncommon.forAll {
-            it.isMultiline shouldBe false
-            "${it}foo".isMultiline shouldBe false
-            "foo${it}".isMultiline shouldBe false
-            "foo${it}bar".isMultiline shouldBe false
-            "foo${it}bar${it}baz".trimIndent().isMultiline shouldBe false
-        }
-    }
-
     @Test fun as_string() = test {
         OrdinaryClass().asString() shouldBe when (Platform.Current) {
             is JS -> """
@@ -489,39 +470,39 @@ class StringsKtTest {
     }
 
     @Test fun split_map() = test {
-        "foo,bar".splitMap(",") { ">$it<" } shouldBe ">foo<,>bar<"
-        "foo-bar".splitMap(",") { ">$it<" } shouldBe ">foo-bar<"
-        "foo X bar".splitMap(" X ") { ">$it<" } shouldBe ">foo< X >bar<"
-        "foo X bar".splitMap(" x ") { ">$it<" } shouldBe ">foo X bar<"
-        "foo X bar".splitMap(" x ", ignoreCase = true) { ">$it<" } shouldBe ">foo< x >bar<"
-        "foo,bar,baz".splitMap(",", limit = 2) { ">$it<" } shouldBe ">foo<,>bar,baz<"
-
         "foo,bar".cs.splitMap(",") { ">$it<" } shouldBe ">foo<,>bar<"
         "foo-bar".cs.splitMap(",") { ">$it<" } shouldBe ">foo-bar<"
         "foo X bar".cs.splitMap(" X ") { ">$it<" } shouldBe ">foo< X >bar<"
         "foo X bar".cs.splitMap(" x ") { ">$it<" } shouldBe ">foo X bar<"
         "foo X bar".cs.splitMap(" x ", ignoreCase = true) { ">$it<" } shouldBe ">foo< x >bar<"
         "foo,bar,baz".cs.splitMap(",", limit = 2) { ">$it<" } shouldBe ">foo<,>bar,baz<"
+
+        "foo,bar".splitMap(",") { ">$it<" } shouldBe ">foo<,>bar<"
+        "foo-bar".splitMap(",") { ">$it<" } shouldBe ">foo-bar<"
+        "foo X bar".splitMap(" X ") { ">$it<" } shouldBe ">foo< X >bar<"
+        "foo X bar".splitMap(" x ") { ">$it<" } shouldBe ">foo X bar<"
+        "foo X bar".splitMap(" x ", ignoreCase = true) { ">$it<" } shouldBe ">foo< x >bar<"
+        "foo,bar,baz".splitMap(",", limit = 2) { ">$it<" } shouldBe ">foo<,>bar,baz<"
     }
 
     @Test fun split_to_sequence() = test {
-        "foo X bar x baz".splitToSequence(" X ").shouldContainExactly("foo", "bar x baz")
-        "foo X bar x baz".splitToSequence(" X ", " x ").shouldContainExactly("foo", "bar", "baz")
-        "foo X bar x baz".splitToSequence(" X ", " x ", keepDelimiters = true).shouldContainExactly("foo X ", "bar x ", "baz")
-        "foo X bar x baz".splitToSequence(" X ", ignoreCase = true).shouldContainExactly("foo", "bar", "baz")
-        "foo X bar x baz".splitToSequence(" X ", ignoreCase = true, keepDelimiters = true).shouldContainExactly("foo X ", "bar x ", "baz")
-        "foo X bar x baz".splitToSequence(" X ", " x ", limit = 2).shouldContainExactly("foo", "bar x baz")
-
         "foo X bar x baz".cs.splitToSequence(" X ").shouldContainExactly("foo", "bar x baz")
         "foo X bar x baz".cs.splitToSequence(" X ", " x ").shouldContainExactly("foo", "bar", "baz")
         "foo X bar x baz".cs.splitToSequence(" X ", " x ", keepDelimiters = true).shouldContainExactly("foo X ", "bar x ", "baz")
         "foo X bar x baz".cs.splitToSequence(" X ", ignoreCase = true).shouldContainExactly("foo", "bar", "baz")
         "foo X bar x baz".cs.splitToSequence(" X ", ignoreCase = true, keepDelimiters = true).shouldContainExactly("foo X ", "bar x ", "baz")
         "foo X bar x baz".cs.splitToSequence(" X ", " x ", limit = 2).shouldContainExactly("foo", "bar x baz")
+
+        "foo X bar x baz".splitToSequence(" X ").shouldContainExactly("foo", "bar x baz")
+        "foo X bar x baz".splitToSequence(" X ", " x ").shouldContainExactly("foo", "bar", "baz")
+        "foo X bar x baz".splitToSequence(" X ", " x ", keepDelimiters = true).shouldContainExactly("foo X ", "bar x ", "baz")
+        "foo X bar x baz".splitToSequence(" X ", ignoreCase = true).shouldContainExactly("foo", "bar", "baz")
+        "foo X bar x baz".splitToSequence(" X ", ignoreCase = true, keepDelimiters = true).shouldContainExactly("foo X ", "bar x ", "baz")
+        "foo X bar x baz".splitToSequence(" X ", " x ", limit = 2).shouldContainExactly("foo", "bar x baz")
     }
 }
 
-private val String.cs: CharSequence get() = StringBuilder(this)
+internal val String.cs: CharSequence get() = StringBuilder(this)
 
 internal val char: Char = 'c'
 internal val blankChar: Char = ' '

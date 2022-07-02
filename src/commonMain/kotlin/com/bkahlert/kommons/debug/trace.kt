@@ -1,10 +1,10 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.LineSeparators.LF
+import com.bkahlert.kommons.LineSeparators.isMultiline
 import com.bkahlert.kommons.Platform
 import com.bkahlert.kommons.Platform.JVM
-import com.bkahlert.kommons.Unicode
 import com.bkahlert.kommons.debug.Typing.SimplyTyped
-import com.bkahlert.kommons.isMultiline
 
 /** Function that renders any object. */
 public typealias Renderer = (Any?) -> String
@@ -118,7 +118,7 @@ public fun <T> T.inspect(
 ): T = trace(caption, highlight, includeCallSite, { it.render { this.typing = typing; customToString = CustomToString.Ignore } }, out, inspect)
 
 internal fun StringBuilder.appendWrapped(value: String, brackets: Pair<String, String>) {
-    val separator = if (value.isMultiline) Unicode.LINE_FEED else ' '
+    val separator = if (value.isMultiline()) LF else ' '
     append(brackets.first)
     append(separator)
     append(value)

@@ -1,5 +1,6 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.LineSeparators.isMultiline
 import com.bkahlert.kommons.VALUE_RANGE
 import com.bkahlert.kommons.debug.Compression.Always
 import com.bkahlert.kommons.debug.Compression.Auto
@@ -9,7 +10,6 @@ import com.bkahlert.kommons.debug.CustomToString.IgnoreForPlainCollectionsAndMap
 import com.bkahlert.kommons.debug.Typing.FullyTyped
 import com.bkahlert.kommons.debug.Typing.SimplyTyped
 import com.bkahlert.kommons.debug.Typing.Untyped
-import com.bkahlert.kommons.isMultiline
 import com.bkahlert.kommons.quoted
 import com.bkahlert.kommons.toHexadecimalString
 
@@ -236,7 +236,7 @@ internal fun RenderingContext.renderStringTo(out: StringBuilder, string: CharSeq
             out.append(string.quoted)
         }
         Never, is Auto -> {
-            if (string.isMultiline) {
+            if (string.isMultiline()) {
                 out.append("\"\"\"\n")
                 out.append(string.toString())
                 out.append("\n\"\"\"")

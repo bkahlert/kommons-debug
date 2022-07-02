@@ -1,7 +1,7 @@
 package com.bkahlert.kommons.debug
 
-import com.bkahlert.kommons.Unicode
-import com.bkahlert.kommons.isMultiline
+import com.bkahlert.kommons.LineSeparators.LF
+import com.bkahlert.kommons.LineSeparators.isMultiline
 
 /**
  * Helper property that supports
@@ -60,7 +60,7 @@ public inline fun <T> T.traceJs(
 ): T {
 
     val appendWrapped: (StringBuilder, String, Pair<String, String>) -> Unit = { sb, value, (left, right) ->
-        val separator = if (value.isMultiline) Unicode.LINE_FEED else ' '
+        val separator = if (value.isMultiline()) LF else ' '
         sb.append(left)
         sb.append(separator)
         sb.append(value)
