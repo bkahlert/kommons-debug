@@ -42,13 +42,14 @@ private fun makeCharFromSurrogatePair(high: Char, low: Char): Int {
 
 /** Returns a sequence yielding the [CodePoint] instances this string consists of. */
 public actual fun String.asCodePointSequence(): Sequence<CodePoint> {
-    var i = 0
+    if (isEmpty()) return emptySequence()
+    var index = 0
     return sequence {
-        while (i < this@asCodePointSequence.length) {
-            val ch = this@asCodePointSequence[i++]
+        while (index < this@asCodePointSequence.length) {
+            val ch = this@asCodePointSequence[index++]
             val v = when {
                 ch.isHighSurrogate() -> {
-                    val low = this@asCodePointSequence[i++]
+                    val low = this@asCodePointSequence[index++]
                     if (low.isLowSurrogate()) {
                         makeCharFromSurrogatePair(ch, low)
                     } else {
@@ -64,5 +65,8 @@ public actual fun String.asCodePointSequence(): Sequence<CodePoint> {
 }
 
 /** Returns the number of Unicode code points in the specified text range of this string. */
-public actual fun String.codePointCount(beginIndex: Int, endIndex: Int): Int =
-    substring(beginIndex, endIndex).asCodePointSequence().count()
+public actual fun String.codePointCount(startIndex: Int, endIndex: Int): Int {
+    val substring = substring(startIndex, endIndex)
+    if (substring.isEmpty()) return 0
+    return substring.asCodePointSequence().count()
+}

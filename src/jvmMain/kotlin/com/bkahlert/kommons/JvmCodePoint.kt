@@ -26,6 +26,7 @@ public val CodePoint.name: String
 
 /** Returns a sequence yielding the [CodePoint] instances this string consists of. */
 public actual fun String.asCodePointSequence(): Sequence<CodePoint> {
+    if (isEmpty()) return emptySequence()
     var pos = 0
     return sequence<CodePoint> {
         while (pos < this@asCodePointSequence.length) {
@@ -36,4 +37,5 @@ public actual fun String.asCodePointSequence(): Sequence<CodePoint> {
 }
 
 /** Returns the number of Unicode code points in the specified text range of this string. */
-public actual fun String.codePointCount(beginIndex: Int, endIndex: Int): Int = kotlinCodePointCount(beginIndex, endIndex)
+public actual fun String.codePointCount(startIndex: Int, endIndex: Int): Int =
+    kotlinCodePointCount(startIndex, endIndex)

@@ -49,25 +49,27 @@ kotlin {
         val commonMain by getting
         val commonTest by getting {
             dependencies {
-                implementation("com.bkahlert.kommons:kommons-test:0.4.0")
+                implementation("com.bkahlert.kommons:kommons-test:0.4.0") { because("JUnit defaults, testEach") }
             }
         }
         val jvmMain by getting {
             dependencies {
-                implementation("org.slf4j:slf4j-api:1.7.36")
                 implementation(kotlin("reflect"))
+                implementation("org.slf4j:slf4j-api:1.7.36") { because("logger API") }
+                implementation("com.ibm.icu:icu4j:71.1") { because("grapheme sequence") }
             }
         }
         val jvmTest by getting {
             dependencies {
-                implementation("org.slf4j:slf4j-simple:1.7.36")
+                implementation("org.slf4j:slf4j-simple:1.7.36") { because("logger implementation for tests") }
+
             }
         }
         val jsMain by getting {
             dependencies {
                 @Suppress("SpellCheckingInspection")
-                implementation(npm("xregexp", "5.1.0"))
-                implementation(npm("grapheme-splitter", "1.0.4"))
+                implementation(npm("xregexp", "5.1.0")) { because("code point sequence") }
+                implementation(npm("@stdlib/string-next-grapheme-cluster-break", "0.0.8")) { because("grapheme sequence") }
             }
         }
         val jsTest by getting

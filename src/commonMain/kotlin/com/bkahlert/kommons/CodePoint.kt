@@ -119,7 +119,7 @@ public expect fun String.asCodePointSequence(): Sequence<CodePoint>
 public fun String.toCodePointList(): List<CodePoint> = asCodePointSequence().toList()
 
 /** Returns the number of Unicode code points in the specified text range of this string. */
-public expect fun String.codePointCount(beginIndex: Int = 0, endIndex: Int = length): Int
+public expect fun String.codePointCount(startIndex: Int = 0, endIndex: Int = length): Int
 
 /** A closed range of code points. */
 public class CodePointRange(

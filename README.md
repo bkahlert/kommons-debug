@@ -250,23 +250,53 @@ ClassPath("dir/to/resource").useBufferedReader { it.readLine() }
 
 ### Unicode
 
-Decode any string to a sequence or list of code points using `String.asCodePointSequence` or `String.toCodePointList`.
+Handling user input requires functions to handle Unicode correctly,
+unless you're not afraid of the following:
 
-Decode any string to a sequence or list of graphemes using `String.asGraphemeSequence` or `String.toGraphemeList`.
+```kotlin
+"👨🏾‍🦱".substring(0, 3) // "👨?", skin tone gone, curly hair gone
+"👩‍👩‍👦‍👦".substring(1, 7) // "?‍👩‍?", wife gone, kids gone
+```
+
+Decode any string to a sequence / list of code points using `String.asCodePointSequence` / `String.toCodePointList`.
+
+Decode any string to a sequence / list of graphemes using `String.asGraphemeSequence` / `String.toGraphemeList`.
 
 #### Examples
 
 ```kotlin
-"a".asCodePoint().name // "LATIN SMALL LETTER A"
+"a".asCodePoint().name     // "LATIN SMALL LETTER A"
+"a".toCodePointList()      // CodePoint(0x61)
+"𝕓".toCodePointList()      // CodePoint(0x1D553)
+"a̳o".toCodePointList()     // "a", "̳", "o"
+"a̳o".toGraphemeList()      // "a̳", "o"
 
-"a".toCodePointList()  // CodePoint(0x61)
-"𝕓".toCodePointList()  // CodePoint(0x1D553)
-"a̳o".toCodePointList() // CodePoint('a'.code), CodePoint('̳'.code), CodePoint('o'.code)
-
-"a".toGraphemeList()   // Grapheme("a")
-"𝕓".toGraphemeList()   // Grapheme("𝕓")
-"a̳o".toGraphemeList()  // Grapheme("a̳"), Grapheme("o")
+"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".length           // 27 (= number of bytes used when encoded with UTF-16)
+"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".codePointCount() // 16 (= number of Unicode code points)
+"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".graphemeCount()  // 6  (= visually perceivable units)
 ```
+
+#### UTF-16 Char *vs* Code Point *vs* Grapheme Cluster
+
+|                 UTF-16                  | Char<br/>(Java, JavaScript, Kotlin, ...)             | Unicode<br/>Code Point                    | Unicode<br/>Grapheme Cluster |
+|:---------------------------------------:|------------------------------------------------------|-------------------------------------------|------------------------------|
+|                 \u0061                  | a (LATIN SMALL LETTER A)                             | a                                         | a                            |
+|            \uD835<br/>\uDD53            | 𝕓 (MATHEMATICAL DOUBLE-STRUCK SMALL B)              | 𝕓                                        | 𝕓                           |
+| \uD83E<br/>\uDEE0<br/>\uD83C<br/>\uDDE9 | ? (HIGH SURROGATES D83E)<br/>? (LOW SURROGATES DEE0) | 🫠 (MELTING FACE EMOJI)                   | 🫠                           |
+|            \uD83C<br/>\uDDE9            | ? (HIGH SURROGATES D83C)<br/>? (LOW SURROGATES DDE9) | \[D] (REGIONAL INDICATOR SYMBOL LETTER D) | 🇩🇪                         |
+|            \uD83C<br/>\uDDEA            | ? (HIGH SURROGATES D83C)<br/>? (LOW SURROGATES DDEA) | \[E] (REGIONAL INDICATOR SYMBOL LETTER E) |                              |
+|            \uD83D<br/>\uDC68            | ? (HIGH SURROGATES D83D)<br/>? (LOW SURROGATES DC68) | 👨 (MAN)                                  | 👨🏾‍🦱                      |
+|            \uD83C<br/>\uDFFE            | ? (HIGH SURROGATES D83C)<br/>? (LOW SURROGATES DFFE) | 🏾 (EMOJI MODIFIER FITZPATRICK TYPE-5)    |                              |
+|                 \u200D                  | \[ZWJ] (ZERO WIDTH JOINER)                           | \[ZWJ] (ZERO WIDTH JOINER)                |                              |
+|            \uD83E<br/>\uDDB1            | ? (HIGH SURROGATES D83E)<br/>? (LOW SURROGATES DDB1) | 🦱 (EMOJI COMPONENT CURLY HAIR)           |                              |
+|            \uD83D<br/>\uDC69            | ? (HIGH SURROGATES D83D)<br/>? (LOW SURROGATES DC69) | 👩 (WOMAN)                                | 👩‍👩‍👦‍👦                  |
+|                 \u200D                  | \[ZWJ] (ZERO WIDTH JOINER)                           | \[ZWJ] (ZERO WIDTH JOINER)                |                              |
+|            \uD83D<br/>\uDC69            | ? (HIGH SURROGATES D83D)<br/>? (LOW SURROGATES DC69) | 👩 (WOMAN)                                |                              |
+|                 \u200D                  | \[ZWJ] (ZERO WIDTH JOINER)                           | \[ZWJ] (ZERO WIDTH JOINER)                |                              |
+|            \uD83D<br/>\uDC66            | ? (HIGH SURROGATES D83D)<br/>? (LOW SURROGATES DC66) | 👦 (BOY)                                  |                              |
+|                 \u200D                  | \[ZWJ] (ZERO WIDTH JOINER)                           | \[ZWJ] (ZERO WIDTH JOINER)                |                              |
+|            \uD83D<br/>\uDC66            | ? (HIGH SURROGATES D83D)<br/>? (LOW SURROGATES DC66) | 👦 (BOY)                                  |                              |
+
 
 ### String Handling
 

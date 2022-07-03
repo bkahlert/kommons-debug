@@ -20,3 +20,10 @@ public expect fun String.asGraphemeSequence(): Sequence<Grapheme>
 
 /** Returns a list containing the [Grapheme] instances this string consists of. */
 public fun String.toGraphemeList(): List<Grapheme> = asGraphemeSequence().toList()
+
+/** Returns the number of [Grapheme] instances in the specified text range of this string. */
+public fun String.graphemeCount(startIndex: Int = 0, endIndex: Int = length): Int {
+    val substring = substring(startIndex, endIndex)
+    if (substring.isEmpty()) return 0
+    return substring.asGraphemeSequence().count()
+}

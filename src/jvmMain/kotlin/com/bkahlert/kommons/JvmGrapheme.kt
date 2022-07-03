@@ -1,18 +1,19 @@
 package com.bkahlert.kommons
 
-import java.text.BreakIterator
+import com.ibm.icu.text.BreakIterator
 
 /** Returns a sequence yielding the [Grapheme] instances this string consists of. */
 public actual fun String.asGraphemeSequence(): Sequence<Grapheme> {
+    if (isEmpty()) return emptySequence()
     val iterator = BreakIterator.getCharacterInstance()
     iterator.setText(this)
-    var start = iterator.first()
+    var index = iterator.first()
     return sequence {
         while (true) {
-            val end = iterator.next()
-            if (end == BreakIterator.DONE) break
-            yield(Grapheme(this@asGraphemeSequence.substring(start, end)))
-            start = end
+            val breakIndex = iterator.next()
+            if (breakIndex == BreakIterator.DONE) break
+            yield(Grapheme(this@asGraphemeSequence.substring(index, breakIndex)))
+            index = breakIndex
         }
     }
 }

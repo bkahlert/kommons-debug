@@ -1,10 +1,20 @@
 package com.bkahlert.kommons
 
-private val GraphemeSplitter = js("require('grapheme-splitter')")
-private val graphemeSplitter = GraphemeSplitter()
+private val nextGraphemeClusterBreak = js("require('@stdlib/string-next-grapheme-cluster-break')")
 
 /** Returns a sequence yielding the [Grapheme] instances this string consists of. */
 public actual fun String.asGraphemeSequence(): Sequence<Grapheme> {
-    val result = graphemeSplitter.splitGraphemes(this) as Array<String>
-    return result.asSequence().map { Grapheme(it) }
+    if (isEmpty()) return emptySequence()
+    var index = 0
+    return sequence {
+        while (true) {
+            val breakIndex = nextGraphemeClusterBreak(this@asGraphemeSequence, index) as Int
+            if (breakIndex == -1) {
+                yield(Grapheme(this@asGraphemeSequence.substring(index, this@asGraphemeSequence.length)))
+                break
+            }
+            yield(Grapheme(this@asGraphemeSequence.substring(index, breakIndex)))
+            index = breakIndex
+        }
+    }
 }

@@ -4,6 +4,7 @@ import com.bkahlert.kommons.test.test
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forAll
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.comparables.shouldBeEqualComparingTo
 import io.kotest.matchers.comparables.shouldBeGreaterThan
@@ -16,6 +17,7 @@ import kotlin.test.Test
 class CodePointTest {
 
     @Test fun to_code_point_list() = test {
+        "".toCodePointList().shouldBeEmpty()
         "a".toCodePointList().shouldContainExactly(CodePoint(0x61))
         "¶".toCodePointList().shouldContainExactly(CodePoint(0xB6))
         "☰".toCodePointList().shouldContainExactly(CodePoint(0x2630))
@@ -24,17 +26,19 @@ class CodePointTest {
     }
 
     @Test fun code_point_count() = test {
+        "".codePointCount() shouldBe 0
         "a".codePointCount() shouldBe 1
         "¶".codePointCount() shouldBe 1
         "☰".codePointCount() shouldBe 1
         "𝕓".codePointCount() shouldBe 1
         "a̳o".codePointCount() shouldBe 3
-        "a̳o".codePointCount(beginIndex = 1) shouldBe 2
-        "a̳o".codePointCount(beginIndex = 2) shouldBe 1
-        "a̳o".codePointCount(beginIndex = 3) shouldBe 0
+        "a̳o".codePointCount(startIndex = 1) shouldBe 2
+        "a̳o".codePointCount(startIndex = 2) shouldBe 1
+        "a̳o".codePointCount(startIndex = 3) shouldBe 0
         "a̳o".codePointCount(endIndex = 1) shouldBe 1
         "a̳o".codePointCount(endIndex = 2) shouldBe 2
         "a̳o".codePointCount(endIndex = 3) shouldBe 3
+        "🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".codePointCount() shouldBe 14
     }
 
     @Test fun instantiate() = test {
