@@ -15,6 +15,12 @@ public value class Grapheme(public val string: String) {
     override fun toString(): String = string
 }
 
+/** Returns the [Grapheme] with the same value, or throws an [IllegalArgumentException] otherwise. */
+public fun String.asGrapheme(): Grapheme = asGraphemeOrNull() ?: throw IllegalArgumentException("invalid grapheme: $this")
+
+/** Returns the [Grapheme] with the same value, or `null` otherwise. */
+public fun String.asGraphemeOrNull(): Grapheme? = asGraphemeSequence().singleOrNull()
+
 /** Returns a sequence yielding the [Grapheme] instances this string consists of. */
 public expect fun String.asGraphemeSequence(): Sequence<Grapheme>
 
@@ -23,6 +29,7 @@ public fun String.toGraphemeList(): List<Grapheme> = asGraphemeSequence().toList
 
 /** Returns the number of [Grapheme] instances in the specified text range of this string. */
 public fun String.graphemeCount(startIndex: Int = 0, endIndex: Int = length): Int {
+    if (endIndex < startIndex || startIndex < 0 || endIndex > length) throw IndexOutOfBoundsException("begin $startIndex, end $endIndex, length $length")
     val substring = substring(startIndex, endIndex)
     if (substring.isEmpty()) return 0
     return substring.asGraphemeSequence().count()

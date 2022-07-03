@@ -1,6 +1,9 @@
 package com.bkahlert.kommons
 
 import com.bkahlert.kommons.Platform.JS
+import com.bkahlert.kommons.TextLength.Companion.chars
+import com.bkahlert.kommons.TextLength.Companion.codePoints
+import com.bkahlert.kommons.TextLength.Companion.graphemes
 import com.bkahlert.kommons.debug.ClassWithCustomToString
 import com.bkahlert.kommons.debug.ClassWithDefaultToString
 import com.bkahlert.kommons.debug.OrdinaryClass
@@ -18,6 +21,7 @@ import io.kotest.matchers.string.shouldHaveLength
 import io.kotest.matchers.string.shouldMatch
 import io.kotest.matchers.string.shouldStartWith
 import io.kotest.matchers.throwable.shouldHaveMessage
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.test.Test
 
 class StringsKtTest {
@@ -177,161 +181,159 @@ class StringsKtTest {
 
 
     @Test fun truncate() = test {
-        withClue("should truncate from center") {
-            "12345678901234567890".truncate() shouldBe "123456 … 567890"
-        }
+        longString.truncate() shouldBe longString.truncate(length = 15.codePoints, marker = Unicode.ELLIPSIS.spaced)
 
-        withClue("should truncate using code points") {
-            "👨🏾👨🏾👨🏾👨🏾👨🏾".truncate(6) shouldBe "👨🏾 … 🏾"
-        }
+        longString.truncate(length = 7.chars) shouldBe "a\uD835 … 👦"
+        longString.truncate(length = 7.codePoints) shouldBe "a𝕓 … ‍👦"
+        longString.truncate(length = 7.graphemes) shouldBe "a𝕓 … 👨🏾‍🦱👩‍👩‍👦‍👦"
 
-        withClue("should not truncate if not necessary") {
-            "1234567890".truncate() shouldBe "1234567890"
-        }
+        longString.truncate(length = 100_000.chars) shouldBeSameInstanceAs longString
+        longString.truncate(length = 100_000.codePoints) shouldBeSameInstanceAs longString
+        longString.truncate(length = 100_000.graphemes) shouldBeSameInstanceAs longString
 
-        withClue("should truncate using custom marker") {
-            "12345678901234567890".truncate(marker = "...") shouldBe "123456...567890"
-        }
+        longString.truncate(length = 7.chars, marker = "⋯") shouldBe "a𝕓⋯‍👦"
+        longString.truncate(length = 7.codePoints, marker = "⋯") shouldBe "a𝕓🫠⋯👦‍👦"
+        longString.truncate(length = 7.graphemes, marker = "⋯") shouldBe "a𝕓🫠⋯🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦"
 
-        withClue("should truncate long text") {
-            longString.truncate() shouldBe "123456 … 567890"
-        }
-
-        withClue("should throw if marker is wider than max length") {
-            shouldThrow<IllegalArgumentException> {
-                "1234567890".truncate(length = 1, marker = "XX")
-            }
-        }
+        shouldThrow<IllegalArgumentException> { longString.truncate(length = 7.chars, marker = "1234567890") }
+            .message shouldBe "The specified length (7 chars) must be greater or equal than the length of the marker \"1234567890\" (10 chars)."
+        shouldThrow<IllegalArgumentException> { longString.truncate(length = 7.codePoints, marker = "1234567890") }
+            .message shouldBe "The specified length (7 codepoints) must be greater or equal than the length of the marker \"1234567890\" (10 codepoints)."
+        shouldThrow<IllegalArgumentException> { longString.truncate(length = 7.graphemes, marker = "1234567890") }
+            .message shouldBe "The specified length (7 graphemes) must be greater or equal than the length of the marker \"1234567890\" (10 graphemes)."
     }
 
     @Test fun truncate_start() = test {
+        longString.truncateStart() shouldBe longString.truncateStart(length = 15.codePoints, marker = Unicode.ELLIPSIS.spaced)
 
-        withClue("should truncate from start") {
-            "12345678901234567890".truncateStart() shouldBe " … 901234567890"
-        }
+        longString.truncateStart(length = 7.chars) shouldBe " … \uDC66\u200D👦"
+        longString.truncateStart(length = 7.codePoints) shouldBe " … ‍👦‍👦"
+        longString.truncateStart(length = 7.graphemes) shouldBe " … 🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦"
 
-        withClue("should truncate using code points") {
-            "👨🏾👨🏾👨🏾👨🏾👨🏾".truncateStart(4) shouldBe " … 🏾"
-        }
+        longString.truncateStart(length = 100_000.chars) shouldBeSameInstanceAs longString
+        longString.truncateStart(length = 100_000.codePoints) shouldBeSameInstanceAs longString
+        longString.truncateStart(length = 100_000.graphemes) shouldBeSameInstanceAs longString
 
-        withClue("should not truncate if not necessary") {
-            "1234567890".truncateStart() shouldBe "1234567890"
-        }
+        longString.truncateStart(length = 7.chars, marker = "⋯") shouldBe "⋯‍👦‍👦"
+        longString.truncateStart(length = 7.codePoints, marker = "⋯") shouldBe "⋯‍👩‍👦‍👦"
+        longString.truncateStart(length = 7.graphemes, marker = "⋯") shouldBe "⋯a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦"
 
-        withClue("should truncate using custom marker") {
-            "12345678901234567890".truncateStart(marker = "...") shouldBe "...901234567890"
-        }
-
-        withClue("should truncate long text") {
-            longString.truncateStart() shouldBe " … 901234567890"
-        }
-
-        withClue("should throw if marker is wider than max length") {
-            shouldThrow<IllegalArgumentException> {
-                "1234567890".truncateStart(length = 1, marker = "XX")
-            }
-        }
+        shouldThrow<IllegalArgumentException> { longString.truncateStart(length = 7.chars, marker = "1234567890") }
+            .message shouldBe "The specified length (7 chars) must be greater or equal than the length of the marker \"1234567890\" (10 chars)."
+        shouldThrow<IllegalArgumentException> { longString.truncateStart(length = 7.codePoints, marker = "1234567890") }
+            .message shouldBe "The specified length (7 codepoints) must be greater or equal than the length of the marker \"1234567890\" (10 codepoints)."
+        shouldThrow<IllegalArgumentException> { longString.truncateStart(length = 7.graphemes, marker = "1234567890") }
+            .message shouldBe "The specified length (7 graphemes) must be greater or equal than the length of the marker \"1234567890\" (10 graphemes)."
     }
 
     @Test fun truncate_end() = test {
+        longString.truncateEnd() shouldBe longString.truncateEnd(length = 15.codePoints, marker = Unicode.ELLIPSIS.spaced)
 
-        withClue("should truncate from end") {
-            "12345678901234567890".truncateEnd() shouldBe "123456789012 … "
-        }
+        longString.truncateEnd(length = 7.chars) shouldBe "a𝕓\uD83E … "
+        longString.truncateEnd(length = 7.codePoints) shouldBe "a𝕓🫠🇩 … "
+        longString.truncateEnd(length = 7.graphemes) shouldBe "a𝕓🫠🇩🇪 … "
 
-        withClue("should truncate using columns") {
-            "👨🏾👨🏾👨🏾👨🏾👨🏾".truncateEnd(4) shouldBe "👨 … "
-        }
+        longString.truncateEnd(length = 100_000.chars) shouldBeSameInstanceAs longString
+        longString.truncateEnd(length = 100_000.codePoints) shouldBeSameInstanceAs longString
+        longString.truncateEnd(length = 100_000.graphemes) shouldBeSameInstanceAs longString
 
-        withClue("should not truncate if not necessary") {
-            "1234567890".truncateEnd() shouldBe "1234567890"
-        }
+        longString.truncateEnd(length = 7.chars, marker = "⋯") shouldBe "a𝕓🫠\uD83C⋯"
+        longString.truncateEnd(length = 7.codePoints, marker = "⋯") shouldBe "a𝕓🫠🇩🇪👨⋯"
+        longString.truncateEnd(length = 7.graphemes, marker = "⋯") shouldBe "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦⋯"
 
-        withClue("should truncate using custom marker") {
-            "12345678901234567890".truncateEnd(marker = "...") shouldBe "123456789012..."
-        }
-
-        withClue("should truncate long text") {
-            longString.truncateEnd() shouldBe "123456789012 … "
-        }
-
-        withClue("should throw if marker is wider than max length") {
-            shouldThrow<IllegalArgumentException> {
-                "1234567890".truncateEnd(length = 1, marker = "XX")
-            }
-        }
+        shouldThrow<IllegalArgumentException> { longString.truncateEnd(length = 7.chars, marker = "1234567890") }
+            .message shouldBe "The specified length (7 chars) must be greater or equal than the length of the marker \"1234567890\" (10 chars)."
+        shouldThrow<IllegalArgumentException> { longString.truncateEnd(length = 7.codePoints, marker = "1234567890") }
+            .message shouldBe "The specified length (7 codepoints) must be greater or equal than the length of the marker \"1234567890\" (10 codepoints)."
+        shouldThrow<IllegalArgumentException> { longString.truncateEnd(length = 7.graphemes, marker = "1234567890") }
+            .message shouldBe "The specified length (7 graphemes) must be greater or equal than the length of the marker \"1234567890\" (10 graphemes)."
     }
 
 
     @Test fun consolidate_whitespaces_by() = test {
         withClue("should remove whitespaces from the right") {
-            "a   b   c".consolidateWhitespacesBy(3) shouldBe "a  b c"
+            "a   b   c".consolidateWhitespacesBy(3.codePoints) shouldBe "a  b c"
         }
 
         withClue("should use whitespaces on the right") {
-            "a   b   c    ".consolidateWhitespacesBy(3) shouldBe "a   b   c "
+            "a   b   c    ".consolidateWhitespacesBy(3.codePoints) shouldBe "a   b   c "
         }
 
         withClue("should use single whitespace on the right") {
-            "a   b   c ".consolidateWhitespacesBy(1) shouldBe "a   b   c"
+            "a   b   c ".consolidateWhitespacesBy(1.codePoints) shouldBe "a   b   c"
         }
 
         withClue("should not merge words") {
-            "a   b   c".consolidateWhitespacesBy(10) shouldBe "a b c"
+            "a   b   c".consolidateWhitespacesBy(10.codePoints) shouldBe "a b c"
         }
 
         withClue("should consider different whitespaces") {
             val differentWhitespaces = "\u0020\u00A0\u2000\u2003"
-            "a ${differentWhitespaces}b".consolidateWhitespacesBy(differentWhitespaces.length) shouldBe "a b"
+            "a ${differentWhitespaces}b".consolidateWhitespacesBy(differentWhitespaces.length.codePoints) shouldBe "a b"
         }
 
         withClue("should leave area before startIndex unchanged") {
-            "a   b   c".consolidateWhitespacesBy(10, startIndex = 5) shouldBe "a   b c"
+            "a   b   c".consolidateWhitespacesBy(10.codePoints, startIndex = 5) shouldBe "a   b c"
         }
 
         withClue("should leave whitespace sequence below minimal length unchanged") {
-            "a      b   c".consolidateWhitespacesBy(3, minWhitespaceLength = 3) shouldBe "a   b   c"
+            "a      b   c".consolidateWhitespacesBy(3.codePoints, minWhitespaceLength = 3) shouldBe "a   b   c"
         }
 
         withClue("regression") {
             val x = "│   nested 1                                                                                            ▮▮"
             val y = "│   nested 1                                                                                      ▮▮"
             val z = "│   nested 1                                                                                         ▮▮"
-            x.consolidateWhitespacesBy(3, minWhitespaceLength = 3) should {
+            x.consolidateWhitespacesBy(3.codePoints, minWhitespaceLength = 3) should {
                 it shouldBe z
                 it shouldNotBe y
             }
         }
+
+        "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespacesBy(3.chars) shouldBe "a  𝕓  🫠  🇩🇪 👨🏾‍🦱 👩‍👩‍👦‍👦"
+        "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespacesBy(3.codePoints) shouldBe "a  𝕓  🫠  🇩🇪 👨🏾‍🦱 👩‍👩‍👦‍👦"
+        "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespacesBy(3.graphemes) shouldBe "a  𝕓  🫠  🇩🇪 👨🏾‍🦱 👩‍👩‍👦‍👦"
     }
 
     @Test fun consolidate_whitespaces() = test {
         withClue("should remove whitespaces from the right") {
-            "a   b   c".consolidateWhitespaces(6) shouldBe "a  b c"
+            "a   b   c".consolidateWhitespaces(6.codePoints) shouldBe "a  b c"
         }
 
         withClue("should use whitespaces on the right") {
-            "a   b   c    ".consolidateWhitespaces(10) shouldBe "a   b   c "
+            "a   b   c    ".consolidateWhitespaces(10.codePoints) shouldBe "a   b   c "
         }
 
         withClue("should use single whitespace on the right") {
-            "a   b   c ".consolidateWhitespaces(9) shouldBe "a   b   c"
+            "a   b   c ".consolidateWhitespaces(9.codePoints) shouldBe "a   b   c"
         }
 
         withClue("should not merge words") {
-            "a   b   c".consolidateWhitespaces(0) shouldBe "a b c"
+            "a   b   c".consolidateWhitespaces(0.codePoints) shouldBe "a b c"
         }
 
         withClue("should consider different whitespaces") {
             val differentWhitespaces = "\u0020\u00A0\u2000\u2003"
-            "a ${differentWhitespaces}b".consolidateWhitespaces(0) shouldBe "a b"
+            "a ${differentWhitespaces}b".consolidateWhitespaces(0.codePoints) shouldBe "a b"
         }
 
         withClue("should leave area before startIndex unchanged") {
-            "a   b   c".consolidateWhitespaces(0, startIndex = 5) shouldBe "a   b c"
+            "a   b   c".consolidateWhitespaces(0.codePoints, startIndex = 5) shouldBe "a   b c"
         }
 
         withClue("should leave whitespace sequence below minimal length unchanged") {
-            "a      b   c".consolidateWhitespaces(9, minWhitespaceLength = 3) shouldBe "a   b   c"
+            "a      b   c".consolidateWhitespaces(9.codePoints, minWhitespaceLength = 3) shouldBe "a   b   c"
+        }
+
+        "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespaces(35.chars) shouldBe "a  𝕓  🫠  🇩🇪 👨🏾‍🦱 👩‍👩‍👦‍👦"
+        "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespaces(24.codePoints) shouldBe "a  𝕓  🫠  🇩🇪 👨🏾‍🦱 👩‍👩‍👦‍👦"
+        "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespaces(14.graphemes) shouldBe "a  𝕓  🫠  🇩🇪 👨🏾‍🦱 👩‍👩‍👦‍👦"
+
+        "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespaces() should {
+            it shouldBe "a 𝕓 🫠 🇩🇪 👨🏾‍🦱 👩‍👩‍👦‍👦"
+            it shouldBe "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespaces(0.chars)
+            it shouldBe "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespaces(0.codePoints)
+            it shouldBe "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespaces(0.graphemes)
         }
     }
 
@@ -523,8 +525,8 @@ class StringsKtTest {
 
 internal val String.cs: CharSequence get() = StringBuilder(this)
 
-internal val char: Char = 'c'
-internal val blankChar: Char = ' '
+internal const val char: Char = 'c'
+internal const val blankChar: Char = ' '
 
 internal val charSequence: CharSequence = StringBuilder("char sequence")
 internal val emptyCharSequence: CharSequence = StringBuilder()
@@ -534,7 +536,7 @@ internal const val string: String = "string"
 internal const val emptyString: String = ""
 internal const val blankString: String = "   "
 
-internal val longString = "1234567890".repeat(1000)
+internal val longString = "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".repeat(1000)
 
 /** [String] containing CSI (`control sequence intro`) escape sequences */
 internal const val ansiCsiString: String = "[1mbold [34mand blue[0m"

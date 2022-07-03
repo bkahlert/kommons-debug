@@ -49,14 +49,18 @@ public actual fun String.asCodePointSequence(): Sequence<CodePoint> {
             val ch = this@asCodePointSequence[index++]
             val v = when {
                 ch.isHighSurrogate() -> {
-                    val low = this@asCodePointSequence[index++]
-                    if (low.isLowSurrogate()) {
+                    val low = if (index < this@asCodePointSequence.length) this@asCodePointSequence[index++] else null
+                    if (low?.isLowSurrogate() == true) {
                         makeCharFromSurrogatePair(ch, low)
                     } else {
-                        throw IllegalStateException("Expected low surrogate, got: ${low.code}")
+                        ch.code
+//                        throw IllegalStateException("Expected low surrogate, got: ${low.code}")
                     }
                 }
-                ch.isLowSurrogate() -> throw IllegalStateException("Standalone low surrogate found: ${ch.code}")
+                ch.isLowSurrogate() -> {
+                    ch.code
+//                    throw IllegalStateException("Standalone low surrogate found: ${ch.code}")
+                }
                 else -> ch.code
             }
             yield(CodePoint(v))
@@ -66,6 +70,7 @@ public actual fun String.asCodePointSequence(): Sequence<CodePoint> {
 
 /** Returns the number of Unicode code points in the specified text range of this string. */
 public actual fun String.codePointCount(startIndex: Int, endIndex: Int): Int {
+    if (endIndex < startIndex || startIndex < 0 || endIndex > length) throw IndexOutOfBoundsException("begin $startIndex, end $endIndex, length $length")
     val substring = substring(startIndex, endIndex)
     if (substring.isEmpty()) return 0
     return substring.asCodePointSequence().count()

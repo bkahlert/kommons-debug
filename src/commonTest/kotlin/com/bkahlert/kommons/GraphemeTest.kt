@@ -1,12 +1,14 @@
 package com.bkahlert.kommons
 
 import com.bkahlert.kommons.test.test
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test
+
 
 class GraphemeTest {
 
@@ -64,5 +66,15 @@ class GraphemeTest {
         Grapheme("☰").codePoints shouldBe "☰".toCodePointList()
         Grapheme("𝕓").codePoints shouldBe "𝕓".toCodePointList()
         Grapheme("a̳").codePoints shouldBe "a̳".toCodePointList()
+    }
+
+    @Test fun as_grapheme() = test {
+        shouldThrow<IllegalArgumentException> { "".asGrapheme() }
+        "👨🏾‍🦱".asGrapheme() shouldBe Grapheme("👨🏾‍🦱")
+        shouldThrow<IllegalArgumentException> { "👨🏾‍🦱👩‍👩‍👦‍👦".asGrapheme() }
+
+        "".asGraphemeOrNull() shouldBe null
+        "👨🏾‍🦱".asGraphemeOrNull() shouldBe Grapheme("👨🏾‍🦱")
+        "👨🏾‍🦱👩‍👩‍👦‍👦".asGraphemeOrNull() shouldBe null
     }
 }

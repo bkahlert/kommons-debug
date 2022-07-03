@@ -1,5 +1,7 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.TextLength.Companion.codePoints
+import com.bkahlert.kommons.TextLengthUnit.CODEPOINTS
 import com.bkahlert.kommons.debug.Compression.Always
 import com.bkahlert.kommons.debug.Typing.Untyped
 import com.bkahlert.kommons.debug.getOrNull
@@ -206,62 +208,64 @@ public inline val String.endSpaced: String get() = withSuffix(" ")
 
 // truncate ------------------------------------------------------------------------------------------------------------
 
-private fun requirePositiveCodePoints(length: Int): Unit = require(length > 0) { "length $length must be positive" }
+private fun requirePositiveLength(length: TextLength): Unit =
+    require(!length.isNegative()) { "length $length must be positive" }
 
-private fun targetLengthFor(length: Int, marker: String): Int {
-    requirePositiveCodePoints(length)
-    val markerCodePointCount = marker.codePointCount()
-    require(length >= markerCodePointCount) { "length $length must not be less than ${markerCodePointCount.quoted}/${marker.quoted}" }
-    return length - markerCodePointCount
+private fun targetLengthFor(length: TextLength, marker: String): Pair<TextLength, List<CharSequence>> {
+    requirePositiveLength(length)
+    val markerUnits = length.unit.split(marker)
+    val markerLength = markerUnits.size.toTextLength(length.unit)
+    require(length >= markerLength) {
+        "The specified length ($length) must be greater or equal than the length of the marker ${marker.quoted} (${markerLength})."
+    }
+    return (length - markerLength) to markerUnits
 }
 
 
 /**
- * Returns this string truncated from the center to the specified [length] (default: 15)
+ * Returns this string truncated from the center to the specified [length] (default: 15 [CODEPOINTS])
  * including the [marker] (default: " … ").
- *
- * ***Note:** This method is Unicode-aware, that is, each Unicode character has length `1`.*
  */
-public fun String.truncate(length: Int = 15, marker: String = Unicode.ELLIPSIS.spaced): String {
-    requirePositiveCodePoints(length)
-    return if (this.length > 2 * length || codePointCount() > length) {
-        val targetCodePoints = targetLengthFor(length, marker)
-        val left = truncateEnd(-(-targetCodePoints).floorDiv(2), "")
-        val right = truncateStart(targetCodePoints.floorDiv(2), "")
-        "$left$marker$right"
-    } else {
-        this
+public fun String.truncate(length: TextLength = 15.codePoints, marker: String = Unicode.ELLIPSIS.spaced): String {
+    requirePositiveLength(length)
+    return length.unit.transform(this) {
+        if (size <= length.value) return this@truncate
+        val (targetLength, markerUnits) = targetLengthFor(length, marker)
+        val left = truncateEnd(targetLength.copy(value = -(-targetLength.value).floorDiv(2)), "")
+        val right = truncateStart(targetLength.copy(value = targetLength.value.floorDiv(2)), "")
+        removeAll { true }
+        add(left)
+        add(marker)
+        add(right)
     }
 }
 
 /**
- * Returns this string truncated from the start to the specified [length] (default: 15)
+ * Returns this string truncated from the start to the specified [length] (default: 15 [CODEPOINTS])
  * including the [marker] (default: " … ").
- *
- * ***Note:** This method is Unicode-aware, that is, each Unicode character has length `1`.*
  */
-public fun String.truncateStart(length: Int = 15, marker: String = Unicode.ELLIPSIS.spaced): String {
-    requirePositiveCodePoints(length)
-    if (codePointCount() <= length) return this
-
-    val targetCodePoints = targetLengthFor(length, marker)
-    val codePoints = toCodePointList().takeLast(targetCodePoints)
-    return "$marker${codePoints.joinToString("")}"
+public fun String.truncateStart(length: TextLength = 15.codePoints, marker: String = Unicode.ELLIPSIS.spaced): String {
+    requirePositiveLength(length)
+    return length.unit.transform(this) {
+        if (size <= length.value) return this@truncateStart
+        val (targetLength, markerUnits) = targetLengthFor(length, marker)
+        while (size > targetLength.value) removeFirst()
+        addAll(0, markerUnits)
+    }
 }
 
 /**
- * Returns this string truncated from the end to the specified [length] (default: 15)
+ * Returns this string truncated from the end to the specified [length] (default: 15 [CODEPOINTS])
  * including the [marker] (default: " … ").
- *
- * ***Note:** This method is Unicode-aware, that is, each Unicode character has length `1`.*
  */
-public fun String.truncateEnd(length: Int = 15, marker: String = Unicode.ELLIPSIS.spaced): String {
-    requirePositiveCodePoints(length)
-    if (codePointCount() <= length) return this
-
-    val targetCodePoints = targetLengthFor(length, marker)
-    val codePoints = toCodePointList().take(targetCodePoints)
-    return "${codePoints.joinToString("")}$marker"
+public fun String.truncateEnd(length: TextLength = 15.codePoints, marker: String = Unicode.ELLIPSIS.spaced): String {
+    requirePositiveLength(length)
+    return length.unit.transform(this) {
+        if (size <= length.value) return this@truncateEnd
+        val (targetLength, markerUnits) = targetLengthFor(length, marker)
+        while (size > targetLength.value) removeLast()
+        addAll(markerUnits)
+    }
 }
 
 
@@ -276,38 +280,36 @@ public fun String.truncateEnd(length: Int = 15, marker: String = Unicode.ELLIPSI
  *
  * Therefore, the length of the returned string might be reduced by less
  * than the specified [length].
- *
- * ***Note:** This method is Unicode-aware, that is, each Unicode character has length `1`.*
  */
-public fun String.consolidateWhitespacesBy(length: Int, startIndex: Int = 0, minWhitespaceLength: Int = 1): String =
-    consolidateWhitespaces(this.length - length, startIndex, minWhitespaceLength)
+public fun String.consolidateWhitespacesBy(length: TextLength, startIndex: Int = 0, minWhitespaceLength: Int = 1): String =
+    consolidateWhitespaces(this.length(length.unit) - length, startIndex, minWhitespaceLength)
 
 /**
  * Returns this string with its whitespaces intelligently consolidated
- * so that the resulting length is reduced to the specified [length].
+ * so that the resulting length is reduced to the specified [length]
+ * (default: 0 [CODEPOINTS]).
  *
  * The algorithm guarantees that word borders are respected, that is,
  * two words never become one (unless [minWhitespaceLength] is set to 0).
  *
  * Therefore, the length of the returned string might be reduced to less
  * than the specified [length].
- *
- * ***Note:** This method is Unicode-aware, that is, each Unicode character has length `1`.*
  */
-public fun String.consolidateWhitespaces(length: Int = 0, startIndex: Int = 0, minWhitespaceLength: Int = 1): String {
-    val difference = this.length - length
-    if (difference <= 0) return this
+public fun String.consolidateWhitespaces(length: TextLength = 0.codePoints, startIndex: Int = 0, minWhitespaceLength: Int = 1): String {
+    val currentLength = this.length(length.unit)
+    val difference = currentLength - length
+    if (!difference.isPositive()) return this
     val trailingWhitespaces = takeLastWhile { it.isWhitespace() }
     if (trailingWhitespaces.isNotEmpty()) {
-        val trimmed = take(this.length - trailingWhitespaces.length.coerceAtMost(difference))
-        return if (trimmed.length <= length) trimmed else trimmed.consolidateWhitespaces(length, startIndex, minWhitespaceLength)
+        val trimmed = take(currentLength.value - trailingWhitespaces.length.coerceAtMost(difference.value))
+        return if (trimmed.length <= length.value) trimmed else trimmed.consolidateWhitespaces(length, startIndex, minWhitespaceLength)
     }
     val regex = Regex("\\p{Z}{${minWhitespaceLength + 1}}")
     val longestWhitespace = regex.findAll(this, startIndex).toList().reversed().maxByOrNull { it.value.length } ?: return this
     val whitespaceStart = longestWhitespace.range.first
     val truncated = replaceRange(whitespaceStart, whitespaceStart + 2, " ")
-    if (truncated.length >= this.length) return truncated
-    return truncated.consolidateWhitespaces(length, startIndex, minWhitespaceLength).toString()
+    if (truncated.length(length.unit) >= currentLength) return truncated
+    return truncated.consolidateWhitespaces(length, startIndex, minWhitespaceLength)
 }
 
 

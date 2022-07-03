@@ -6,8 +6,19 @@
 
 ## About
 
-**Kommons** is a Kotlin Multiplatform Library to support print debugging.
+**Kommons** is a Kotlin Multiplatform Library that adds:
 
+1. powerful [print debugging](#print-debugging) functions:
+    - [trace](#anytrace--anyinspect)
+    - [inspect](#anytrace--anyinspect)
+    - [render](#anyrender--anyasstring)
+    - [renderType](#anyrendertype)
+2. [runtime](#runtime) information on the [platform](#platform) you're running on and a platform-independent [stack trace](#stack-trace)
+3. easily accessible [Unicode support](#unicode-support)
+4. [string handling](#string-handling) functions
+5. [regex](#regular-expressions) functions such as the possibility to use glob patterns
+6. facilitated [time handling](#time-handling) using `Now`, `Yesterday`, and `Tomorrow`
+7. [file handling](#file-handling-only-jvm) features such as locating source files and accessing the class path with the NIO2 API
 
 ## Installation / Setup
 
@@ -26,12 +37,14 @@ Kommons Debug is hosted on GitHub with releases provided on Maven Central.
 
 ## Features
 
-### Any?.trace / Any?.inspect
+### Print Debugging
+
+#### Any?.trace / Any?.inspect
 
 Print tracing information and easily cleanup afterwards using
 IntelliJ's code cleanup feature.
 
-#### Example
+##### Example
 
 ```kotlin
 data class Foo(val bar: String = "baz") {
@@ -66,11 +79,11 @@ The example above also work in browsers:
 
 ![docs/trace-browser-sources.png](docs/trace-browser-sources.png)
 
-### Any.renderType()
+#### Any.renderType()
 
 Renders any object's type
 
-#### Examples
+##### Examples
 
 ```kotlin
 "string".renderType()               // String
@@ -82,14 +95,14 @@ val lambda: (String) -> Unit = {}
 lambda.renderType()                 // (String)->Unit
 ```
 
-### Any?.render() / Any.asString()
+#### Any?.render() / Any.asString()
 
 Renders any object depending on whether its `toString()` is overridden:
 
 - If there is a custom `toString()` it is simply used.
 - if there is *no custom* `toString()` the object is serialized in the form structurally
 
-#### Examples
+##### Examples
 
 ```kotlin
 "string".render()                              // string
@@ -103,11 +116,11 @@ foo().asString()                               // { bar: "baz" }
 foo(null).asString(excludeNullValues = false)  // { }
 ```
 
-### Any?.asEmoji()
+#### Any?.asEmoji()
 
 Renders any object as an emoji.
 
-#### Examples
+##### Examples
 
 ```kotlin
 null.asEmoji()       //  "❔"
@@ -118,12 +131,12 @@ Now.asEmoji(Floor)   //  "🕑"
 "other".asEmoji()    //  "🔣"
 ```
 
-### Any.properties
+#### Any.properties
 
 Contains a map of the object's properties with each entry representing
 the name and value of a property.
 
-#### Examples
+##### Examples
 
 ```kotlin
 "string".properties               // { length: 6 }
@@ -133,7 +146,9 @@ foo().properties                  // { bar: "baz" }
 foo(foo()).properties             // { bar: { bar: "baz" } }
 ```
 
-### Platform
+### Runtime
+
+#### Platform
 
 Reflects the platform the program runs on, e.g. `Platform.JVM`.
 
@@ -144,12 +159,12 @@ The platform type provides access to some useful features:
 - `Platform.isIntelliJ`: Returns whether the program is running in IntelliJ.
 - `Platform.onExit`: Allows registering callbacks that are invoked when the program exits.
 
-### Stack Trace
+#### Stack Trace
 
 Access the current stack trace by a simple call to `StackTrace.get()`
 or locate a specific caller using `StackTrace.get().findLastKnownCallOrNull`.
 
-#### Examples
+##### Examples
 
 ```kotlin
 fun foo(block: () -> StackTraceElement?) = block()
@@ -159,96 +174,7 @@ foo { bar { StackTrace.findLastKnownCallOrNull("bar") } }?.function  // "foo"
 foo { bar { StackTrace.findLastKnownCallOrNull(::bar) } }?.function  // "foo"
 ```
 
-### Byte, UByte, ByteArray, UByteArray Conversions
-
-All Byte, UByte, ByteArray, UByteArray instances support `toHexadecimalString`, `toOctalString` and `toBinaryString`.
-
-#### Examples
-
-```kotlin
-val byteArray = byteArrayOf(0x00, 0x7f, -0x80, -0x01)
-val largeByteArrayOf = byteArrayOf(-0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01)
-val veryLargeByteArray = byteArrayOf(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
-
-byteArray.map { it.toHexadecimalString() } // "00", "7f", "80", "ff"
-byteArray.toHexadecimalString()            // "007f80ff"
-largeByteArrayOf.toHexadecimalString()     // "ffffffffffffffffffffffffffffffff"
-veryLargeByteArray.toHexadecimalString()   // "0100000000000000000000000000000000"
-
-byteArray.map { it.toOctalString() } // "000", "177", "200", "377"
-byteArray.toOctalString()            // "000177200377"
-largeByteArrayOf.toOctalString()     // "377377377377377377377377377377377377377377377377"
-veryLargeByteArray.toOctalString()   // "001000000000000000000000000000000000000000000000000"
-
-byteArray.map { it.toBinaryString() } // "00000000", "01111111", "10000000", "11111111"
-byteArray.toBinaryString()            // "00000000011111111000000011111111"
-largeByteArrayOf.toBinaryString()     //         "111111111111111111111111111...111111"
-veryLargeByteArray.toBinaryString()   // "00000001000000000000000000000000000...000000"
-```
-
-### Checksums
-
-Compute `MD5`, `SHA-1`, and `SHA-256` checksums for arbitrary files.
-
-#### Examples
-
-```kotlin
-val file = SystemLocations.Home / ".gitconfig"
-file.md5Checksum()
-file.sha1Checksum()
-file.sha256Checksum()
-```
-
-### File Handling \[only JVM\]
-
-Easily access your working directory with `SystemLocations.Work`,
-your home directory with `SystemLocations.Home` and your system's
-temporary directory with `SystemLocations.Temp`.
-
-Create files with contents in one call using
-
-- `createTextFile`
-- `createBinaryFile`
-- `createTempTextFile`
-- `createTempBinaryFile`
-
-Safely read files with
-`useInputStream`, `useBufferedInputStream`, `useReader`, and `useBufferedReader`,
-and write files with
-`useOutputStream`, `useBufferedOutputStream`, `useWriter`, and `useBufferedWriter`.
-
-Map URIs and URLs to a Path with `usePath`, which also works for class path resource.
-
-#### Example
-
-```kotlin
-standardLibraryClassPath.usePath {
-    it.pathString
-} // [cryptic] kotlin/text/Regex [cryptic] java/lang/Object ...
-```
-
-Find the class directory, the source directory or the source file itself of a class.
-
-#### Example
-
-```kotlin
-Foo::class.findClassesDirectoryOrNull()  // /home/john/dev/project/build/classes/kotlin/jvm/test
-Foo::class.findSourceDirectoryOrNull()   // /home/john/dev/project/src/jvmTest/kotlin
-Foo::class.findSourceFileOrNull()        // /home/john/dev/project/src/jvmTest/kotlin/packages/source.kt
-```
-
-Access a class path resource like any other NIO 2 path using `ClassPath`.
-
-#### Example
-
-```kotlin
-ClassPath("dir/to/resource").readText()
-ClassPath("dir/to/resource").readBytes()
-ClassPath("dir/to/resource").copyToDirectory(SystemLocations.Temp)
-ClassPath("dir/to/resource").useBufferedReader { it.readLine() }
-```
-
-### Unicode
+### Unicode Support
 
 Handling user input requires functions to handle Unicode correctly,
 unless you're not afraid of the following:
@@ -266,14 +192,17 @@ Decode any string to a sequence / list of graphemes using `String.asGraphemeSequ
 
 ```kotlin
 "a".asCodePoint().name     // "LATIN SMALL LETTER A"
-"a".toCodePointList()      // CodePoint(0x61)
-"𝕓".toCodePointList()      // CodePoint(0x1D553)
-"a̳o".toCodePointList()     // "a", "̳", "o"
-"a̳o".toGraphemeList()      // "a̳", "o"
+"a𝕓c̳🔤".toCharArray()      // "a", "?", "?", "c", "̳", "?", "?"
+"a𝕓c̳🔤".toCodePointList()  // "a", "𝕓", "c", "̳", "🫠"
+"a𝕓c̳🔤".toGraphemeList()   // "a", "𝕓", "c̳", "🫠"
 
-"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".length           // 27 (= number of bytes used when encoded with UTF-16)
-"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".codePointCount() // 16 (= number of Unicode code points)
-"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".graphemeCount()  // 6  (= visually perceivable units)
+"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".length               // 27 (= number of bytes used when encoded with UTF-16)
+"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".length(CODEPOINTS)   // 16 (= number of Unicode code points)
+"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".length(GRAPHEMES)    //  6 (= visually perceivable units)
+
+"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".truncate(7.chars)       // "a\uD835 … 👦"
+"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".truncate(7.codePoints)  // "a𝕓 … ‍👦"
+"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".truncate(7.graphemes)   // "a𝕓 … 👨🏾‍🦱👩‍👩‍👦‍👦"
 ```
 
 #### UTF-16 Char *vs* Code Point *vs* Grapheme Cluster
@@ -296,7 +225,6 @@ Decode any string to a sequence / list of graphemes using `String.asGraphemeSequ
 |            \uD83D<br/>\uDC66            | ? (HIGH SURROGATES D83D)<br/>? (LOW SURROGATES DC66) | 👦 (BOY)                                  |                              |
 |                 \u200D                  | \[ZWJ] (ZERO WIDTH JOINER)                           | \[ZWJ] (ZERO WIDTH JOINER)                |                              |
 |            \uD83D<br/>\uDC66            | ? (HIGH SURROGATES D83D)<br/>? (LOW SURROGATES DC66) | 👦 (BOY)                                  |                              |
-
 
 ### String Handling
 
@@ -485,7 +413,7 @@ Iterate any type of closed ranges using `asIterable`.
     .map { it.toInt() } // [-4, 4, 13, 22, 31, 40]
 ```
 
-### Time Operations
+### Time Handling
 
 ```kotlin
 Now + 2.seconds     // 2 seconds in the future
@@ -495,6 +423,97 @@ Tomorrow + 1.days   // the day after tomorrow
 Instant.parse("1910-06-22T13:00:00Z") + 5.minutes // 1910-06-22T12:05:00Z
 LocalDate.parse("1910-06-22") - 2.days            // 1910-06-20
 SystemLocations.Temp.createTempFile().age         // < 1ms
+```
+
+### Byte Handling
+
+#### Byte, UByte, ByteArray, UByteArray Conversions
+
+All Byte, UByte, ByteArray, UByteArray instances support `toHexadecimalString`, `toOctalString` and `toBinaryString`.
+
+##### Examples
+
+```kotlin
+val byteArray = byteArrayOf(0x00, 0x7f, -0x80, -0x01)
+val largeByteArrayOf = byteArrayOf(-0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01, -0x01)
+val veryLargeByteArray = byteArrayOf(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+
+byteArray.map { it.toHexadecimalString() } // "00", "7f", "80", "ff"
+byteArray.toHexadecimalString()            // "007f80ff"
+largeByteArrayOf.toHexadecimalString()     // "ffffffffffffffffffffffffffffffff"
+veryLargeByteArray.toHexadecimalString()   // "0100000000000000000000000000000000"
+
+byteArray.map { it.toOctalString() } // "000", "177", "200", "377"
+byteArray.toOctalString()            // "000177200377"
+largeByteArrayOf.toOctalString()     // "377377377377377377377377377377377377377377377377"
+veryLargeByteArray.toOctalString()   // "001000000000000000000000000000000000000000000000000"
+
+byteArray.map { it.toBinaryString() } // "00000000", "01111111", "10000000", "11111111"
+byteArray.toBinaryString()            // "00000000011111111000000011111111"
+largeByteArrayOf.toBinaryString()     //         "111111111111111111111111111...111111"
+veryLargeByteArray.toBinaryString()   // "00000001000000000000000000000000000...000000"
+```
+
+#### Checksums
+
+Compute `MD5`, `SHA-1`, and `SHA-256` checksums for arbitrary files.
+
+##### Examples
+
+```kotlin
+val file = SystemLocations.Home / ".gitconfig"
+file.md5Checksum()
+file.sha1Checksum()
+file.sha256Checksum()
+```
+
+### File Handling \[only JVM\]
+
+Easily access your working directory with `SystemLocations.Work`,
+your home directory with `SystemLocations.Home` and your system's
+temporary directory with `SystemLocations.Temp`.
+
+Create files with contents in one call using
+
+- `createTextFile`
+- `createBinaryFile`
+- `createTempTextFile`
+- `createTempBinaryFile`
+
+Safely read files with
+`useInputStream`, `useBufferedInputStream`, `useReader`, and `useBufferedReader`,
+and write files with
+`useOutputStream`, `useBufferedOutputStream`, `useWriter`, and `useBufferedWriter`.
+
+Map URIs and URLs to a Path with `usePath`, which also works for class path resource.
+
+#### Example
+
+```kotlin
+standardLibraryClassPath.usePath {
+    it.pathString
+} // [cryptic] kotlin/text/Regex [cryptic] java/lang/Object ...
+```
+
+Find the class directory, the source directory or the source file itself of a class.
+
+#### Example
+
+```kotlin
+Foo::class.findClassesDirectoryOrNull()  // /home/john/dev/project/build/classes/kotlin/jvm/test
+Foo::class.findSourceDirectoryOrNull()   // /home/john/dev/project/src/jvmTest/kotlin
+Foo::class.findSourceFileOrNull()        // /home/john/dev/project/src/jvmTest/kotlin/packages/source.kt
+```
+
+Access a class path resource like any other NIO 2 path using `ClassPath`.
+
+#### Example
+
+```kotlin
+ClassPath("dir/to/resource").readText()
+ClassPath("dir/to/resource").readBytes()
+ClassPath("dir/to/resource").copyToDirectory(SystemLocations.Temp)
+ClassPath("dir/to/resource").useBufferedReader { it.readLine() }
 ```
 
 ### Either

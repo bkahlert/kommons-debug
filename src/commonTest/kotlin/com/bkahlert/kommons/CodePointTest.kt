@@ -145,12 +145,14 @@ class CodePointTest {
         0x61.toByte().asCodePoint() shouldBe CodePoint(0x61)
         0xB6.toByte().asCodePoint() shouldBe CodePoint(0xB6)
 
+        shouldThrow<IllegalArgumentException> { "".asCodePoint() }
         "a".asCodePoint() shouldBe CodePoint(0x61)
         "¶".asCodePoint() shouldBe CodePoint(0xB6)
         "☰".asCodePoint() shouldBe CodePoint(0x2630)
         "𝕓".asCodePoint() shouldBe CodePoint(0x1D553)
         shouldThrow<IllegalArgumentException> { "a̳o".asCodePoint() }
 
+        "".asCodePointOrNull() shouldBe null
         "a".asCodePointOrNull() shouldBe CodePoint(0x61)
         "¶".asCodePointOrNull() shouldBe CodePoint(0xB6)
         "☰".asCodePointOrNull() shouldBe CodePoint(0x2630)

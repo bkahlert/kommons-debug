@@ -1,6 +1,7 @@
 package com.bkahlert.kommons
 
 import com.bkahlert.kommons.test.test
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.test.Test
@@ -9,6 +10,16 @@ import kotlin.test.assertTrue
 
 @Suppress("ReplaceCallWithBinaryOperator")
 class DelegatingCharSequenceTest {
+
+    @Test fun of_empty() = test {
+        val empty = ""
+        val foo = DelegatingCharSequence(empty)
+        foo.length shouldBe 0
+        shouldThrow<IndexOutOfBoundsException> { foo[-1] }
+        shouldThrow<IndexOutOfBoundsException> { foo[0] }
+        assertEquals("", foo.subSequence(0, 0).toString())
+        foo.toString() shouldBeSameInstanceAs empty
+    }
 
     @Test fun of_string() = test {
         val string = "foo"
