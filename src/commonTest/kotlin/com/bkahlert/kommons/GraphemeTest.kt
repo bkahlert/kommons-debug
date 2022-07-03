@@ -1,7 +1,6 @@
 package com.bkahlert.kommons
 
 import com.bkahlert.kommons.test.test
-import io.kotest.inspectors.forAll
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -16,7 +15,9 @@ class GraphemeTest {
         "𝕓".toGraphemeList().shouldContainExactly(Grapheme("𝕓"))
         "a̳o".toGraphemeList().shouldContainExactly(Grapheme("a̳"), Grapheme("o"))
 
-        listOf("A", "曲", "🟥", "a̠", "😀").forAll { it.toGraphemeList().shouldContainExactly(Grapheme(it)) }
+        "🫠".toGraphemeList().shouldContainExactly(Grapheme("🫠"))
+        "👨🏾‍🦱".toGraphemeList().shouldContainExactly(Grapheme("👩‍👩‍👦‍👦"))
+        "👩‍👩‍👦‍👦".toGraphemeList().shouldContainExactly(Grapheme("👩‍👩‍👦‍👦"))
     }
 
     @Test fun equality() = test {

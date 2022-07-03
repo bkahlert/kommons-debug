@@ -6,6 +6,7 @@ import kotlin.jvm.JvmInline
  * Representation of a [Unicode grapheme cluster](https://unicode.org/glossary/#grapheme_cluster)
  *
  * @see <a href="https://unicode.org/reports/tr29/">Unicode® Technical Standard #18—UNICODE TEXT SEGMENTATION</a>
+ * @see <a href="https://unicode.org/reports/tr29/#Grapheme_Cluster_Boundary_Rules">Grapheme Cluster Boundary Rules</a>
  */
 @JvmInline
 public value class Grapheme(public val string: String) {

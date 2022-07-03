@@ -33,9 +33,9 @@ public val Regex.isIndexedGroup: Boolean
 /** The contents of this regular expression's group if any, or this [Regex] otherwise. */
 public val Regex.groupContents: Regex
     get() = if (isGroup) {
-        if (pattern.startsWith("(?<")) Regex(pattern.substring(pattern.indexOf('>') + 1, pattern.length - 1))
-        else if (pattern.startsWith("(?:")) Regex(pattern.substring(3, pattern.length - 1))
-        else Regex(pattern.substring(1, pattern.length - 1))
+        if (pattern.startsWith("(?<")) Regex(pattern.substring(pattern.indexOf('>') + 1, pattern.lastIndex))
+        else if (pattern.startsWith("(?:")) Regex(pattern.substring(3, pattern.lastIndex))
+        else Regex(pattern.substring(1, pattern.lastIndex))
     } else this
 
 
@@ -88,7 +88,7 @@ public fun Regex.Companion.fromGlob(
         .split(multilineWildcardRegex)
         .joinToString("$anyCharacterPattern*") { multilineWildcardFenced ->
             multilineWildcardFenced.split(wildcard).joinToString("$anyNonLineSeparatorPattern*") { wildcardFenced ->
-                wildcardFenced.splitToSequence(delimiters = lineSeparators, keepDelimiters = false).joinToString(anyLineSepPattern) {
+                wildcardFenced.splitToSequence(delimiters = lineSeparators).joinToString(anyLineSepPattern) {
                     escape(it)
                 }
             }
@@ -213,8 +213,8 @@ public fun Regex.group(name: String? = null): Regex {
             requireValidGroupName(name)
             if (isGroup) {
                 if (pattern.startsWith("(?<")) Regex("(?<$name>$pattern)")
-                else if (pattern.startsWith("(?:")) Regex("(?<$name>${pattern.substring(3, pattern.length - 1)})")
-                else Regex("(?<$name>${pattern.substring(1, pattern.length - 1)})")
+                else if (pattern.startsWith("(?:")) Regex("(?<$name>${pattern.substring(3, pattern.lastIndex)})")
+                else Regex("(?<$name>${pattern.substring(1, pattern.lastIndex)})")
             } else Regex("(?<$name>$pattern)")
         }
     }

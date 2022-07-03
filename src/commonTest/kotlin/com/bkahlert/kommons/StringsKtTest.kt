@@ -388,18 +388,37 @@ class StringsKtTest {
         randomString(100, 'A', 'B').forAll { listOf('A', 'B') shouldContain it }
     }
 
+
     @Test fun index_of_or_null() = test {
-        charSequence.indexOfOrNull('h') shouldBe 1
-        string.indexOfOrNull('t') shouldBe 1
+        charSequence.indexOfOrNull('e') shouldBe 6
+        charSequence.indexOfOrNull('E') shouldBe null
+        charSequence.indexOfOrNull('e', ignoreCase = true) shouldBe 6
+        charSequence.indexOfOrNull('e', startIndex = 7) shouldBe 9
+        charSequence.indexOfOrNull('E', startIndex = 7) shouldBe null
+        charSequence.indexOfOrNull('e', startIndex = 7, ignoreCase = true) shouldBe 9
 
-        charSequence.indexOfOrNull('x') shouldBe null
-        string.indexOfOrNull('x') shouldBe null
+        charSequence.indexOfOrNull("e") shouldBe 6
+        charSequence.indexOfOrNull("E") shouldBe null
+        charSequence.indexOfOrNull("e", ignoreCase = true) shouldBe 6
+        charSequence.indexOfOrNull("e", startIndex = 7) shouldBe 9
+        charSequence.indexOfOrNull("E", startIndex = 7) shouldBe null
+        charSequence.indexOfOrNull("e", startIndex = 7, ignoreCase = true) shouldBe 9
+    }
 
-        charSequence.indexOfOrNull("seq") shouldBe 5
-        string.indexOfOrNull("ring") shouldBe 2
+    @Test fun last_index_of_or_null() = test {
+        charSequence.lastIndexOfOrNull('e') shouldBe 12
+        charSequence.lastIndexOfOrNull('E') shouldBe null
+        charSequence.lastIndexOfOrNull('e', ignoreCase = true) shouldBe 12
+        charSequence.lastIndexOfOrNull('e', startIndex = 7) shouldBe 6
+        charSequence.lastIndexOfOrNull('E', startIndex = 7) shouldBe null
+        charSequence.lastIndexOfOrNull('e', startIndex = 7, ignoreCase = true) shouldBe 6
 
-        charSequence.indexOfOrNull("xyz") shouldBe null
-        string.indexOfOrNull("xyz") shouldBe null
+        charSequence.lastIndexOfOrNull("e") shouldBe 12
+        charSequence.lastIndexOfOrNull("E") shouldBe null
+        charSequence.lastIndexOfOrNull("e", ignoreCase = true) shouldBe 12
+        charSequence.lastIndexOfOrNull("e", startIndex = 7) shouldBe 6
+        charSequence.lastIndexOfOrNull("E", startIndex = 7) shouldBe null
+        charSequence.lastIndexOfOrNull("e", startIndex = 7, ignoreCase = true) shouldBe 6
     }
 
     @Test fun as_string() = test {

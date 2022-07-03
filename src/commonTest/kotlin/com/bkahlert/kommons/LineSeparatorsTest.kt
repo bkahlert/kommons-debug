@@ -143,15 +143,15 @@ class LineSeparatorsTest {
     }
 
     @Test fun unify_line_separators() = test {
-        stringWithAllLineSeparators.cs.unifyLineSeparators(*LineSeparators.Unicode) shouldBe stringWithDefaultLineSeparators
-        stringWithAllLineSeparators.cs.unifyLineSeparators(*LineSeparators.Unicode, lineSeparator = CRLF) shouldBe stringWithWindowsLineSeparators
-        stringWithAllLineSeparators.unifyLineSeparators(*LineSeparators.Unicode) shouldBe stringWithDefaultLineSeparators
-        stringWithAllLineSeparators.unifyLineSeparators(*LineSeparators.Unicode, lineSeparator = CRLF) shouldBe stringWithWindowsLineSeparators
+        stringWithAllLineSeparators.cs.unifyLineSeparators(LineSeparators.Unicode) shouldBe stringWithDefaultLineSeparators
+        stringWithAllLineSeparators.cs.unifyLineSeparators(CRLF, LineSeparators.Unicode) shouldBe stringWithWindowsLineSeparators
+        stringWithAllLineSeparators.unifyLineSeparators(LineSeparators.Unicode) shouldBe stringWithDefaultLineSeparators
+        stringWithAllLineSeparators.unifyLineSeparators(CRLF, LineSeparators.Unicode) shouldBe stringWithWindowsLineSeparators
 
         stringWithAllLineSeparators.cs.unifyLineSeparators() shouldBe "foo${Default}foo${Default}foo${Default}foo${NEL}foo${PS}foo${LS}foo"
-        stringWithAllLineSeparators.cs.unifyLineSeparators(lineSeparator = CRLF) shouldBe "foo${CRLF}foo${CRLF}foo${CRLF}foo${NEL}foo${PS}foo${LS}foo"
+        stringWithAllLineSeparators.cs.unifyLineSeparators(CRLF) shouldBe "foo${CRLF}foo${CRLF}foo${CRLF}foo${NEL}foo${PS}foo${LS}foo"
         stringWithAllLineSeparators.unifyLineSeparators() shouldBe "foo${Default}foo${Default}foo${Default}foo${NEL}foo${PS}foo${LS}foo"
-        stringWithAllLineSeparators.unifyLineSeparators(lineSeparator = CRLF) shouldBe "foo${CRLF}foo${CRLF}foo${CRLF}foo${NEL}foo${PS}foo${LS}foo"
+        stringWithAllLineSeparators.unifyLineSeparators(CRLF) shouldBe "foo${CRLF}foo${CRLF}foo${CRLF}foo${NEL}foo${PS}foo${LS}foo"
     }
 
 

@@ -119,9 +119,14 @@ public object LineSeparators : AbstractList<String>() {
             ?.key ?: default
     }
 
+
     /** Replaces all specified [lineSeparators] (default: [Common]) with the specified [lineSeparator] (default: [Default]). */
-    public fun CharSequence.unifyLineSeparators(vararg lineSeparators: String = Common, lineSeparator: String = Default): String =
+    public fun CharSequence.unifyLineSeparators(lineSeparator: String = Default, lineSeparators: Array<String> = Common): String =
         splitToSequence(delimiters = lineSeparators, keepDelimiters = false).joinToString(lineSeparator)
+
+    /** Replaces all specified [lineSeparators] (default: [Common]) with the [Default] line separator. */
+    public fun CharSequence.unifyLineSeparators(lineSeparators: Array<String> = Common): String =
+        unifyLineSeparators(lineSeparator = Default, lineSeparators = lineSeparators)
 
 
     /**

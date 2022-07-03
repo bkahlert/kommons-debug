@@ -391,6 +391,31 @@ public fun CharSequence.indexOfOrNull(string: String, startIndex: Int = 0, ignor
     indexOf(string, startIndex, ignoreCase).takeIf { it >= 0 }
 
 
+// lastIndexOfOrNull ---------------------------------------------------------------------------------------------------
+
+/**
+ * Returns the index within this char sequence of the last occurrence of the specified character,
+ * starting from the specified [startIndex].
+ *
+ * @param startIndex The index of character to start searching at. The search proceeds backward toward the beginning of the string.
+ * @param ignoreCase `true` to ignore character case when matching a character. By default `false`.
+ * @return An index of the last occurrence of [char] or `null` if none is found.
+ */
+public fun CharSequence.lastIndexOfOrNull(char: Char, startIndex: Int = lastIndex, ignoreCase: Boolean = false): Int? =
+    lastIndexOf(char, startIndex, ignoreCase).takeIf { it >= 0 }
+
+/**
+ * Returns the index within this char sequence of the last occurrence of the specified [string],
+ * starting from the specified [startIndex].
+ *
+ * @param startIndex The index of character to start searching at. The search proceeds backward toward the beginning of the string.
+ * @param ignoreCase `true` to ignore character case when matching a string. By default `false`.
+ * @return An index of the last occurrence of [string] or `null` if none is found.
+ */
+public fun CharSequence.lastIndexOfOrNull(string: String, startIndex: Int = lastIndex, ignoreCase: Boolean = false): Int? =
+    lastIndexOf(string, startIndex, ignoreCase).takeIf { it >= 0 }
+
+
 // asString ------------------------------------------------------------------------------------------------------------
 
 /**
