@@ -73,7 +73,7 @@ Foo().inspect("details") { it.bar.reversed() }.compute()
 
 ![docs/trace-cleanup.png](docs/trace-cleanup.png)
 
-The example above also work in browsers:
+The examples above also work in browsers:
 
 ![docs/trace-browser-console.png](docs/trace-browser-console.png)
 
@@ -196,7 +196,7 @@ Decode any string to a sequence / list of graphemes using `String.asGraphemeSequ
 "a𝕓c̳🔤".toCodePointList()  // "a", "𝕓", "c", "̳", "🫠"
 "a𝕓c̳🔤".toGraphemeList()   // "a", "𝕓", "c̳", "🫠"
 
-"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".length               // 27 (= number of bytes used when encoded with UTF-16)
+"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".length               // 27 (= number of Java chars)
 "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".length(CODEPOINTS)   // 16 (= number of Unicode code points)
 "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".length(GRAPHEMES)    //  6 (= visually perceivable units)
 

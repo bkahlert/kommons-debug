@@ -230,7 +230,7 @@ public fun String.truncate(length: TextLength = 15.codePoints, marker: String = 
     requirePositiveLength(length)
     return length.unit.transform(this) {
         if (size <= length.value) return this@truncate
-        val (targetLength, markerUnits) = targetLengthFor(length, marker)
+        val (targetLength, _) = targetLengthFor(length, marker)
         val left = truncateEnd(targetLength.copy(value = -(-targetLength.value).floorDiv(2)), "")
         val right = truncateStart(targetLength.copy(value = targetLength.value.floorDiv(2)), "")
         removeAll { true }
