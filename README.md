@@ -24,14 +24,14 @@
 
 Kommons Debug is hosted on GitHub with releases provided on Maven Central.
 
-* **Gradle** `implementation("com.bkahlert.kommons:kommons-debug:0.10.1")`
+* **Gradle** `implementation("com.bkahlert.kommons:kommons-debug:0.11.0")`
 
 * **Maven**
   ```xml
   <dependency>
       <groupId>com.bkahlert.kommons</groupId>
       <artifactId>kommons-debug</artifactId>
-      <version>0.10.1</version>
+      <version>0.11.0</version>
   </dependency>
   ```
 
