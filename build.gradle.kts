@@ -13,7 +13,7 @@ allprojects {
     apply { plugin("maven-publish") }
 }
 
-description = "Kommons Debug is a Kotlin Multiplatform Library to support print debugging"
+description = "Kommons is a Kotlin Multiplatform Library with features you did not know you were missing"
 group = "com.bkahlert.kommons"
 
 repositories {

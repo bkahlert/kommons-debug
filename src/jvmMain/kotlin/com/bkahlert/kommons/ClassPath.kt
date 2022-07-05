@@ -1,6 +1,5 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.Platform.JVM
 import java.io.File
 import java.net.URI
 import java.net.URL
@@ -35,7 +34,7 @@ import kotlin.io.path.exists
 @Suppress("FunctionName")
 public fun ClassPath(resource: String): Path {
     val normalized = resource.removePrefix("classpath:").removePrefix("/")
-    val url = JVM.contextClassLoader.getResource(normalized) ?: throw NoSuchFileException(resource, null, "classpath:$resource could not be found")
+    val url = Program.contextClassLoader.getResource(normalized) ?: throw NoSuchFileException(resource, null, "classpath:$resource could not be found")
     return ClassPath(url)
 }
 

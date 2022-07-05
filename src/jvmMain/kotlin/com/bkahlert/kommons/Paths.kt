@@ -1,6 +1,5 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.Platform.JVM
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.BufferedReader
@@ -494,7 +493,7 @@ public fun Path.deleteDirectoryEntriesRecursively(predicate: (Path) -> Boolean =
 /** Deletes this file when the virtual machine shuts down. */
 public fun Path.deleteOnExit(recursively: Boolean = true): Path {
     val file = toFile()
-    JVM.onExit {
+    Program.onExit {
         if (recursively) file.deleteRecursively()
         else file.delete()
     }

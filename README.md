@@ -13,7 +13,8 @@
     - [inspect](#anytrace--anyinspect)
     - [render](#anyrender--anyasstring)
     - [renderType](#anyrendertype)
-2. [runtime](#runtime) information on the [platform](#platform) you're running on and a platform-independent [stack trace](#stack-trace)
+2. [runtime](#runtime) information on the currently running [program](#program), the [platform](#platform) it is running on and a
+   platform-independent [stack trace](#stack-trace)
 3. easily accessible [Unicode support](#unicode-support)
 4. [string handling](#string-handling) functions
 5. [regex](#regular-expressions) functions such as the possibility to use glob patterns
@@ -148,16 +149,20 @@ foo(foo()).properties             // { bar: { bar: "baz" } }
 
 ### Runtime
 
-#### Platform
+#### Program
 
-Reflects the platform the program runs on, e.g. `Platform.JVM`.
+Reflects the currently running program and provides:
 
-The platform type provides access to some useful features:
-
-- `Platform.ansiSupport`: Returns to what extent ANSI escape codes are supported.
 - `Platform.isDebugging`: Returns whether the program is running in debug mode.
 - `Platform.isIntelliJ`: Returns whether the program is running in IntelliJ.
 - `Platform.onExit`: Allows registering callbacks that are invoked when the program exits.
+
+#### Platform
+
+Reflects the platform the program runs on (e.g. `Platform.JVM`)
+and provides:
+
+- `Platform.ansiSupport`: Returns to what extent ANSI escape codes are supported.
 
 #### Stack Trace
 

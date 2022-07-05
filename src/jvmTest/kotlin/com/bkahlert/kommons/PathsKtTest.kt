@@ -1,7 +1,6 @@
 package com.bkahlert.kommons
 
 import com.bkahlert.kommons.DeleteOnExecTestHelper.Variant
-import com.bkahlert.kommons.Platform.JVM
 import com.bkahlert.kommons.test.createAnyFile
 import com.bkahlert.kommons.test.createDirectoryWithFiles
 import com.bkahlert.kommons.test.createTempJarFileSystem
@@ -615,7 +614,7 @@ class PathsKtTest {
         standardLibraryClassPathClass.toURI().usePath { it.readBytes() } shouldBe standardLibraryClassPathClassBytes
         standardLibraryClassPathClass.usePath { it.readBytes() } shouldBe standardLibraryClassPathClassBytes
 
-        val classPathTextPath = checkNotNull(JVM.contextClassLoader.getResource(classPathTextFile))
+        val classPathTextPath = checkNotNull(Program.contextClassLoader.getResource(classPathTextFile))
         classPathTextPath.toURI().usePath { it.readBytes() } shouldBe classPathTextFileBytes
         classPathTextPath.usePath { it.readBytes() } shouldBe classPathTextFileBytes
 
