@@ -24,50 +24,116 @@ public inline val UByte.Companion.VALUE_RANGE: UIntRange get() = UByte.Companion
 /** [ClosedRange] of all valid [Byte] values. */
 public inline val Byte.Companion.VALUE_RANGE: IntRange get() = Byte.Companion.MIN_VALUE..Byte.Companion.MAX_VALUE
 
-/** Returns a hexadecimal string representation of this [UByte] value. */
-public fun UByte.toHexadecimalString(): String = toString(16).padStart(2, '0')
+
+/** Returns a new byte array — optionally [trimmed], that is, only containing necessary bytes — representing this [Int]. */
+public fun Int.toByteArray(trimmed: Boolean = false): ByteArray =
+    0.until(Int.SIZE_BYTES)
+        .map { i -> shr((Int.SIZE_BYTES - i - 1) * Byte.SIZE_BITS).toByte() }
+        .let { if (trimmed) it.dropWhile { byte -> byte == Byte.ZERO } else it }
+        .toByteArray().takeUnless { it.isEmpty() } ?: byteArrayOf(Byte.ZERO)
+
+/** Returns a new byte array — optionally [trimmed], that is, only containing necessary bytes — representing this [Long]. */
+public fun Long.toByteArray(trimmed: Boolean = false): ByteArray =
+    0.until(Long.SIZE_BYTES)
+        .map { i -> shr((Long.SIZE_BYTES - i - 1) * Byte.SIZE_BITS).toByte() }
+        .let { if (trimmed) it.dropWhile { byte -> byte == Byte.ZERO } else it }
+        .toByteArray().takeUnless { it.isEmpty() } ?: byteArrayOf(Byte.ZERO)
+
+/** Returns a new byte array — optionally [trimmed], that is, only containing necessary bytes — representing this [UInt]. */
+public fun UInt.toUByteArray(trimmed: Boolean = false): UByteArray =
+    0.until(UInt.SIZE_BYTES)
+        .map { i -> shr((UInt.SIZE_BYTES - i - 1) * UByte.SIZE_BITS).toUByte() }
+        .let { if (trimmed) it.dropWhile { byte -> byte == UByte.ZERO } else it }
+        .toUByteArray().takeUnless { it.isEmpty() } ?: ubyteArrayOf(UByte.ZERO)
+
+/** Returns a new byte array — optionally [trimmed], that is, only containing necessary bytes — representing this [UInt]. */
+public fun ULong.toUByteArray(trimmed: Boolean = false): UByteArray =
+    0.until(ULong.SIZE_BYTES)
+        .map { i -> shr((ULong.SIZE_BYTES - i - 1) * UByte.SIZE_BITS).toUByte() }
+        .let { if (trimmed) it.dropWhile { byte -> byte == UByte.ZERO } else it }
+        .toUByteArray().takeUnless { it.isEmpty() } ?: ubyteArrayOf(UByte.ZERO)
+
 
 /** Returns a hexadecimal string representation of this [Byte] value. */
 public fun Byte.toHexadecimalString(): String = (toInt() and 0xFF).toString(16).padStart(2, '0')
 
-/** Returns a hexadecimal string representation of this [UByteArray] value. */
-public fun UByteArray.toHexadecimalString(): String = joinToString("") { it.toHexadecimalString() }
-
 /** Returns a hexadecimal string representation of this [ByteArray] value. */
 public fun ByteArray.toHexadecimalString(): String = joinToString("") { it.toHexadecimalString() }
 
+/** Returns a hexadecimal string representation of this [Int] value. */
+public fun Int.toHexadecimalString(): String = toString(16)
 
-/** Returns a decimal string representation of this [UByte] value. */
-public fun UByte.toDecimalString(): String = toString(10)
+/** Returns a hexadecimal string representation of this [Long] value. */
+public fun Long.toHexadecimalString(): String = toString(16)
+
+/** Returns a hexadecimal string representation of this [UByte] value. */
+public fun UByte.toHexadecimalString(): String = toString(16).padStart(2, '0')
+
+/** Returns a hexadecimal string representation of this [UByteArray] value. */
+public fun UByteArray.toHexadecimalString(): String = joinToString("") { it.toHexadecimalString() }
+
+/** Returns a hexadecimal string representation of this [UInt] value. */
+public fun UInt.toHexadecimalString(): String = toString(16)
+
+/** Returns a hexadecimal string representation of this [ULong] value. */
+public fun ULong.toHexadecimalString(): String = toString(16)
+
 
 /** Returns a decimal string representation of this [Byte] value. */
 public fun Byte.toDecimalString(): String = (toInt() and 0xFF).toString(10)
 
+/** Returns a decimal string representation of this [UByte] value. */
+public fun UByte.toDecimalString(): String = toString(10)
 
-/** Returns an octal string representation of this [UByte] value. */
-public fun UByte.toOctalString(): String = toString(8).padStart(3, '0')
 
 /** Returns an octal string representation of this [Byte] value. */
 public fun Byte.toOctalString(): String = (toInt() and 0xFF).toString(8).padStart(3, '0')
 
-/** Returns an octal string representation of this [UByteArray] value. */
-public fun UByteArray.toOctalString(): String = joinToString("") { it.toOctalString() }
-
 /** Returns an octal string representation of this [ByteArray] value. */
 public fun ByteArray.toOctalString(): String = joinToString("") { it.toOctalString() }
 
+/** Returns an octal string representation of this [Int] value. */
+public fun Int.toOctalString(): String = toString(8)
 
-/** Returns a binary string representation of this [UByte] value. */
-public fun UByte.toBinaryString(): String = toString(2).padStart(8, '0')
+/** Returns an octal string representation of this [Long] value. */
+public fun Long.toOctalString(): String = toString(8)
+
+/** Returns an octal string representation of this [UByte] value. */
+public fun UByte.toOctalString(): String = toString(8).padStart(3, '0')
+
+/** Returns an octal string representation of this [UByteArray] value. */
+public fun UByteArray.toOctalString(): String = joinToString("") { it.toOctalString() }
+
+/** Returns an octal string representation of this [UInt] value. */
+public fun UInt.toOctalString(): String = toString(8)
+
+/** Returns an octal string representation of this [ULong] value. */
+public fun ULong.toOctalString(): String = toString(8)
+
 
 /** Returns a binary string representation of this [Byte] value. */
 public fun Byte.toBinaryString(): String = (toInt() and 0xFF).toString(2).padStart(8, '0')
 
+/** Returns a binary string representation of this [ByteArray] value. */
+public fun ByteArray.toBinaryString(): String = joinToString("") { it.toBinaryString() }
+
+/** Returns a binary string representation of this [Int] value. */
+public fun Int.toBinaryString(): String = toString(2)
+
+/** Returns a binary string representation of this [Long] value. */
+public fun Long.toBinaryString(): String = toString(2)
+
+/** Returns a binary string representation of this [UByte] value. */
+public fun UByte.toBinaryString(): String = toString(2).padStart(8, '0')
+
 /** Returns a binary string representation of this [UByteArray] value. */
 public fun UByteArray.toBinaryString(): String = joinToString("") { it.toBinaryString() }
 
-/** Returns a binary string representation of this [ByteArray] value. */
-public fun ByteArray.toBinaryString(): String = joinToString("") { it.toBinaryString() }
+/** Returns a binary string representation of this [UInt] value. */
+public fun UInt.toBinaryString(): String = toString(2)
+
+/** Returns a binary string representation of this [ULong] value. */
+public fun ULong.toBinaryString(): String = toString(2)
 
 
 private val base64Characters = ("" +

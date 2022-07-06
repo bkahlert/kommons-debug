@@ -137,3 +137,55 @@ public fun Number.roundToInt(): Int = RoundingMode.HalfEven(toDouble()).kotlinRo
  * Rounds the [Double] value of this number. Ties are rounded towards the even neighbor.
  */
 public fun Number.roundToLong(): Long = RoundingMode.HalfEven(toDouble()).kotlinRoundToLong()
+
+
+/** Whether this [Byte] is even. */
+public val Byte.isEven: Boolean get():Boolean = this % 2 == 0
+
+/** Whether this [Short] is even. */
+public val Short.isEven: Boolean get():Boolean = this % 2 == 0
+
+/** Whether this [Int] is even. */
+public val Int.isEven: Boolean get():Boolean = this % 2 == 0
+
+/** Whether this [Long] is even. */
+public val Long.isEven: Boolean get():Boolean = this % 2L == 0L
+
+
+/** Whether this [Byte] is odd. */
+public val Byte.isOdd: Boolean get():Boolean = this % 2 != 0
+
+/** Whether this [Short] is odd. */
+public val Short.isOdd: Boolean get():Boolean = this % 2 != 0
+
+/** Whether this [Int] is odd. */
+public val Int.isOdd: Boolean get():Boolean = this % 2 != 0
+
+/** Whether this [Long] is odd. */
+public val Long.isOdd: Boolean get():Boolean = this % 2L != 0L
+
+
+/** Whether this [UByte] is even. */
+public val UByte.isEven: Boolean get():Boolean = this % 2u == 0u
+
+/** Whether this [UShort] is even. */
+public val UShort.isEven: Boolean get():Boolean = this % 2u == 0u
+
+/** Whether this [UInt] is even. */
+public val UInt.isEven: Boolean get():Boolean = this % 2u == 0u
+
+/** Whether this [ULong] is even. */
+public val ULong.isEven: Boolean get():Boolean = this % 2uL == 0uL
+
+
+/** Whether this [UByte] is odd. */
+public val UByte.isOdd: Boolean get():Boolean = this % 2u != 0u
+
+/** Whether this [UShort] is odd. */
+public val UShort.isOdd: Boolean get():Boolean = this % 2u != 0u
+
+/** Whether this [UInt] is odd. */
+public val UInt.isOdd: Boolean get():Boolean = this % 2u != 0u
+
+/** Whether this [ULong] is odd. */
+public val ULong.isOdd: Boolean get():Boolean = this % 2uL != 0uL

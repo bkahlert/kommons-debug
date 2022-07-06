@@ -432,9 +432,24 @@ SystemLocations.Temp.createTempFile().age         // < 1ms
 
 ### Byte Handling
 
-#### Byte, UByte, ByteArray, UByteArray Conversions
+#### toHexadecimalString(), toOctalString(), toBinaryString()
 
-All Byte, UByte, ByteArray, UByteArray instances support `toHexadecimalString`, `toOctalString` and `toBinaryString`.
+The extension functions
+
+- `toHexadecimalString()`
+- `toOctalString()`
+- `toBinaryString()`
+
+... are provided for:
+
+- `Byte`
+- `ByteArray`
+- `Int`
+- `Long`
+- `UByte`
+- `UByteArray`
+- `UInt`
+- `ULong`
 
 ##### Examples
 
@@ -458,6 +473,13 @@ byteArray.toBinaryString()            // "00000000011111111000000011111111"
 largeByteArrayOf.toBinaryString()     //         "111111111111111111111111111...111111"
 veryLargeByteArray.toBinaryString()   // "00000001000000000000000000000000000...000000"
 ```
+
+Further conversions:
+
+- `Int.toByteArray()`
+- `Long.toByteArray()`
+- `UInt.toUByteArray()`
+- `ULong.toUByteArray()`
 
 #### Checksums
 

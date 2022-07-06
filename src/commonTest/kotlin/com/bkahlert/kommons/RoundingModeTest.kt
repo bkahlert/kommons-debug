@@ -9,6 +9,7 @@ import com.bkahlert.kommons.RoundingMode.HalfUp
 import com.bkahlert.kommons.RoundingMode.Unnecessary
 import com.bkahlert.kommons.RoundingMode.Up
 import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -213,5 +214,46 @@ class RoundingModeTest {
     @Test fun regression() = test {
         HalfEven(0.7, 0.001) shouldBe 0.7
         0.7.round(0.001) shouldBe 0.7
+    }
+
+
+    @Test fun is_odd() = testAll(-1, 1) {
+        it.toByte().isOdd shouldBe true
+        (it + 1).toByte().isOdd shouldBe false
+        it.toShort().isOdd shouldBe true
+        (it + 1).toShort().isOdd shouldBe false
+        it.isOdd shouldBe true
+        (it + 1).isOdd shouldBe false
+        it.toLong().isOdd shouldBe true
+        (it + 1).toLong().isOdd shouldBe false
+
+        it.toUByte().isOdd shouldBe true
+        (it + 1).toUByte().isOdd shouldBe false
+        it.toUShort().isOdd shouldBe true
+        (it + 1).toUShort().isOdd shouldBe false
+        it.toUInt().isOdd shouldBe true
+        (it + 1).toUInt().isOdd shouldBe false
+        it.toULong().isOdd shouldBe true
+        (it + 1).toULong().isOdd shouldBe false
+    }
+
+    @Test fun is_even() = testAll(-1, 1) {
+        it.toByte().isEven shouldBe false
+        (it + 1).toByte().isEven shouldBe true
+        it.toShort().isEven shouldBe false
+        (it + 1).toShort().isEven shouldBe true
+        it.isEven shouldBe false
+        (it + 1).isEven shouldBe true
+        it.toLong().isEven shouldBe false
+        (it + 1).toLong().isEven shouldBe true
+
+        it.toUByte().isEven shouldBe false
+        (it + 1).toUByte().isEven shouldBe true
+        it.toUShort().isEven shouldBe false
+        (it + 1).toUShort().isEven shouldBe true
+        it.toUInt().isEven shouldBe false
+        (it + 1).toUInt().isEven shouldBe true
+        it.toULong().isEven shouldBe false
+        (it + 1).toULong().isEven shouldBe true
     }
 }
