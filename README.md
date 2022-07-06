@@ -521,7 +521,19 @@ ClassPath("dir/to/resource").copyToDirectory(SystemLocations.Temp)
 ClassPath("dir/to/resource").useBufferedReader { it.readLine() }
 ```
 
-### Either
+### Miscellaneous
+
+#### Scaling
+
+```kotlin
+0.5.scale(+0.5)               // = +0.75 (0.5 scaled 50% closer to +1.0) 
+0.5.scale(-0.5)               // = -0.25 (0.5 scaled 50% closer to -1.0) 
+
+4.0.scale(+0.5, -10.0..+10.0)  // = +7.0 (4.0 scaled 50% closer to +10.0) 
+4.0.scale(-0.5, -10.0..+10.0)  // = -4.0 (4.0 scaled 50% closer to -10.0) 
+```
+
+#### Either
 
 Generic either type that can be used as a replacement for `Result`,
 i.e. in cases where the alternative value does not necessarily mean failure.

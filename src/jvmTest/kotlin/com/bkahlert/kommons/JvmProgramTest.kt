@@ -26,15 +26,15 @@ import kotlin.test.Test
 class JvmProgramTest {
 
     @Test fun name() = test {
-        Program.name shouldBe null
+        Program.name shouldBe "kommons-debug"
     }
 
     @Test fun group() = test {
-        Program.group shouldBe null
+        Program.group shouldBe "com.bkahlert.kommons"
     }
 
     @Test fun version() = test {
-        Program.version shouldBe null
+        Program.version shouldNotBe null
     }
 
     @Test fun context_class_loader() = test {

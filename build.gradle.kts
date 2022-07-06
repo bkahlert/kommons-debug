@@ -90,6 +90,11 @@ kotlin {
 }
 
 tasks {
+    withType<ProcessResources> {
+        filesMatching("build.properties") {
+            expand(project.properties)
+        }
+    }
     withType<Test>().configureEach {
         testLogging {
             events = setOf(
