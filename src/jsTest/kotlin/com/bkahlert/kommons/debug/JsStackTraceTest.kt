@@ -1,6 +1,8 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.Parser.Companion.ParserException
 import com.bkahlert.kommons.test.test
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.should
@@ -22,11 +24,12 @@ class JsStackTraceTest {
     }
 
     @Test fun parse() = test {
-        JsStackTraceElement.parseOrNull("").shouldBeNull()
-        JsStackTraceElement.parseOrNull("AnyReceiver.anyFun_hash_k\$ ($file:5:20)") shouldBe stackTraceElementWithReceiverAndFunction
-        JsStackTraceElement.parseOrNull("AnyReceiver.<anonymous> ($file:5:20)") shouldBe stackTraceElementWithReceiverAndAnonymousFunction
-        JsStackTraceElement.parseOrNull("anyFun ($file:5:20)") shouldBe stackTraceElementWithFunction
-        JsStackTraceElement.parseOrNull("$file:5:20") shouldBe stackTraceElement
+        JsStackTraceElement.parse("AnyReceiver.anyFun_hash_k\$ ($file:5:20)") shouldBe stackTraceElementWithReceiverAndFunction
+        JsStackTraceElement.parse("AnyReceiver.<anonymous> ($file:5:20)") shouldBe stackTraceElementWithReceiverAndAnonymousFunction
+        JsStackTraceElement.parse("anyFun ($file:5:20)") shouldBe stackTraceElementWithFunction
+        JsStackTraceElement.parse("$file:5:20") shouldBe stackTraceElement
+        shouldThrow<ParserException> { JsStackTraceElement.parse("").shouldBeNull() }
+            .message shouldBe "Failed to parse \"\" into an instance of JsStackTraceElement"
     }
 
     @Test fun get_firefox_stack_trace() = test {

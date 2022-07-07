@@ -1,5 +1,6 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.Parser
 import com.bkahlert.kommons.takeUnlessEmpty
 import kotlin.reflect.KFunction
 
@@ -36,30 +37,23 @@ public data class JsStackTraceElement(
         if (brackets) append(')')
     }
 
-    public companion object {
-        private val RenderedStackTraceElementRegex =
-            "^(?:(?:(?<receiver>[^. ]+)\\.)?(?<function>[^ ]*)?\\s+)?\\(?(?<file>[^()]+):(?<line>\\d+):(?<column>\\d+)\\)?\$".toRegex()
-
-        /**
-         * Parses the specified [renderedStackTraceElement] as [JsStackTraceElement] and,
-         * if successful, returns it. Returns `null` otherwise.
-         */
-        public fun parseOrNull(renderedStackTraceElement: String): JsStackTraceElement? {
-            return RenderedStackTraceElementRegex
-                .matchEntire(renderedStackTraceElement)
-                ?.destructured
-                ?.let { (receiver, function, file, line, column) ->
-                    JsStackTraceElement(
-                        receiver.takeUnlessEmpty(),
-                        function.takeUnlessEmpty(),
-                        file,
-                        line.toInt(),
-                        column.toInt()
-                    )
-                }
-        }
-    }
+    public companion object : Parser<JsStackTraceElement> by (Parser.parser {
+        RenderedStackTraceElementRegex.matchEntire(it)
+            ?.destructured
+            ?.let { (receiver, function, file, line, column) ->
+                JsStackTraceElement(
+                    receiver.takeUnlessEmpty(),
+                    function.takeUnlessEmpty(),
+                    file,
+                    line.toInt(),
+                    column.toInt()
+                )
+            }
+    })
 }
+
+private val RenderedStackTraceElementRegex =
+    "^(?:(?:(?<receiver>[^. ]+)\\.)?(?<function>[^ ]*)?\\s+)?\\(?(?<file>[^()]+):(?<line>\\d+):(?<column>\\d+)\\)?\$".toRegex()
 
 private val functionMangleRegex: Regex = "_[a-z\\d]+_k\\$$".toRegex()
 private val renderedStackTraceElementUnificationRegex = "^(?<receiverAndFunction>[^@]*)@(?<location>[^@]*)$".toRegex()

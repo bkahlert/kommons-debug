@@ -97,7 +97,7 @@ public fun Any?.stringify(
             if (key.isEmpty()) {
                 value
             } else if (predicate(self, key, value)) {
-                value.stringify(space, predicate).parse()
+                value.stringify(space, predicate).parseJson()
             } else {
                 undefined
             }
@@ -107,10 +107,10 @@ public fun Any?.stringify(
 }
 
 /** Returns a simple JavaScript object (as [Json]) by applying [JSON.parse] to this string. */
-public fun String.parse(): Json = when (this) {
+public fun String.parseJson(): Json = when (this) {
     "null" -> json()
     else -> JSON.parse(this)
 }
 
 /** Returns a simple JavaScript object (as [Json]) by applying [JSON.stringify] to this object and [JSON.parse] to its output. */
-public fun Any?.toJson(): Json = stringify().parse()
+public fun Any?.toJson(): Json = stringify().parseJson()

@@ -1,6 +1,8 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.Parser.Companion.ParserException
 import com.bkahlert.kommons.test.test
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -40,6 +42,9 @@ class SemanticVersionTest {
             it.preRelease shouldBe null
             it.build shouldBe null
         }
+
+        shouldThrow<ParserException> { SemanticVersion.parse("invalid") }
+            .message shouldBe "Failed to parse \"invalid\" into an instance of SemanticVersion"
     }
 
     @Test fun equality() = test {

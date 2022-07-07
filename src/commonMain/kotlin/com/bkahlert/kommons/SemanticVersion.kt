@@ -1,5 +1,7 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.Parser.Companion.parser
+
 /**
  * Semantic Version of the format [major].[minor].[patch].
  * @see <a href="https://semver.org">Semantic Versioning 2.0.0</a>
@@ -35,25 +37,21 @@ public data class SemanticVersion(
             }
         }
 
-    public companion object {
-
-        private val regex = Regex(
-            "" +
-                "(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)" +
-                "(?<preRelease>-(?:\\w+\\.)*\\w+)?" +
-                "(?<build>\\+(?:\\w+\\.)*\\w+)?" +
-                ""
-        )
-
-        public fun parse(version: String): SemanticVersion =
-            regex.matchEntire(version)?.run {
-                SemanticVersion(
-                    major = groupValues[1].toInt(),
-                    minor = groupValues[2].toInt(),
-                    patch = groupValues[3].toInt(),
-                    preRelease = groupValues.drop(4).firstOrNull { it.startsWith("-") }?.drop(1),
-                    build = groupValues.drop(4).firstOrNull { it.startsWith("+") }?.drop(1),
-                )
-            } ?: throw IllegalArgumentException("$version is not valid semantic version")
-    }
+    public companion object : Parser<SemanticVersion> by (parser {
+        regex.matchEntire(it)?.run {
+            SemanticVersion(
+                major = groupValues[1].toInt(),
+                minor = groupValues[2].toInt(),
+                patch = groupValues[3].toInt(),
+                preRelease = groupValues.drop(4).firstOrNull { it.startsWith("-") }?.drop(1),
+                build = groupValues.drop(4).firstOrNull { it.startsWith("+") }?.drop(1),
+            )
+        }
+    })
 }
+
+private val regex = Regex(
+    "(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)" +
+        "(?<preRelease>-(?:\\w+\\.)*\\w+)?" +
+        "(?<build>\\+(?:\\w+\\.)*\\w+)?"
+)

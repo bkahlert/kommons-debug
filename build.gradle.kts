@@ -1,6 +1,3 @@
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.gradle.api.tasks.testing.logging.TestLogEvent
-
 plugins {
     kotlin("multiplatform") version "1.7.0"
     id("org.jetbrains.dokka") version "1.7.0"
@@ -93,20 +90,6 @@ tasks {
     withType<ProcessResources> {
         filesMatching("build.properties") {
             expand(project.properties)
-        }
-    }
-    withType<Test>().configureEach {
-        testLogging {
-            events = setOf(
-                TestLogEvent.SKIPPED,
-                TestLogEvent.FAILED,
-                TestLogEvent.STANDARD_OUT,
-                TestLogEvent.STANDARD_ERROR
-            )
-            exceptionFormat = TestExceptionFormat.FULL
-            showExceptions = true
-            showCauses = true
-            showStackTraces = true
         }
     }
 }
