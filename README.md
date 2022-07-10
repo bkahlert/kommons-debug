@@ -19,7 +19,8 @@
 4. [string handling](#string-handling) functions
 5. [regex](#regular-expressions) functions such as the possibility to use glob patterns
 6. facilitated [time handling](#time-handling) using `Now`, `Yesterday`, and `Tomorrow`
-7. [file handling](#file-handling-only-jvm) features such as locating source files and accessing the class path with the NIO2 API
+7. [factories](#factories) to easily implement `of`/`ofOrNull`, `from`/`fromOrNull`, and `parse`/`parseOrNull`
+8. [file handling](#file-handling-only-jvm) features such as locating source files and accessing the class path with the NIO2 API
 
 ## Installation / Setup
 
@@ -501,6 +502,26 @@ val file = SystemLocations.Home / ".gitconfig"
 file.md5Checksum()
 file.sha1Checksum()
 file.sha256Checksum()
+```
+
+### Factories
+
+The [Factory interface](src/commonMain/kotlin/com/bkahlert/kommons/factories.kt) provides
+the factory builders `creator`, `converter`, and `parser` to easily implement
+the factory methods `of`/`ofOrNull`, `from`/`fromOrNull`, and `parse`/`parseOrNull`
+as shown in the following example:
+
+```kotlin
+data class Version(val major: Int, val minor: Int, val patch: Int) {
+    companion object : Parser<Version> by (parser {                 // The `parsing` method allows the following outcomes:
+        it.split('.').let { (major, minor, patch) ->                // - If you return a Version this will be the successful result. 
+            Version(major.toInt(), minor.toInt(), patch.toInt())    // - If you return null a generic ParsingException is thrown.
+        }                                                           // - If you throw an exception it will be wrapped in a ParsingException.
+    })
+}
+
+Version.parseOrNull("1.2.3")   // returns Version(1, 2, 3)
+Version.parse("invalid")       // throws ParsingException: "Failed to parse "invalid" into an instance of Version"
 ```
 
 ### File Handling \[only JVM\]

@@ -6,5 +6,5 @@ authors:
         orcid: "https://orcid.org/0000-0003-1705-4067"
 title: "Kommons Debug — A Kotlin Multiplatform Library to support print debugging"
 version: 0.12.0
-date-released: 2022-07-10
+date-released: 2022-07-11
 url: "https://github.com/bkahlert/kommons-debug"

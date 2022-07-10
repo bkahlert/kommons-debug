@@ -1,6 +1,6 @@
 package com.bkahlert.kommons.debug
 
-import com.bkahlert.kommons.Parser.Companion.ParserException
+import com.bkahlert.kommons.Parser.ParsingException
 import com.bkahlert.kommons.test.test
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactly
@@ -28,7 +28,7 @@ class JsStackTraceTest {
         JsStackTraceElement.parse("AnyReceiver.<anonymous> ($file:5:20)") shouldBe stackTraceElementWithReceiverAndAnonymousFunction
         JsStackTraceElement.parse("anyFun ($file:5:20)") shouldBe stackTraceElementWithFunction
         JsStackTraceElement.parse("$file:5:20") shouldBe stackTraceElement
-        shouldThrow<ParserException> { JsStackTraceElement.parse("").shouldBeNull() }
+        shouldThrow<ParsingException> { JsStackTraceElement.parse("").shouldBeNull() }
             .message shouldBe "Failed to parse \"\" into an instance of JsStackTraceElement"
     }
 

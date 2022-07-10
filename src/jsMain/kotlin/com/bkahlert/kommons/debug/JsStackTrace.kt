@@ -1,6 +1,7 @@
 package com.bkahlert.kommons.debug
 
 import com.bkahlert.kommons.Parser
+import com.bkahlert.kommons.Parser.Companion.parser
 import com.bkahlert.kommons.takeUnlessEmpty
 import kotlin.reflect.KFunction
 
@@ -37,7 +38,7 @@ public data class JsStackTraceElement(
         if (brackets) append(')')
     }
 
-    public companion object : Parser<JsStackTraceElement> by (Parser.parser {
+    public companion object : Parser<JsStackTraceElement> by (parser {
         RenderedStackTraceElementRegex.matchEntire(it)
             ?.destructured
             ?.let { (receiver, function, file, line, column) ->
