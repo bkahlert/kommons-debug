@@ -1,7 +1,6 @@
 package com.bkahlert.kommons
 
 import com.bkahlert.kommons.test.test
-import com.ibm.icu.text.UnicodeSet
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
@@ -18,7 +17,7 @@ class JvmStringsKtTest {
         withClue("illegal") { shouldThrow<IllegalArgumentException> { "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".transform("-illegal-") } }
         withClue("compound ID") {
             "The quick brown fox jumps over the lazy dog".transform(
-                "NFKD", "Lower(Null)", "Latin-Katakana", "NFC", globalFilter = UnicodeSet("[:Latin:]"), globalInverseFilter = UnicodeSet("[:Katakana:]"),
+                "NFKD", "Lower(Null)", "Latin-Katakana", "NFC", globalFilter = "[:Latin:]", globalInverseFilter = "[:Katakana:]",
             ) shouldBe "The quick brown fox jumps over the lazy dog".transform("[:Latin:]; NFKD; Lower(); Latin-Katakana; NFC; ([:Katakana:]);")
         }
     }
