@@ -1,3 +1,6 @@
+import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.targets.js.yarn.yarn
+
 plugins {
     kotlin("multiplatform") version "1.7.0"
     id("org.jetbrains.dokka") version "1.7.0"
@@ -40,6 +43,7 @@ kotlin {
             }
         }
         nodejs()
+        yarn.ignoreScripts = false // suppress "warning Ignored scripts due to flag." warning
     }
 
     sourceSets {
@@ -94,28 +98,11 @@ tasks {
     }
 }
 
-val dokkaOutputDir = buildDir.resolve("dokka")
-tasks.dokkaHtml.configure {
-    outputDirectory.set(dokkaOutputDir)
-    dokkaSourceSets {
-        configureEach {
-            displayName.set(
-                when (platform.get()) {
-                    org.jetbrains.dokka.Platform.jvm -> "jvm"
-                    org.jetbrains.dokka.Platform.js -> "js"
-                    org.jetbrains.dokka.Platform.native -> "native"
-                    org.jetbrains.dokka.Platform.common -> "common"
-                }
-            )
-        }
-    }
-}
-val deleteDokkaOutputDir by tasks.register<Delete>("deleteDokkaOutputDirectory") { delete(dokkaOutputDir) }
-val javadocJar = tasks.register<Jar>("javadocJar") {
+val javadocJar by tasks.registering(Jar::class) {
+    val dokkaHtml = tasks.named<DokkaTask>("dokkaHtml")
+    dependsOn(dokkaHtml)
     archiveClassifier.set("javadoc")
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    dependsOn(deleteDokkaOutputDir) // TODO add jsGenerateExternalsIntegrated
-    from(tasks.dokkaHtml.map { it.outputs })
+    from(dokkaHtml.get().outputDirectory)
 }
 
 publishing {
@@ -142,7 +129,7 @@ publishing {
 
     publications {
         withType<MavenPublication>().configureEach {
-            artifact(javadocJar)
+            artifact(javadocJar.get())
             pom {
                 name.set("Kommons")
                 description.set(project.description)
