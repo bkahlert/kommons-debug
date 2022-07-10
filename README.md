@@ -25,14 +25,14 @@
 
 Kommons Debug is hosted on GitHub with releases provided on Maven Central.
 
-* **Gradle** `implementation("com.bkahlert.kommons:kommons-debug:0.11.0")`
+* **Gradle** `implementation("com.bkahlert.kommons:kommons-debug:0.12.0")`
 
 * **Maven**
   ```xml
   <dependency>
       <groupId>com.bkahlert.kommons</groupId>
       <artifactId>kommons-debug</artifactId>
-      <version>0.11.0</version>
+      <version>0.12.0</version>
   </dependency>
   ```
 
@@ -193,6 +193,8 @@ Decode any string to a sequence / list of code points using `String.asCodePointS
 
 Decode any string to a sequence / list of graphemes using `String.asGraphemeSequence` / `String.toGraphemeList`.
 
+Transliterations and transforms can be done using `String.transform`.
+
 #### Examples
 
 ```kotlin
@@ -208,6 +210,8 @@ Decode any string to a sequence / list of graphemes using `String.asGraphemeSequ
 "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".truncate(7.chars)       // "a\uD835 … 👦"
 "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".truncate(7.codePoints)  // "a𝕓 … ‍👦"
 "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".truncate(7.graphemes)   // "a𝕓 … 👨🏾‍🦱👩‍👩‍👦‍👦"
+
+"© А-З ÄÖÜäöüẞß".transform("de_DE", "de_DE-ASCII")  // "(C) A-Z AEOEUeaeoeueSSss"
 ```
 
 #### UTF-16 Char *vs* Code Point *vs* Grapheme Cluster
