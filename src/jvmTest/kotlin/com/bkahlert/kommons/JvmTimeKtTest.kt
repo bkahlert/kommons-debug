@@ -162,3 +162,4 @@ class JvmInstantTest {
 
 internal actual val instant0202: Instant = Instant.parse("2020-02-02T02:02:02Z")
 internal actual val instant2232: Instant = Instant.parse("2020-02-02T22:32:02Z")
+internal actual val localDate: LocalDate = LocalDate.parse("2020-02-02")

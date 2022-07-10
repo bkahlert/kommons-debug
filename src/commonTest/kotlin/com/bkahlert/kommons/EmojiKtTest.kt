@@ -28,6 +28,3 @@ class EmojiKtTest {
         "other".asEmoji() shouldBe "🔣"
     }
 }
-
-internal expect val instant0202: Instant
-internal expect val instant2232: Instant

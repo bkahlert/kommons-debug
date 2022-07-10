@@ -432,6 +432,11 @@ Tomorrow + 1.days   // the day after tomorrow
 Instant.parse("1910-06-22T13:00:00Z") + 5.minutes // 1910-06-22T12:05:00Z
 LocalDate.parse("1910-06-22") - 2.days            // 1910-06-20
 SystemLocations.Temp.createTempFile().age         // < 1ms
+
+Now.toMomentString()               // "now"
+(Now - 12.hours).toMomentString()  // "12h ago"
+(Now + 3.days).toMomentString()    // "in 3d"
+(Today - 1.days).toMomentString()  // "yesterday"
 ```
 
 ### Byte Handling

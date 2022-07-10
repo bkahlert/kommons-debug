@@ -132,3 +132,4 @@ class JsInstantTest {
 
 internal actual val instant0202: Instant = Date("February 02, 2020 02:02:02 UTC")
 internal actual val instant2232: Instant = Date("February 02, 2020 22:32:02 UTC")
+internal actual val localDate: LocalDate = LocalDate(2020, 1, 2)

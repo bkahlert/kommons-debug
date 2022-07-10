@@ -149,6 +149,12 @@ public actual inline operator fun Date.minus(duration: Duration): Date = Date(ge
 public actual inline operator fun Date.minus(other: Date): Duration = (getTime().toLong() - other.getTime().toLong()).milliseconds
 
 
+private val instantFormatterOptions by lazy { dateLocaleOptions { month = "long"; day = "numeric"; year = "numeric" } }
+
+/** Returns this [Instant] formatted as a local date (e.g. May 15, 1984). */
+public actual fun Instant.toLocalDateString(): String = toLocaleDateString(options = instantFormatterOptions)
+
+
 /** Returns a copy of this [LocalDate] with the whole days of the specified [duration] added. */
 public actual operator fun LocalDate.plus(duration: Duration): LocalDate = LocalDate(fullYear, month, date + duration.inWholeDays.toInt())
 
@@ -157,3 +163,6 @@ public actual operator fun LocalDate.minus(duration: Duration): LocalDate = Loca
 
 /** Returns the [Duration] between this and the specified [other]. */
 public actual operator fun LocalDate.minus(other: LocalDate): Duration = (time - other.time).milliseconds
+
+/** Returns this [LocalDate] formatted as a local date (e.g. May 15, 1984). */
+public actual fun LocalDate.toLocalDateString(): String = instant.toLocalDateString()
