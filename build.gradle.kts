@@ -9,10 +9,6 @@ plugins {
     id("nebula.release") version "16.0.0"
 }
 
-allprojects {
-    apply { plugin("maven-publish") }
-}
-
 description = "Kommons is a Kotlin Multiplatform Library with features you did not know you were missing"
 group = "com.bkahlert.kommons"
 
@@ -46,6 +42,7 @@ kotlin {
         yarn.ignoreScripts = false // suppress "warning Ignored scripts due to flag." warning
     }
 
+    @Suppress("UNUSED_VARIABLE")
     sourceSets {
         val commonMain by getting
         val commonTest by getting {
@@ -91,6 +88,7 @@ kotlin {
 }
 
 tasks {
+    @Suppress("UnstableApiUsage")
     withType<ProcessResources> {
         filesMatching("build.properties") {
             expand(project.properties)
@@ -99,10 +97,13 @@ tasks {
 }
 
 val javadocJar by tasks.registering(Jar::class) {
-    val dokkaHtml = tasks.named<DokkaTask>("dokkaHtml")
-    dependsOn(dokkaHtml)
+    description = "Generates a JavaDoc JAR using Dokka"
+    group = JavaBasePlugin.DOCUMENTATION_GROUP
     archiveClassifier.set("javadoc")
-    from(dokkaHtml.get().outputDirectory)
+    tasks.named<DokkaTask>("dokkaHtml").also {
+        dependsOn(it)
+        from(it.get().outputDirectory)
+    }
 }
 
 publishing {
@@ -129,7 +130,7 @@ publishing {
 
     publications {
         withType<MavenPublication>().configureEach {
-            artifact(javadocJar.get())
+            artifact(javadocJar)
             pom {
                 name.set("Kommons")
                 description.set(project.description)
@@ -175,11 +176,6 @@ signing {
 }
 
 // getting rid of missing dependency declarations
-val signingTasks = tasks.filter { it.name.startsWith("sign") }
-listOf(
-    tasks.getByName("publishKotlinMultiplatformPublicationToMavenLocal"),
-    tasks.getByName("publishJsPublicationToMavenLocal"),
-    tasks.getByName("publishJvmPublicationToMavenLocal"),
-).forEach {
-    it.dependsOn(signingTasks)
+tasks.filter { it.name.startsWith("sign") }.also { signingTasks ->
+    tasks.filter { it.name.startsWith("publish") && it.name.contains("Publication") }.forEach { it.dependsOn(signingTasks) }
 }
