@@ -1,7 +1,6 @@
 package com.bkahlert.kommons
 
 import com.ibm.icu.text.Transliterator
-import com.ibm.icu.text.UnicodeSet
 
 /**
  * Returns this string transformed according to the specified [id].
@@ -19,7 +18,9 @@ public fun String.transform(id: String): String =
 /**
  * Returns this string transformed according to a
  * [compound ID](https://unicode-org.github.io/icu/userguide/transforms/general/#compound-ids)
- * built using the specified [ids], the optional [globalFilter] and the optional [globalInverseFilter].
+ * built using the specified [ids],
+ * the optional [globalFilter] (e.g. `[:Latin:]`, `[\p{Lu}]`) and
+ * the optional [globalInverseFilter].
  *
  * **Example:**
  * Use `Latin-ASCII` to convert non-ASCII-range punctuation, symbols,
@@ -30,11 +31,11 @@ public fun String.transform(id: String): String =
  */
 public fun String.transform(
     vararg ids: String,
-    globalFilter: UnicodeSet? = null,
-    globalInverseFilter: UnicodeSet? = null,
+    globalFilter: String? = null,
+    globalInverseFilter: String? = null,
 ): String = transform(
     listOfNotNull(
-        globalFilter?.toString(),
+        globalFilter,
         *ids,
         globalInverseFilter?.let { "($it)" },
     ).joinToString("; ", postfix = ";")

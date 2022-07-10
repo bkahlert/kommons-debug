@@ -1,7 +1,6 @@
 package com.bkahlert.kommons
 
 import kotlin.js.Date
-import kotlin.math.absoluteValue
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
@@ -111,34 +110,14 @@ public inline operator fun Date.compareTo(other: Date): Int = time.compareTo(oth
 
 /** Returns a copy of this [Date] with the specified [duration] added. */
 public actual inline operator fun Date.plus(duration: Duration): Date = duration.toComponents { days, hours, minutes, seconds, nanoseconds ->
-    val offset = getTimezoneOffset()
-    val offsetHours = offset / 60
-    val offsetMinutes = offset.mod(60)
     Date(
-        buildString {
-            append(this@plus.fullYear)
-            append('-')
-            append((this@plus.month + 1).toString().padStart(2, '0'))
-            append('-')
-            append((this@plus.date + days).toString().padStart(2, '0'))
-            append('T')
-            append((this@plus.hours - (if (offsetHours >= 0) 0 else 12) + hours).toString().padStart(2, '0'))
-            append(':')
-            append((this@plus.minutes + minutes).toString().padStart(2, '0'))
-            append(':')
-            append((this@plus.seconds + seconds).toString().padStart(2, '0'))
-            append('.')
-            append((this@plus.milliseconds + (nanoseconds / 1_000_000)))
-            if (offsetHours >= 0) {
-                append('+')
-                append(offsetHours.toString().padStart(2, '0'))
-                append(offsetMinutes.toString().padStart(2, '0'))
-            } else {
-                append('-')
-                append((12 - offsetHours.absoluteValue).toString().padStart(2, '0'))
-                append(offsetMinutes.toString().padStart(2, '0'))
-            }
-        }
+        year = this@plus.fullYear,
+        month = this@plus.month,
+        day = this@plus.date + days.toInt(),
+        hour = this@plus.hours + hours,
+        minute = this@plus.minutes + minutes,
+        second = this@plus.seconds + seconds,
+        millisecond = this@plus.milliseconds + (nanoseconds / 1_000_000)
     )
 }
 
