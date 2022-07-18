@@ -44,7 +44,11 @@ kotlin {
 
     @Suppress("UNUSED_VARIABLE")
     sourceSets {
-        val commonMain by getting
+        val commonMain by getting {
+            dependencies {
+                implementation("io.github.microutils:kotlin-logging:2.1.23") { because("SLF4J logger API + Kotlin wrapper") }
+            }
+        }
         val commonTest by getting {
             dependencies {
                 implementation("com.bkahlert.kommons:kommons-test:0.4.1") { because("JUnit defaults, testEach") }

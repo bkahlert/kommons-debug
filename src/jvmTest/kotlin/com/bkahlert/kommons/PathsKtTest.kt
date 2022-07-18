@@ -3,9 +3,11 @@ package com.bkahlert.kommons
 import com.bkahlert.kommons.DeleteOnExecTestHelper.Variant
 import com.bkahlert.kommons.test.createAnyFile
 import com.bkahlert.kommons.test.createDirectoryWithFiles
+import com.bkahlert.kommons.test.createTempJarFile
 import com.bkahlert.kommons.test.createTempJarFileSystem
 import com.bkahlert.kommons.test.fixtures.SvgImageFixture
 import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.toNewJarFileSystem
 import io.kotest.assertions.asClue
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -27,10 +29,12 @@ import io.kotest.matchers.string.shouldStartWith
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import java.io.File
 import java.net.URI
 import java.net.URL
 import java.nio.file.DirectoryNotEmptyException
 import java.nio.file.FileAlreadyExistsException
+import java.nio.file.FileSystemNotFoundException
 import java.nio.file.Files
 import java.nio.file.LinkOption.NOFOLLOW_LINKS
 import java.nio.file.NoSuchFileException
@@ -52,12 +56,54 @@ import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.pathString
 import kotlin.io.path.readBytes
 import kotlin.io.path.readText
+import kotlin.io.path.toPath
 import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 class PathsKtTest {
+
+    @Test fun to_path_or_null(@TempDir tempDir: Path) = test {
+        tempDir.toUri().toURL().toPathOrNull()?.pathString shouldBe tempDir.pathString
+        tempDir.toUri().toPathOrNull()?.pathString shouldBe tempDir.pathString
+        tempDir.toFile().toPathOrNull()?.pathString shouldBe tempDir.pathString
+
+        URL("https://example.com/path").toPathOrNull() shouldBe null
+        URI("https://example.com/path").toPathOrNull() shouldBe null
+        File("\u0000").toPathOrNull() shouldBe null
+    }
+
+    @Test fun to_path(@TempDir tempDir: Path) = test {
+        tempDir.toUri().toURL().toPath().pathString shouldBe tempDir.pathString
+        tempDir.toUri().toPath().pathString shouldBe tempDir.pathString
+        tempDir.toFile().toPath().pathString shouldBe tempDir.pathString
+
+        shouldThrow<FileSystemNotFoundException> { URL("https://example.com/path").toPath() }
+        shouldThrow<FileSystemNotFoundException> { URI("https://example.com/path").toPath() }
+        shouldThrow<IllegalArgumentException> { File("\u0000").toPath() }
+    }
+
+    @Test fun to_file_or_null(@TempDir tempDir: File) = test {
+        tempDir.toPath().toUri().toURL().toFileOrNull()?.path shouldBe tempDir.path
+        tempDir.toPath().toUri().toFileOrNull()?.path shouldBe tempDir.path
+        tempDir.toPath().toFileOrNull()?.path shouldBe tempDir.path
+
+        URL("https://example.com/path").toFileOrNull() shouldBe null
+        tempDir.toPath().createJarAndResolve().toUri().toFileOrNull() shouldBe null
+        tempDir.toPath().createJarAndResolve().toFileOrNull() shouldBe null
+    }
+
+    @Test fun to_file(@TempDir tempDir: File) = test {
+        tempDir.toPath().toUri().toURL().toFile().path shouldBe tempDir.path
+        tempDir.toPath().toUri().toFile().path shouldBe tempDir.path
+        tempDir.toPath().toFile().path shouldBe tempDir.path
+
+        shouldThrow<FileSystemNotFoundException> { URL("https://example.com/path").toFile() }
+        shouldThrow<UnsupportedOperationException> { tempDir.toPath().createJarAndResolve().toUri().toFile() }
+        shouldThrow<UnsupportedOperationException> { tempDir.toPath().createJarAndResolve().toFile() }
+    }
+
 
     @Test fun create_temp_file(@TempDir tempDir: Path) = test {
         tempDir.createTempFile() should {
@@ -702,3 +748,6 @@ public fun Path.symbolicLink(): Path = resolveRandom().apply {
     Files.createSymbolicLink(this, resolveRandom())
     check(exists(NOFOLLOW_LINKS)) { "Failed to create symbolic link $this." }
 }
+
+public fun Path.createJarAndResolve(): Path =
+    createTempJarFile().toNewJarFileSystem().getPath("file")

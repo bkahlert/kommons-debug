@@ -4,6 +4,7 @@ import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.BufferedReader
 import java.io.BufferedWriter
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -54,12 +55,42 @@ import kotlin.io.path.outputStream
 import kotlin.io.path.pathString
 import kotlin.io.path.reader
 import kotlin.io.path.setLastModifiedTime
+import kotlin.io.path.toPath
 import kotlin.io.path.writeBytes
 import kotlin.io.path.writeText
 import kotlin.io.path.writer
 import kotlin.streams.asSequence
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+
+/** Returns this URL as a [Path] or `null` otherwise. */
+public fun URL.toPathOrNull(): Path? = kotlin.runCatching { toPath() }.getOrNull()
+
+/** Returns this URI as a [Path] or `null` otherwise. */
+public fun URI.toPathOrNull(): Path? = kotlin.runCatching { toPath() }.getOrNull()
+
+/** Returns this file as a [Path] or `null` otherwise. */
+public fun File.toPathOrNull(): Path? = kotlin.runCatching { toPath() }.getOrNull()
+
+/** Returns this URL as a [Path] or throws an exception otherwise. */
+public fun URL.toPath(): Path = toURI().toPath()
+
+
+/** Returns this URL as a [File] or `null` otherwise. */
+public fun URL.toFileOrNull(): File? = kotlin.runCatching { toFile() }.getOrNull()
+
+/** Returns this URI as a [File] or `null` otherwise. */
+public fun URI.toFileOrNull(): File? = kotlin.runCatching { toFile() }.getOrNull()
+
+/** Returns this path as a [File] or `null` otherwise. */
+public fun Path.toFileOrNull(): File? = kotlin.runCatching { toFile() }.getOrNull()
+
+/** Returns this URL as a [File] or throws an exception otherwise. */
+public fun URL.toFile(): File = toPath().toFile()
+
+/** Returns this URI as a [File] or throws an exception otherwise. */
+public fun URI.toFile(): File = toPath().toFile()
+
 
 /**
  * Creates an empty file in the directory specified by this path, using

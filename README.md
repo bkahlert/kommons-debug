@@ -148,6 +148,21 @@ foo().properties                  // { bar: "baz" }
 foo(foo()).properties             // { bar: { bar: "baz" } }
 ```
 
+#### URL / URI / Path / File // open / locate \[only JVM\]
+
+Any `URL`, `URI`, `Path` and `File` can be opened locally using `open`.
+
+```kotlin
+URL("file:///home/john/dev/project/src/jvm/kotlin/packages/source.kt").open()
+```
+
+In order to only open the directory containing an above-mentioned resource
+`locate` can be used.
+
+```kotlin
+URL("file:///home/john/dev/project/src/jvm/kotlin/packages/source.kt").locate()
+```
+
 ### Runtime
 
 #### Program
