@@ -87,13 +87,13 @@ class PathsKtTest {
     }
 
     @Test fun create_temp_binary_file(@TempDir tempDir: Path) = test {
-        createTempBinaryFile(bytes) should {
+        createTempBinaryFile(string.encodeToByteArray()) should {
             it.shouldExist()
-            it.readBytes() shouldBe bytes
+            it.readBytes() shouldBe string.encodeToByteArray()
         }
-        tempDir.createTempBinaryFile(bytes) should {
+        tempDir.createTempBinaryFile(string.encodeToByteArray()) should {
             it.shouldExist()
-            it.readBytes() shouldBe bytes
+            it.readBytes() shouldBe string.encodeToByteArray()
         }
     }
 
@@ -105,9 +105,9 @@ class PathsKtTest {
     }
 
     @Test fun create_binary_file(@TempDir tempDir: Path) = test {
-        tempDir.resolve("file").createBinaryFile(bytes) should {
+        tempDir.resolve("file").createBinaryFile(string.encodeToByteArray()) should {
             it.shouldExist()
-            it.readBytes() shouldBe bytes
+            it.readBytes() shouldBe string.encodeToByteArray()
         }
     }
 
