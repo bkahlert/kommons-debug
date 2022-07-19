@@ -390,6 +390,13 @@ class StringsKtTest {
         randomString(100, 'A', 'B').forAll { listOf('A', 'B') shouldContain it }
     }
 
+    @Test fun repeat() = test {
+        shouldThrow<IllegalArgumentException> { char.repeat(-1) }
+        char.repeat(0) shouldBe ""
+        char.repeat(1) shouldBe "c"
+        char.repeat(2) shouldBe "cc"
+        char.repeat(3) shouldBe "ccc"
+    }
 
     @Test fun index_of_or_null() = test {
         charSequence.indexOfOrNull('e') shouldBe 6

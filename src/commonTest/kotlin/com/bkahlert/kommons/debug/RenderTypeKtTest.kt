@@ -274,6 +274,7 @@ internal object CollectionTypes : TypeMap() {
     val iterable: Iterable<Any?> = object : Iterable<Any?> {
         override fun iterator(): Iterator<Any?> = PrimitiveTypes.values.iterator()
     }
+
     val set: Set<Any?> = emptySet()
     val list: List<Any?> = listOf("foo", null)
     val mutableList: MutableList<Any?> = mutableListOf(PrimitiveTypes.values)

@@ -370,6 +370,12 @@ public fun randomString(length: Int = 16, vararg allowedCharacters: Char = (('0'
     buildString(length) { repeat(length) { append(allowedCharacters[Random.nextInt(0, allowedCharacters.size)]) } }
 
 
+// repeat --------------------------------------------------------------------------------------------------------------
+
+/** Returns a string containing this char repeated [n] times. */
+public fun Char.repeat(n: Int): String = toString().repeat(n)
+
+
 // indexOfOrNull -------------------------------------------------------------------------------------------------------
 
 /**
