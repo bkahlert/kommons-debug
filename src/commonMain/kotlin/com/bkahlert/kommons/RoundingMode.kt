@@ -10,9 +10,9 @@ import kotlin.math.roundToLong as kotlinRoundToLong
 public enum class RoundingMode(private val calc: (Double, Double) -> Double) {
 
     /**
-     * Rounding mode to round away from zero.  Always increments the
-     * digit prior to a non-zero discarded fraction.  Note that this
-     * rounding mode never decreases the magnitude of the calculated
+     * Rounding-mode to round away from zero. Always increments the
+     * digit before a non-zero discarded fraction.  Note that this
+     * rounding-mode never decreases the magnitude of the calculated
      * value.
      */
     Up({ passedNumber, roundTo ->
@@ -23,35 +23,36 @@ public enum class RoundingMode(private val calc: (Double, Double) -> Double) {
     }),
 
     /**
-     * Rounding mode to round towards zero.  Never increments the digit
-     * prior to a discarded fraction (i.e., truncates).  Note that this
-     * rounding mode never increases the magnitude of the calculated value.
+     * Rounding-mode to round towards zero.  Never increments the digit
+     * before a discarded fraction (i.e., truncates).  Note that this
+     * rounding-mode never increases the magnitude of the calculated value.
      */
     Down({ passedNumber, roundTo -> if (roundTo == 0.0) passedNumber else (kotlin.math.truncate(passedNumber / roundTo) / (1.0 / roundTo)) }),
 
     /**
-     * Rounding mode to round towards positive infinity.  If the
-     * result is positive, behaves as for [Up];
-     * if negative, behaves as for [Down].  Note
-     * that this rounding mode never decreases the calculated value.
+     * Rounding-mode to round towards positive infinity.  If the
+     * result is positive, behaves as for [Up] and if negative, behaves as for [Down].
+     *
+     * Note that this rounding-mode never decreases the calculated value.
      */
     Ceiling({ passedNumber, roundTo -> if (roundTo == 0.0) passedNumber else (kotlin.math.ceil(passedNumber / roundTo) / (1.0 / roundTo)) }),
 
     /**
-     * Rounding mode to round towards negative infinity.  If the
-     * result is positive, behave as for [Down];
-     * if negative, behave as for [Up].  Note that
-     * this rounding mode never increases the calculated value.
+     * Rounding-mode to round towards negative infinity.  If the
+     * result is positive, behave as for [Down] and if negative, behave as for [Up].
+     *
+     * Note that this rounding-mode never increases the calculated value.
      */
     Floor({ passedNumber, roundTo -> if (roundTo == 0.0) passedNumber else (kotlin.math.floor(passedNumber / roundTo) / (1.0 / roundTo)) }),
 
     /**
-     * Rounding mode to round towards &quot;nearest neighbor&quot;
+     * Rounding-mode to round towards "nearest neighbor"
      * unless both neighbors are equidistant, in which case round up.
      * Behaves as for [Up] if the discarded
-     * fraction is  0.5; otherwise, behaves as for
-     * [Down].  Note that this is the rounding
-     * mode commonly taught at school.
+     * fraction is 0.5 and otherwise, behaves as for
+     * [Down].
+     *
+     * Note that this is the rounding mode commonly taught at school.
      */
     HalfUp({ passedNumber, roundTo ->
         if (roundTo == 0.0) passedNumber else {
@@ -61,7 +62,7 @@ public enum class RoundingMode(private val calc: (Double, Double) -> Double) {
     }),
 
     /**
-     * Rounding mode to round towards &quot;nearest neighbor&quot;
+     * Rounding-mode to round towards "nearest neighbor"
      * unless both neighbors are equidistant, in which case round
      * down.  Behaves as for [Up] if the discarded
      * fraction is &gt; 0.5; otherwise, behaves as for
@@ -75,18 +76,20 @@ public enum class RoundingMode(private val calc: (Double, Double) -> Double) {
     }),
 
     /**
-     * Rounding mode to round towards the &quot;nearest neighbor&quot;
+     * Rounding-mode to round towards the "nearest neighbor"
      * unless both neighbors are equidistant, in which case, round
-     * towards the even neighbor.  Behaves as for
-     * [HalfUp] if the digit to the left of the
-     * discarded fraction is odd; behaves as for
-     * [HalfDown] if it's even.  Note that this
-     * is the rounding mode that statistically minimizes cumulative
-     * error when applied repeatedly over a sequence of calculations.
-     * It is sometimes known as &quot;Banker&#39;s rounding,&quot; and is
-     * chiefly used in the USA.  This rounding mode is analogous to
-     * the rounding policy used for [Float] and [Double]
-     * arithmetic in Java.
+     * towards the even neighbor.
+     *
+     * Behaves as for [HalfUp] if the digit to the left of the
+     * discarded fraction is odd and behaves as for [HalfDown] if it's even.
+     *
+     * Note that this is the rounding-mode that statistically minimizes cumulative
+     * error when applied many times over a sequence of calculations.
+     * It's sometimes known as "Banker's rounding," and is
+     * chiefly used in the United States of America.
+     *
+     * This rounding-mode is analogous to the rounding policy used for [Float]
+     * and [Double] arithmetic in Java.
      */
     HalfEven({ passedNumber, roundTo ->
         if (roundTo == 0.0) passedNumber
@@ -94,8 +97,8 @@ public enum class RoundingMode(private val calc: (Double, Double) -> Double) {
     }),
 
     /**
-     * Rounding mode to assert that the requested operation has an exact
-     * result, hence no rounding is necessary.  If this rounding mode is
+     * Rounding-mode to assert that the requested operation has an exact
+     * result, hence no rounding is necessary.  If this rounding-mode is
      * specified on an operation that yields an inexact result, an
      * [ArithmeticException] is thrown.
      */

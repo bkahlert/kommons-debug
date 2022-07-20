@@ -265,13 +265,13 @@ public fun Path.isSubPathOf(path: Path): Boolean =
 /**
  * Returns this [Path] with all parent directories created.
  *
- * Example: If directory `/some/where` existed and this method was called on `/some/where/resides/a/file`,
+ * Example: if directory `/some/where` existed and this method was called on `/some/where/resides/a/file`,
  * the missing directories `/some/where/resides` and `/some/where/resides/a` would be created.
  */
 public fun Path.createParentDirectories(): Path = apply { parent?.takeUnless { it.exists() }?.createDirectories() }
 
 /**
- * Contains since when this file was last modified.
+ * The duration passed since when this file was last modified.
  */
 public var Path.age: Duration
     get() :Duration = (Timestamp - getLastModifiedTime().toMillis()).milliseconds
@@ -316,10 +316,10 @@ public var Path.lastModified: FileTime
  * Otherwise, this [FileSystem] is used—unless [path] is [absolute][Path.isAbsolute].
  *
  * In other words: [path] is resolved against this path's file system.
- * So the resolved path will reside in this path's file system, too.
+ * So the resolved path resides in this path's file system, too.
  * The only exception is if [path] is absolute. Since
- * an absolute path is already "fully-qualified" it is
- * the resolved result *(and its file system the resulting file system)*.
+ * an absolute path is already "fully qualified" it's
+ * returned as is.
  */
 public fun Path.resolveBetweenFileSystems(path: Path): Path =
     when {
@@ -348,8 +348,8 @@ public tailrec fun Path.resolveRandom(prefix: String = randomString(4), suffix: 
 
 /**
  * Returns a path based on the following rules:
- * - If this path **is no directory** it is returned.
- * - If this path **is a directory** the file name returned by the specified [computeFileName] relative to this directory is returned.
+ * - If this path **is no directory** it's returned.
+ * - If this path **is a directory** the filename returned by the specified [computeFileName] relative to this directory is returned.
  *
  * Use [options] to control how symbolic links are handled.
  */
@@ -358,7 +358,7 @@ public fun Path.resolveFile(vararg options: LinkOption, computeFileName: () -> P
 
 /**
  * Returns a path based on the following rules:
- * - If this path **is no directory** it is returned.
+ * - If this path **is no directory** it's returned.
  * - If this path **is a directory** the specified [fileName] relative to this directory is returned.
  *
  * Use [options] to control how symbolic links are handled.
@@ -368,7 +368,7 @@ public fun Path.resolveFile(fileName: Path, vararg options: LinkOption): Path =
 
 /**
  * Returns a path based on the following rules:
- * - If this path **is no directory** it is returned.
+ * - If this path **is no directory** it's returned.
  * - If this path **is a directory** the specified [fileName] relative to this directory is returned.
  *
  * Use [options] to control how symbolic links are handled.
@@ -401,7 +401,7 @@ private fun Path.streamContentsRecursively(glob: String = "*", vararg options: L
  * @param glob the globbing pattern. The syntax is specified by the [FileSystem.getPathMatcher] method.
  *
  * @throws java.util.regex.PatternSyntaxException if the glob pattern is invalid.
- * @throws NotDirectoryException If this path does not refer to a directory.
+ * @throws NotDirectoryException If this path doesn't refer to a directory.
  * @throws IOException If an I/O error occurs.
  *
  * @see Files.walk
@@ -416,7 +416,7 @@ public fun Path.listDirectoryEntriesRecursively(glob: String = "*", vararg optio
  * @param glob the globbing pattern. The syntax is specified by the [FileSystem.getPathMatcher] method.
  *
  * @throws java.util.regex.PatternSyntaxException if the glob pattern is invalid.
- * @throws NotDirectoryException If this path does not refer to a directory.
+ * @throws NotDirectoryException If this path doesn't refer to a directory.
  * @throws IOException If an I/O error occurs.
  * @return the value returned by [block].
  *
@@ -432,7 +432,7 @@ public fun <T> Path.useDirectoryEntriesRecursively(glob: String = "*", vararg op
  * @param glob the globbing pattern. The syntax is specified by the [FileSystem.getPathMatcher] method.
  *
  * @throws java.util.regex.PatternSyntaxException if the glob pattern is invalid.
- * @throws NotDirectoryException If this path does not refer to a directory.
+ * @throws NotDirectoryException If this path doesn't refer to a directory.
  * @throws IOException If an I/O error occurs.
  *
  * @see Files.walk
@@ -477,7 +477,7 @@ public inline fun Path.copyToDirectory(
 /**
  * Deletes this file or empty directory.
  *
- * Returns the deletes path.
+ * Returns the deleted path.
  */
 public fun Path.delete(vararg options: LinkOption): Path =
     apply { if (exists(*options)) Files.delete(this) }
@@ -485,9 +485,9 @@ public fun Path.delete(vararg options: LinkOption): Path =
 /**
  * Deletes this file or directory recursively.
  *
- * Symbolic links are not followed but deleted themselves.
+ * Symbolic links aren't followed but deleted themselves.
  *
- * Returns the deletes path.
+ * Returns the deleted path.
  */
 public fun Path.deleteRecursively(vararg options: LinkOption, predicate: (Path) -> Boolean = { true }): Path =
     apply {
@@ -571,9 +571,8 @@ private fun startOpenFileSystemsCloseJob() {
  * giving it the [Path] this [URI] points to
  * and returns the result.
  *
- * In contrast to [Paths.get] this function does not
- * only check the default file system but also loads the needed one if necessary
- * (and closes it afterwards).
+ * In contrast to [Paths.get] this function doesn't
+ * only check the default file system but also loads the needed one if necessary—and closes it afterward.
  *
  * @see FileSystems.getDefault
  * @see FileSystems.newFileSystem
@@ -604,9 +603,8 @@ public fun <R> URI.usePath(block: (Path) -> R): R =
  * giving it the [Path] this [URI] points to
  * and returns the result.
  *
- * In contrast to [Paths.get] this function does not
- * only check the default file system but also loads the needed one if necessary
- * (and closes it afterwards).
+ * In contrast to [Paths.get] this function doesn't
+ * only check the default file system but also loads the needed one if necessary—and closes it afterward.
  *
  * @see FileSystems.getDefault
  * @see FileSystems.newFileSystem
@@ -621,11 +619,10 @@ public inline fun <R> URL.usePath(noinline block: (Path) -> R): R =
  * giving it a new [InputStream] of this file
  * and returns the result.
  *
- * The [InputStream] is closed down correctly whether an exception is thrown or not.
+ * The [InputStream] is closed correctly whether an exception is thrown or not.
  *
- * If no [options] are present then it is equivalent to opening the file with
- * the [READ]
- * options.
+ * If no [options] are present then it's equal to open the file with
+ * the [READ] options.
  */
 public inline fun <R> Path.useInputStream(vararg options: OpenOption, block: (InputStream) -> R): R =
     inputStream(*options).use(block)
@@ -635,9 +632,9 @@ public inline fun <R> Path.useInputStream(vararg options: OpenOption, block: (In
  * giving it a new [BufferedInputStream] of this file
  * and returns the result.
  *
- * The [BufferedInputStream] is closed down correctly whether an exception is thrown or not.
+ * The [BufferedInputStream] is closed correctly whether an exception is thrown or not.
  *
- * If no [options] are present then it is equivalent to opening the file with
+ * If no [options] are present then it's equal to open the file with
  * the [READ]
  * options.
  */
@@ -652,9 +649,9 @@ public inline fun <R> Path.useBufferedInputStream(
  * giving it a new [InputStreamReader] of this file
  * and returns the result.
  *
- * The [InputStreamReader] is closed down correctly whether an exception is thrown or not.
+ * The [InputStreamReader] is closed correctly whether an exception is thrown or not.
  *
- * If no [options] are present then it is equivalent to opening the file with
+ * If no [options] are present then it's equal to open the file with
  * the [READ]
  * options.
  */
@@ -669,9 +666,9 @@ public inline fun <R> Path.useReader(
  * giving it a new [BufferedReader] of this file
  * and returns the result.
  *
- * The [BufferedReader] is closed down correctly whether an exception is thrown or not.
+ * The [BufferedReader] is closed correctly whether an exception is thrown or not.
  *
- * If no [options] are present then it is equivalent to opening the file with
+ * If no [options] are present then it's equal to open the file with
  * the [READ]
  * options.
  */
@@ -687,9 +684,9 @@ public inline fun <R> Path.useBufferedReader(
  * giving it a new [OutputStream] of this file
  * and returns the result.
  *
- * The [OutputStream] is closed down correctly whether an exception is thrown or not.
+ * The [OutputStream] is closed correctly whether an exception is thrown or not.
  *
- * If no [options] are present then it is equivalent to opening the file with
+ * If no [options] are present then it's equal to open the file with
  * the [CREATE], [TRUNCATE_EXISTING], and [WRITE]
  * options.
  */
@@ -703,9 +700,9 @@ public inline fun Path.useOutputStream(
  * giving it a new [BufferedOutputStream] of this file
  * and returns the result.
  *
- * The [BufferedOutputStream] is closed down correctly whether an exception is thrown or not.
+ * The [BufferedOutputStream] is closed correctly whether an exception is thrown or not.
  *
- * If no [options] are present then it is equivalent to opening the file with
+ * If no [options] are present then it's equal to open the file with
  * the [CREATE], [TRUNCATE_EXISTING], and [WRITE]
  * options.
  */
@@ -720,9 +717,9 @@ public inline fun Path.useBufferedOutputStream(
  * giving it a new [Writer] of this file
  * and returns the result.
  *
- * The [Writer] is closed down correctly whether an exception is thrown or not.
+ * The [Writer] is closed correctly whether an exception is thrown or not.
  *
- * If no [options] are present then it is equivalent to opening the file with
+ * If no [options] are present then it's equal to open the file with
  * the [CREATE], [TRUNCATE_EXISTING], and [WRITE]
  * options.
  */
@@ -737,9 +734,9 @@ public inline fun Path.useWriter(
  * giving it a new [BufferedWriter] of this file
  * and returns the result.
  *
- * The [BufferedWriter] is closed down correctly whether an exception is thrown or not.
+ * The [BufferedWriter] is closed correctly whether an exception is thrown or not.
  *
- * If no [options] are present then it is equivalent to opening the file with
+ * If no [options] are present then it's equal to open the file with
  * the [CREATE], [TRUNCATE_EXISTING], and [WRITE]
  * options.
  */

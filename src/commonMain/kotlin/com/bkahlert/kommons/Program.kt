@@ -1,15 +1,15 @@
 package com.bkahlert.kommons
 
-/** The currently running program. */
+/** The running program. */
 public expect object Program {
 
-    /** The name of currently running program. */
+    /** The name of running program. */
     public val name: String?
 
-    /** The group name of currently running program. */
+    /** The group name of running program. */
     public val group: String?
 
-    /** The version of the currently running program, or `null` if it cannot be determined. */
+    /** The version of the running program, or `null` if it can't be determined. */
     public val version: SemanticVersion?
 
     /** Whether this program is running in debug mode. */

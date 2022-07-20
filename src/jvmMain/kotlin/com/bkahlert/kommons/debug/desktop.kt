@@ -36,22 +36,22 @@ public fun File.open() {
 }
 
 
-/** Attempts to locally open the directory containing the file this URL points, or the directory itself if it is one. */
+/** Attempts to locally open the directory containing the file this URL points, or the directory itself if it's one. */
 public fun URL.locate() {
     toFileOrNull()?.locate()
 }
 
-/** Attempts to locally open the directory containing the file this URI points, or the directory itself if it is one. */
+/** Attempts to locally open the directory containing the file this URI points, or the directory itself if it's one. */
 public fun URI.locate() {
     toFileOrNull()?.locate()
 }
 
-/** Attempts to locally open the directory containing the file this path points, or the directory itself if it is one. */
+/** Attempts to locally open the directory containing the file this path points, or the directory itself if it's one. */
 public fun Path.locate() {
     toFileOrNull()?.locate()
 }
 
-/** Attempts to locally open the directory containing this file, or the directory itself if it is one. */
+/** Attempts to locally open the directory containing this file, or the directory itself if it's one. */
 public fun File.locate() {
     if (isDirectory) open()
     else parentFile?.open()

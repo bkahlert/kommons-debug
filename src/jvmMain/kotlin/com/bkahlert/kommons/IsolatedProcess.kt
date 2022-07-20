@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 public object IsolatedProcess {
 
     /**
-     * The location of the binary of the currently running Java distribution.
+     * The binary location of the running Java distribution.
      */
     private val JavaBinary: Path by lazy { SystemLocations.JavaHome / "bin" / "java" }
 

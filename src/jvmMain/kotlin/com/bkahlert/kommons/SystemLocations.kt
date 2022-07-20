@@ -24,18 +24,18 @@ public object SystemLocations {
     public val Work: Path by lazy { FileSystems.getDefault().getPath("").toAbsolutePath() }
 
     /**
-     * Home directory of the currently logged-in user.
+     * Home directory of the logged-in user.
      */
     @Suppress("PropertyName")
     public val Home: Path by lazy { Paths.get(System.getProperty("user.home")) }
 
     /**
-     * Directory in which temporary data can be stored.
+     * Directory, in which temporary data can be stored.
      */
     @Suppress("PropertyName")
     public val Temp: Path by lazy { Paths.get(System.getProperty("java.io.tmpdir")) }
 
-    /** Directory of the currently running Java distribution. */
+    /** Directory of the running Java distribution. */
     @Suppress("PropertyName")
     public val JavaHome: Path by lazy { Paths.get(System.getProperty("java.home")) }
 }
@@ -58,7 +58,7 @@ public fun <T> withTempDirectory(prefix: String = "", block: Path.() -> T): T =
 public fun requireTempSubPath(path: Path): Path =
     path.apply {
         require(fileSystem != FileSystems.getDefault() || isSubPathOf(SystemLocations.Temp)) {
-            "${normalize().toAbsolutePath()} is not inside ${SystemLocations.Temp}."
+            "${normalize().toAbsolutePath()} isn't inside ${SystemLocations.Temp}."
         }
     }
 
@@ -70,8 +70,8 @@ private val cleanUpLock = ReentrantLock()
  * deleting files older than the specified [keepAge] and stopping when [keepCount] files
  * are left.
  *
- * Because this process affects a potentially huge number of files,
- * this directory is required to be located somewhere inside of [SystemLocations.Temp]
+ * Because this process might affect a huge number of files,
+ * this directory needs to be somewhere inside of [SystemLocations.Temp]
  * if not explicitly specified otherwise.
  */
 public fun Path.cleanUp(keepAge: Duration, keepCount: Int, enforceTempContainment: Boolean = true): Path {

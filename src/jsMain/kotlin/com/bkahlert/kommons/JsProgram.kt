@@ -2,16 +2,16 @@ package com.bkahlert.kommons
 
 import kotlinx.browser.window
 
-/** The currently running program. */
+/** The running program. */
 public actual object Program {
 
-    /** The name of currently running program. */
+    /** The name of running program. */
     public actual val name: String? = null
 
-    /** The group name of currently running program. */
+    /** The group name of running program. */
     public actual val group: String? = null
 
-    /** The version of the currently running program, or `null` if it cannot be determined. */
+    /** The version of the running program, or `null` if it can't be determined. */
     public actual val version: SemanticVersion? = null
 
     /** Whether this program is running in debug mode. */

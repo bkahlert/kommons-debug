@@ -341,9 +341,9 @@ class PathsKtTest {
         }
         // absolute other path
         tempDir.createTempJarFileSystem().use { jarFileSystem ->
-            val receiverFilePath_: Path = tempDir.createTempDirectory().createTempFile()
+            val receiverFilePath: Path = tempDir.createTempDirectory().createTempFile()
             val absoluteJarPath: Path = jarFileSystem.rootDirectories.first()
-            receiverFilePath_.resolveBetweenFileSystems(absoluteJarPath)
+            receiverFilePath.resolveBetweenFileSystems(absoluteJarPath)
                 .shouldBe(absoluteJarPath)
         }
         // absolute other path
@@ -744,10 +744,10 @@ class DeleteOnExecTestHelper {
     }
 }
 
-public fun Path.symbolicLink(): Path = resolveRandom().apply {
+fun Path.symbolicLink(): Path = resolveRandom().apply {
     Files.createSymbolicLink(this, resolveRandom())
     check(exists(NOFOLLOW_LINKS)) { "Failed to create symbolic link $this." }
 }
 
-public fun Path.createJarAndResolve(): Path =
+fun Path.createJarAndResolve(): Path =
     createTempJarFile().toNewJarFileSystem().getPath("file")

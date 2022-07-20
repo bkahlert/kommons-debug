@@ -9,7 +9,10 @@ import kotlin.jvm.JvmInline
  * @see <a href="https://unicode.org/reports/tr29/#Grapheme_Cluster_Boundary_Rules">Grapheme Cluster Boundary Rules</a>
  */
 @JvmInline
-public value class Grapheme(public val string: String) {
+public value class Grapheme(
+    /** The string this grapheme consists of. */
+    public val string: String,
+) {
     /** The [CodePoint] instances this grapheme consists of. */
     public val codePoints: List<CodePoint> get() = string.toCodePointList()
     override fun toString(): String = string

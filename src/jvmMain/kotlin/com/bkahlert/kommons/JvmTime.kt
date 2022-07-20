@@ -18,7 +18,7 @@ import kotlin.time.toJavaDuration
 /** An instantaneous point on the time-line. */
 public actual typealias Instant = java.time.Instant
 
-/** A date without a time-zone in the ISO-8601 calendar system, such as 2007-12-03. */
+/** A date without a time-zone in the [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) calendar system, such as 2007-12-03. */
 public actual typealias LocalDate = java.time.LocalDate
 
 

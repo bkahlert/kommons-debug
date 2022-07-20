@@ -8,7 +8,7 @@ package com.bkahlert.kommons.debug
 public external object Object {
     /**
      * Returns the own enumerable property names of the specified [obj] as an array,
-     * iterated in the same order that a normal loop would.
+     * iterated in the same order that a usual loop would.
      */
     public fun keys(obj: Any): Array<String>
 
@@ -18,7 +18,7 @@ public external object Object {
     public fun entries(obj: Any): Array<Array<Any?>>
 
     /**
-     * Returns all properties (including non-enumerable properties except for those which use Symbol) found directly in
+     * Returns all properties, including non-enumerable properties except for those which use Symbol, found directly in
      * the specified [obj] as an array.
      */
     public fun getOwnPropertyNames(obj: Any): Array<String>
@@ -26,7 +26,7 @@ public external object Object {
 
 /**
  * Returns the own enumerable property names of this object as an array,
- * iterated in the same order that a normal loop would.
+ * iterated in the same order that a usual loop would.
  */
 public val Any.keys: Array<String> get() = Object.keys(this)
 

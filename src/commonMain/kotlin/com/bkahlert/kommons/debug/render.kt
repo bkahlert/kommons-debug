@@ -13,7 +13,7 @@ import com.bkahlert.kommons.debug.Typing.Untyped
 import com.bkahlert.kommons.quoted
 import com.bkahlert.kommons.toHexadecimalString
 
-/** Renders this object using the optionally specified [settings]. */
+/** Renders this object using [settings]. */
 public fun Any?.render(settings: RenderingSettings = RenderingSettings.Default): String =
     buildString { RenderingContext(settings).renderTo(this, this@render) }
 
@@ -92,7 +92,7 @@ public sealed class Compression {
     /** Never compress output */
     public object Never : Compression()
 
-    /** Compress output if the output does not exceed the specified [maxLength] (default: 60). */
+    /** Compress output if the output doesn't exceed the specified [maxLength] (default: 60). */
     public class Auto(
         /** The maximum length compressed output is allowed to have. */
         public val maxLength: Int = 60
@@ -389,15 +389,7 @@ internal fun RenderingContext.renderObjectTo(out: StringBuilder, obj: Any) {
 
 private fun RenderingContext.renderCompressedObjectTo(out: StringBuilder, obj: Any) {
     out.append("{")
-    val entries = (if (obj is Map<*, *>) obj.entries else obj.properties.entries)
-        .map { (key, value) ->
-            val renderedKey =
-                if (key is CharSequence) key.quoted.removeSurrounding("\"")
-                else render({ compression = Always }) { renderTo(it, key) }
-            renderedKey to value
-        }
-        .filter { (key, _) -> filterProperties(obj, key) }
-        .filter { (_, value) -> filterProperties(value, null) }
+    val entries = stringKeyedEntries(obj)
     if (entries.isNotEmpty()) out.append(" ")
     entries.forEachIndexed { index, (key, value) ->
         if (index > 0) out.append(", ")
@@ -415,15 +407,7 @@ private fun RenderingContext.renderCompressedObjectTo(out: StringBuilder, obj: A
 private fun RenderingContext.renderNonCompressedObjectTo(out: StringBuilder, obj: Any) {
     val keyIndent = "    "
     out.append("{")
-    val entries = (if (obj is Map<*, *>) obj.entries else obj.properties.entries)
-        .map { (key, value) ->
-            val renderedKey =
-                if (key is CharSequence) key.quoted.removeSurrounding("\"")
-                else render({ compression = Always }) { renderTo(it, key) }
-            renderedKey to value
-        }
-        .filter { (key, _) -> filterProperties(obj, key) }
-        .filter { (_, value) -> filterProperties(value, null) }
+    val entries = stringKeyedEntries(obj)
     if (entries.isNotEmpty()) out.append("\n")
     entries.forEachIndexed { index, (key, value) ->
         if (index > 0) out.append(",\n")
@@ -439,3 +423,14 @@ private fun RenderingContext.renderNonCompressedObjectTo(out: StringBuilder, obj
     if (entries.isNotEmpty()) out.append("\n")
     out.append("}")
 }
+
+private fun RenderingContext.stringKeyedEntries(obj: Any) =
+    (if (obj is Map<*, *>) obj.entries else obj.properties.entries)
+        .map { (key, value) ->
+            val renderedKey =
+                if (key is CharSequence) key.quoted.removeSurrounding("\"")
+                else render({ compression = Always }) { renderTo(it, key) }
+            renderedKey to value
+        }
+        .filter { (key, _) -> filterProperties(obj, key) }
+        .filter { (_, value) -> filterProperties(value, null) }

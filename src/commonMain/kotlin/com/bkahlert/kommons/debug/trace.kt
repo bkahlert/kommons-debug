@@ -6,11 +6,11 @@ import com.bkahlert.kommons.Platform
 import com.bkahlert.kommons.Platform.JVM
 import com.bkahlert.kommons.debug.Typing.SimplyTyped
 
-/** Function that renders any object. */
+/** A function that renders any object. */
 public typealias Renderer = (Any?) -> String
-/** Function that outputs any string. */
+/** A function that outputs any string. */
 public typealias Printer = (String) -> Unit
-/** Function that transform an instance of type `T` for further inspection. */
+/** A function that transforms an instance of type `T` for further inspection. */
 public typealias Inspector<T> = (T) -> Any?
 
 /**
@@ -32,7 +32,7 @@ public typealias Inspector<T> = (T) -> Any?
  * chain().of.endless()
  * ```
  *
- * will be printed.
+ * is printed.
  */
 @Suppress("GrazieInspection", "DEPRECATION", "unused")
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
@@ -57,7 +57,7 @@ public val <T> T.trace: T get(): T = trace()
  * chain().of.endless()
  * ```
  *
- * will be printed.
+ * is printed.
  */
 @Suppress("GrazieInspection", "DEPRECATION", "unused")
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))

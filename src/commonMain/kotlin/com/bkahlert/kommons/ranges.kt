@@ -38,7 +38,7 @@ public sealed class ValueRange<T : Comparable<T>>(
 /**
  * Returns this value with the specified [sourceRange] (default: `0.0..1.0`) mapped to the specified [destinationRange].
  *
- * @throws IllegalArgumentException if this value is not in the specified [sourceRange]
+ * @throws IllegalArgumentException if this value isn't in the specified [sourceRange]
  */
 @Suppress("NOTHING_TO_INLINE")
 public inline fun Double.map(
@@ -56,7 +56,7 @@ public inline fun Double.map(
  * mapped to the [ClosedRange] starting with the specified [destinationRangeStart] (default: `0.0`) and ending with the
  * specified [destinationRangeEndInclusive].
  *
- * @throws IllegalArgumentException if this value is not in the [ClosedRange]
+ * @throws IllegalArgumentException if this value isn't in the [ClosedRange]
  * starting with the specified [sourceRangeStart] and
  * ending with the specified [sourceRangeEndInclusive]
  */
@@ -71,7 +71,7 @@ public inline fun Double.map(
 /**
  * Returns this value with the specified [sourceRange] (default: `0.0..1.0`) mapped to the specified [destinationRange].
  *
- * @throws IllegalArgumentException if this value is not in the specified [sourceRange]
+ * @throws IllegalArgumentException if this value isn't in the specified [sourceRange]
  */
 @Suppress("NOTHING_TO_INLINE")
 public inline fun Double.map(
@@ -84,7 +84,7 @@ public inline fun Double.map(
  * mapped to the [ClosedRange] starting with the specified [destinationRangeStart] (default: `0.0`) and ending with the
  * specified [destinationRangeEndInclusive].
  *
- * @throws IllegalArgumentException if this value is not in the [ClosedRange]
+ * @throws IllegalArgumentException if this value isn't in the [ClosedRange]
  * starting with the specified [sourceRangeStart] and
  * ending with the specified [sourceRangeEndInclusive]
  */
@@ -100,7 +100,7 @@ public inline fun Double.map(
  * Returns this value with the specified [sourceRange]
  * mapped to the [ClosedRange] `0.0..1.0`.
  *
- * @throws IllegalArgumentException if this value is not in the specified [sourceRange]
+ * @throws IllegalArgumentException if this value isn't in the specified [sourceRange]
  */
 @Suppress("NOTHING_TO_INLINE")
 public inline fun Double.normalize(
@@ -111,7 +111,7 @@ public inline fun Double.normalize(
  * Returns this value with the specified [sourceRangeStart] (default: `0.0`) and [sourceRangeEndInclusive]
  * mapped to the [ClosedRange] `0.0..1.0`.
  *
- * @throws IllegalArgumentException if this value is not in the [ClosedRange]
+ * @throws IllegalArgumentException if this value isn't in the [ClosedRange]
  * starting with the specified [sourceRangeStart] and
  * ending with the specified [sourceRangeEndInclusive]
  */
@@ -125,7 +125,7 @@ public inline fun Double.normalize(
  * Returns this value with the specified [sourceRange]
  * mapped to the [ClosedRange] `0.0..1.0`.
  *
- * @throws IllegalArgumentException if this value is not in the specified [sourceRange]
+ * @throws IllegalArgumentException if this value isn't in the specified [sourceRange]
  */
 @Suppress("NOTHING_TO_INLINE")
 public inline fun Int.normalize(
@@ -141,7 +141,7 @@ public inline fun Int.normalize(
  * Returns this value with the specified [sourceRangeStart] (default: `0.0`) and [sourceRangeEndInclusive]
  * mapped to the [ClosedRange] `0.0..1.0`.
  *
- * @throws IllegalArgumentException if this value is not in the [ClosedRange]
+ * @throws IllegalArgumentException if this value isn't in the [ClosedRange]
  * starting with the specified [sourceRangeStart] and
  * ending with the specified [sourceRangeEndInclusive]
  */
@@ -158,10 +158,10 @@ public inline fun Int.normalize(
 
 /**
  * Returns this value with the specified [sourceRange] (default: `0.0..1.0`)
- * closer to its maximum value (for [amount] in range `(0.0..1.0]`)
- * respective closer to its minimum value (for [amount] in range `[-1.0..0.0)`).
+ * closer to its maximum value for [amount] in range `(0.0..1.0]`
+ * respective closer to its minimum value for [amount] in range `[-1.0..0.0)`.
  *
- * @throws IllegalArgumentException if this value is not in the specified [sourceRange] or [amount] is not in `[-1.0..+1.0]`
+ * @throws IllegalArgumentException if this value isn't in the specified [sourceRange] or [amount] isn't in `[-1.0..+1.0]`
  */
 @Suppress("NOTHING_TO_INLINE")
 public inline fun Double.scale(
@@ -176,12 +176,12 @@ public inline fun Double.scale(
 /**
  * Returns this value with the specified [sourceRangeStart] (default: `0.0`)
  * and [sourceRangeEndInclusive] (default: `1.0`)
- * closer to its maximum value [sourceRangeEndInclusive] (for [amount] in range `(0.0..1.0]`)
- * respective closer to its minimum value [sourceRangeStart] (for [amount] in range `[-1.0..0.0)`).
+ * closer to its maximum value [sourceRangeEndInclusive] for [amount] in range `(0.0..1.0]`
+ * respective closer to its minimum value [sourceRangeStart] for [amount] in range `[-1.0..0.0)`.
  *
- * @throws IllegalArgumentException if this value is not in the [ClosedRange]
+ * @throws IllegalArgumentException if this value isn't in the [ClosedRange]
  * starting with the specified [sourceRangeStart] and
- * ending with the specified [sourceRangeEndInclusive] or [amount] is not in `[-1.0..+1.0]`
+ * ending with the specified [sourceRangeEndInclusive] or [amount] isn't in `[-1.0..+1.0]`
  */
 @Suppress("NOTHING_TO_INLINE")
 public inline fun Double.scale(

@@ -21,7 +21,7 @@ public sealed interface Creator<T> {
      * Factory that can create a [T] object of a [P1] object.
      *
      * *Intended to be implemented by delegation by a companion object
-     * using [creator] in order to provide
+     * using [creator] to offer
      * a [of] factory method and
      * a [ofOrNull] factory method.*
      *
@@ -39,7 +39,7 @@ public sealed interface Creator<T> {
      * Factory that can create a [T] object of a [P1] and a [P2] object.
      *
      * *Intended to be implemented by delegation by a companion object
-     * using [creator] in order to provide
+     * using [creator] to offer
      * a [of] factory method and
      * a [ofOrNull] factory method.*
      *
@@ -57,7 +57,7 @@ public sealed interface Creator<T> {
      * Factory that can create a [T] object of a [P1], a [P2] and a [P3] object.
      *
      * *Intended to be implemented by delegation by a companion object
-     * using [creator] in order to provide
+     * using [creator] to offer
      * a [of] factory method and
      * a [ofOrNull] factory method.*
      *
@@ -136,7 +136,7 @@ public sealed interface Converter<T> {
      * Factory that can convert a [P1] object to a [T] object.
      *
      * *Intended to be implemented by delegation by a companion object
-     * using [converter] in order to provide
+     * using [converter] to offer
      * a [from] factory method and
      * a [fromOrNull] factory method.*
      *
@@ -154,7 +154,7 @@ public sealed interface Converter<T> {
      * Factory that can convert a [P1] and a [P2] object to a [T] object.
      *
      * *Intended to be implemented by delegation by a companion object
-     * using [converter] in order to provide
+     * using [converter] to offer
      * a [from] factory method and
      * a [fromOrNull] factory method.*
      *
@@ -172,7 +172,7 @@ public sealed interface Converter<T> {
      * Factory that can convert a [P1], a [P2], and a [P3] object to a [T] object.
      *
      * *Intended to be implemented by delegation by a companion object
-     * using [converter] in order to provide
+     * using [converter] to offer
      * a [from] factory method and
      * a [fromOrNull] factory method.*
      *
@@ -246,7 +246,7 @@ public sealed interface Converter<T> {
  * Parser than can parse a string into a [T] object.
  *
  * *Intended to be implemented by delegation by a companion object
- * using [parser] in order to provide
+ * using [parser] to offer
  * a [parse] factory method and
  * a [parseOrNull] factory method.*
  *

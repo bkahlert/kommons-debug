@@ -14,7 +14,7 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
 import kotlin.concurrent.withLock
 
-/** The currently running program. */
+/** The running program. */
 public actual object Program {
 
     private val buildProperties: Properties by lazy {
@@ -22,15 +22,15 @@ public actual object Program {
             .getOrElse { Properties() }
     }
 
-    /** The name of currently running program. */
+    /** The name of running program. */
     public actual val name: String? = buildProperties["name"]
         ?.toString()?.takeUnless { it.startsWith('$') }
 
-    /** The group name of currently running program. */
+    /** The group name of running program. */
     public actual val group: String? = buildProperties["group"]
         ?.toString()?.takeUnless { it.startsWith('$') }
 
-    /** The version of the currently running program, or `null` if it cannot be determined. */
+    /** The version of the running program, or `null` if it can't be determined. */
     public actual val version: SemanticVersion? = buildProperties["version"]
         ?.toString()
         ?.takeUnless { it.startsWith('$') }
@@ -38,7 +38,7 @@ public actual object Program {
 
 
     /**
-     * Contains the context ClassLoader for the current [Thread].
+     * The context ClassLoader for the current [Thread].
      *
      * The context [ClassLoader] is provided by the creator of the [Thread] for use
      * by code running in this thread when loading classes and resources.
@@ -63,7 +63,7 @@ public actual object Program {
     private val intellijTraits: List<String>
         get() = listOf("jetbrains", "intellij", "idea", "idea_rt.jar")
 
-    /** Whether this program is started by IDEA Intellij. */
+    /** Whether this program is started by [IDEA IntelliJ](https://www.jetbrains.com/lp/intellij-frameworks/). */
     public val isIntelliJ: Boolean
         get() = runCatching { jvmJavaAgents.any { it.containsAny(intellijTraits, ignoreCase = true) } }.getOrElse { false }
 

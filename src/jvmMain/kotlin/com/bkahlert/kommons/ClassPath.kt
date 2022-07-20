@@ -41,7 +41,7 @@ public fun ClassPath(resource: String): Path {
 /** Returns a [Path] that points to the specified [resource]. */
 @Suppress("FunctionName")
 public fun ClassPath(resource: URL): Path =
-    DelegatingPath(resource.also { require(it.openStream().use { it.available() > 0 }) { "$resource is unavailable" } })
+    DelegatingPath(resource.also { require(it.openStream().use { inputStream -> inputStream.available() > 0 }) { "$resource is unavailable" } })
 
 /** Returns a [Path] that points to the specified [resource]. */
 @Suppress("FunctionName")

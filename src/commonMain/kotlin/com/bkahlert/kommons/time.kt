@@ -13,7 +13,7 @@ import kotlin.time.DurationUnit.SECONDS
 /** An instantaneous point on the time-line. */
 public expect class Instant
 
-/** A date without a time-zone in the ISO-8601 calendar system, such as 2007-12-03. */
+/** A date without a time-zone in the [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) calendar system, such as 2007-12-03. */
 public expect class LocalDate
 
 
@@ -77,9 +77,9 @@ private fun Duration.describeMoment(moment: String, descriptive: Boolean): Strin
 
 /**
  * Attempts to describe this duration like a human being would do,
- * e.g. "5m ago" instead of "367.232723s".
+ * for example "5m ago" instead of "367.232723s".
  *
- * Set [descriptive] to `false` to disable the use of "ago" and "in".
+ * Set [descriptive] to `false` to turn off the use of "ago" and "in".
  */
 public fun Duration.toMomentString(descriptive: Boolean = true): String {
     val abs = absoluteValue
@@ -108,17 +108,17 @@ public fun Duration.toMomentString(descriptive: Boolean = true): String {
 
 /**
  * Attempts to describe this date like a human being would do,
- * e.g. "28 days ago" instead of "2021-22-23T24-25-26Z".
+ * for example "28 days ago" instead of "2021-22-23T24-25-26Z".
  *
- * Set [descriptive] to `false` to disable the use of "ago" and "in".
+ * Set [descriptive] to `false` to turn off the use of "ago" and "in".
  */
 public fun Instant.toMomentString(descriptive: Boolean = true): String = (this - Now).toMomentString(descriptive)
 
 /**
  * Attempts to describe this date like a human being would do,
- * e.g. "28 days ago" instead of "2021-22-23".
+ * for example "28 days ago" instead of "2021-22-23".
  *
- * Set [descriptive] to `false` to disable the use of "ago" and "in".
+ * Set [descriptive] to `false` to turn off the use of "ago" and "in".
  */
 public fun LocalDate.toMomentString(descriptive: Boolean = true): String =
     when ((this - Today).inWholeDays) {

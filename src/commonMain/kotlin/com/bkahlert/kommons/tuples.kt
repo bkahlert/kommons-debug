@@ -2,18 +2,27 @@ package com.bkahlert.kommons
 
 /** Represents a quartet of values. */
 public data class Quadruple<out A, out B, out C, out D>(
+    /** The first value. */
     public val first: A,
+    /** The second value. */
     public val second: B,
+    /** The third value. */
     public val third: C,
+    /** The fourth value. */
     public val fourth: D,
 )
 
 /** Represents a quintet of values. */
 public data class Quintuple<out A, out B, out C, out D, out E>(
+    /** The first value. */
     public val first: A,
+    /** The second value. */
     public val second: B,
+    /** The third value. */
     public val third: C,
+    /** The fourth value. */
     public val fourth: D,
+    /** The fifth value. */
     public val fifth: E,
 )
 

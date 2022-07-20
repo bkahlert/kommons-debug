@@ -6,11 +6,11 @@ package com.bkahlert.kommons
  * letters `a` to `z`, `A` to `Z` and the digits `0` to `9`.
  *
  * In contrast to [randomString] the returned identifier
- * will resemble the string it is derived from at much as possible.
+ * resembles the string derived from at much as possible.
  *
- * The resulting string will:
- * - have at least [minLength] characters
- * - all possibly invalid characters replaced
+ * The resulting string:
+ * - has at least [minLength] characters
+ * - has problematic characters replaced
  * - start with a letter
  * - always be the same for the same input
  */

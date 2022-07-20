@@ -7,15 +7,15 @@ import com.bkahlert.kommons.Parser.Companion.parser
  * @see <a href="https://semver.org">Semantic Versioning 2.0.0</a>
  */
 public data class SemanticVersion(
-    /** The major version; to be increased when making incompatible API changes. */
+    /** The major version which increases when making incompatible API changes. */
     val major: Int,
-    /** The minor version; to be increased when adding functionality in a backwards compatible manner. */
+    /** The minor version which increases when adding features in a backward compatible manner. */
     val minor: Int,
-    /** The patch version; to be increased when making backwards compatible bug fixes. */
+    /** The patch version which increases when making backwards compatible bug fixes. */
     val patch: Int,
-    /** Optional pre-release tag (not including the dash `-`); marks a version a release candidate. */
+    /** Optional pre-release tag, not including the dash `-`, marking a version a release candidate. */
     val preRelease: String? = null,
-    /** Optional build number (not including the plus `+`); used to identify a specific build. */
+    /** Optional build number, not including the plus `+`, identifying a specific build. */
     val build: String? = null,
 ) {
 
@@ -37,8 +37,8 @@ public data class SemanticVersion(
             }
         }
 
-    public companion object : Parser<SemanticVersion> by (parser {
-        regex.matchEntire(it)?.run {
+    public companion object : Parser<SemanticVersion> by (parser { string ->
+        regex.matchEntire(string)?.run {
             SemanticVersion(
                 major = groupValues[1].toInt(),
                 minor = groupValues[2].toInt(),

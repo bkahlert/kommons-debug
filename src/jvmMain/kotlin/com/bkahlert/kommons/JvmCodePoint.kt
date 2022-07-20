@@ -3,9 +3,7 @@ package com.bkahlert.kommons
 import com.ibm.icu.lang.UCharacter
 import kotlin.text.codePointCount as kotlinCodePointCount
 
-/**
- * Contains the character pointed to and represented by a [String].
- */
+/** The character pointed to and represented by a [String]. */
 public actual val CodePoint.string: String
     get() = buildString { appendCodePoint(index) }
 

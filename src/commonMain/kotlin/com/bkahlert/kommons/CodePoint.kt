@@ -48,17 +48,17 @@ public value class CodePoint(
     /** Whether this code point is one of the 10 digits `0`-`9`. */
     public val is0to9: Boolean get() = index in 0x30..0x39
 
-    /** Whether this code point is one of the 26 upper case characters `A`-`Z`. */
+    /** Whether this code point is one of the 26 uppercase characters `A`-`Z`. */
     public val isAtoZ: Boolean get() = index in 0x41..0x5a
 
-    /** Whether this code point is one of the 26 lower case characters `a`-`z`. */
+    /** Whether this code point is one of the 26 lowercase characters `a`-`z`. */
     @Suppress("SpellCheckingInspection")
     public val isatoz: Boolean get() = index in 0x61..0x7a
 
     /**
      * Whether this code point is one of
-     * the 26 upper case characters `A`-`Z` or
-     * the 26 lower case characters `a`-`z`.
+     * the 26 uppercase characters `A`-`Z` or
+     * the 26 lowercase characters `a`-`z`.
      */
     @Suppress("SpellCheckingInspection")
     public val isAtoz: Boolean get() = isAtoZ || isatoz
@@ -71,7 +71,7 @@ public value class CodePoint(
 
     /**
      * Whether this code point is alphanumeric, that is,
-     * if it is a [Unicode Letter](https://www.unicode.org/glossary/#letter) or
+     * if it's a [Unicode Letter](https://www.unicode.org/glossary/#letter) or
      * a [Unicode Digit](http://www.unicode.org/glossary/#digits).
      */
     public val isAlphanumeric: Boolean get() = Regex("[\\p{L} \\p{Nd}]").matches(string)
@@ -88,7 +88,7 @@ public value class CodePoint(
     }
 }
 
-/** Contains the character pointed to and represented by a [String]. */
+/** The character pointed to and represented by a [String]. */
 public expect val CodePoint.string: String
 
 /** Returns the Unicode code point with the same value. */
@@ -97,7 +97,7 @@ public inline val Char.codePoint: CodePoint get() = CodePoint(code)
 /** Returns the Unicode code point with the same value. */
 public fun Byte.asCodePoint(): CodePoint = CodePoint(toInt() and 0xFF)
 
-/** Returns the Unicode code point with the same value, or throws an [IllegalArgumentException] otherwise. */
+/** Returns the Unicode code point with the same value or throws an [IllegalArgumentException] otherwise. */
 public fun String.asCodePoint(): CodePoint = asCodePointOrNull() ?: throw IllegalArgumentException("invalid code point: $this")
 
 /** Returns the Unicode code point with the same value, or `null` otherwise. */

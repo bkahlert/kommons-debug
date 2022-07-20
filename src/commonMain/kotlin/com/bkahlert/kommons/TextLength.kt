@@ -2,7 +2,7 @@ package com.bkahlert.kommons
 
 import kotlin.math.roundToInt
 
-/** A unit of which text consists of. */
+/** A unit of which texts consists of. */
 public typealias TextUnit = CharSequence
 
 /** The list of possible text length measurement units, in which a text length can be expressed. */
@@ -117,7 +117,7 @@ public data class TextLength(
     /**
      * Returns a text length whose value is this text length value multiplied by the given [scale] number.
      *
-     * The operation may involve rounding when the result cannot be represented exactly with a [Double] number.
+     * The operation may involve rounding when the result can't be represented exactly with a [Double] number.
      */
     public operator fun times(scale: Double): TextLength {
         val intScale = scale.roundToInt()
@@ -133,10 +133,10 @@ public data class TextLength(
      * Returns a text length whose value is this text length value divided by the given [scale] number.
      *
      * @throws IllegalArgumentException if the operation results in an undefined value for the given arguments,
-     * e.g. when dividing zero text length by zero.
+     * for example, when dividing text length by zero.
      */
     public operator fun div(scale: Int): TextLength {
-        if (scale == 0) throw IllegalArgumentException("Dividing zero text length by zero yields an undefined result.")
+        if (scale == 0) throw IllegalArgumentException("Dividing text length by zero yields an undefined result.")
         return TextLength(value / scale, unit)
     }
 
@@ -144,7 +144,7 @@ public data class TextLength(
      * Returns a text length whose value is this text length value divided by the given [scale] number.
      *
      * @throws IllegalArgumentException if the operation results in an undefined value for the given arguments,
-     * e.g. when dividing an infinite text length by infinity or zero text length by zero.
+     * for example, when dividing an infinite text length by infinity or text length by zero.
      */
     public operator fun div(scale: Double): TextLength {
         val intScale = scale.roundToInt()
@@ -176,6 +176,6 @@ public data class TextLength(
 public fun Int.toTextLength(unit: TextLengthUnit): TextLength =
     TextLength(this, unit)
 
-/** Returns the [TextLength] of the specified range of this string. */
+/** Returns the [TextLength] of the specified range. */
 public fun String.length(unit: TextLengthUnit, startIndex: Int = 0, endIndex: Int = length): TextLength =
     TextLength(unit.length(this, startIndex, endIndex), unit)

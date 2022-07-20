@@ -9,7 +9,7 @@ import kotlin.reflect.jvm.javaField
 import kotlin.reflect.jvm.javaGetter
 
 /**
- * Contains a [Map] of this object's properties with each [Map.Entry.key] representing
+ * A [Map] of this object's properties with each [Map.Entry.key] representing
  * a property name and [Map.Entry.value] the corresponding value.
  */
 public actual val Any.properties: Map<String, Any?>

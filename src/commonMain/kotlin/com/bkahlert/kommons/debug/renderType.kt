@@ -6,7 +6,7 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty
 
 /**
- * Renders the (simplified) type of this object.
+ * Renders the [simplified] type of this object.
  *
  * Example:
  * ```kotlin
@@ -17,7 +17,7 @@ import kotlin.reflect.KProperty
 public fun Any.renderType(simplified: Boolean = true): String = buildString { this@renderType.renderTypeTo(this, simplified) }
 
 /**
- * Renders the (simplified) type of this object to the specified [out].
+ * Renders the [simplified] type of this object to the specified [out].
  * @see renderType
  */
 public fun Any.renderTypeTo(out: StringBuilder, simplified: Boolean = true) {

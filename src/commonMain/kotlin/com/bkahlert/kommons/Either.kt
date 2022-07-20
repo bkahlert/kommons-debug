@@ -81,7 +81,7 @@ public inline infix fun <R, A, B : R> Either<A, B>.getRightOrElse(onLeft: (A) ->
 
 /**
  * Returns the encapsulated [Left.value] value if this instance represents [Left] or the
- * [defaultValue] if it is [Right].
+ * [defaultValue] if it's [Right].
  *
  * This function is a shorthand for `getLeftOrElse { defaultValue }` (see [getLeftOrElse]).
  */
@@ -93,7 +93,7 @@ public inline infix fun <R, A : R> Either<A, *>.getLeftOrDefault(defaultValue: R
 
 /**
  * Returns the encapsulated [Right.value] value if this instance represents [Right] or the
- * [defaultValue] if it is [Left].
+ * [defaultValue] if it's [Left].
  *
  * This function is a shorthand for `getRightOrElse { defaultValue }` (see [getRightOrElse]).
  */
@@ -105,7 +105,7 @@ public inline infix fun <R, B : R> Either<*, B>.getRightOrDefault(defaultValue: 
 
 /**
  * Returns the encapsulated [Left.value] value if this instance represents [Left] or
- * `null` if it is [Right].
+ * `null` if it's [Right].
  *
  * This function is a shorthand for `getLeftOrElse { null }` (see [getLeftOrElse]).
  */
@@ -117,7 +117,7 @@ public inline fun <R, A : R> Either<A, *>.getLeftOrNull(): R? = when (this) {
 
 /**
  * Returns the encapsulated [Right.value] value if this instance represents [Right] or
- * `null`  if it is [Left].
+ * `null` if it's [Left].
  *
  * This function is a shorthand for `getRightOrElse { null }` (see [getRightOrElse]).
  */
@@ -149,7 +149,7 @@ public inline fun <A, B, R> Either<A, B>.fold(
 /**
  * Returns the encapsulated result of the given [transform] function applied to the encapsulated value
  * if this instance represents [Left] or the
- * original encapsulated [Right] value if it is [Right].
+ * original encapsulated [Right] value if it's [Right].
  */
 @Suppress("NOTHING_TO_INLINE")
 public inline infix fun <R, A, B> Either<A, B>.mapLeft(transform: (A) -> R): Either<R, B> {
@@ -165,9 +165,9 @@ public inline infix fun <R, A, B> Either<A, B>.mapLeft(transform: (A) -> R): Eit
 /**
  * Returns the encapsulated result of the given [transform] function applied to the encapsulated value
  * if this instance represents [Right] or the
- * original encapsulated [Left] value if it is [Left].
+ * original encapsulated [Left] value if it's [Left].
  */
-@Suppress("toNLINE")
+@Suppress("NOTHING_TO_INLINE")
 public inline infix fun <R, A, B> Either<A, B>.mapRight(transform: (B) -> R): Either<A, R> {
     contract {
         callsInPlace(transform, AT_MOST_ONCE)

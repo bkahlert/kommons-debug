@@ -3,10 +3,10 @@ package com.bkahlert.kommons
 import kotlin.js.JsName
 import kotlin.reflect.KClass
 
-/** Typical strategies to join words to a phrase respectively split a phrase to words. */
+/** Typical strategies to join words to a phrase, respectively split a phrase to words. */
 public enum class CaseStyle {
 
-    /** Strategy that separates words with a capitalized letter, and the first word starting with lower case. */
+    /** Strategy that separates words with a capitalized letter, and the first word starting with lowercase. */
     @Suppress("EnumEntryName")
     camelCase {
         override fun matches(phrase: CharSequence, isUpperCase: (Char) -> Boolean): Boolean {
@@ -25,7 +25,7 @@ public enum class CaseStyle {
             }
     },
 
-    /** Strategy that separates words with a capitalized letter, and the first word starting with upper case. */
+    /** Strategy that separates words with a capitalized letter, and the first word starting with uppercase. */
     PascalCase {
         override fun matches(phrase: CharSequence, isUpperCase: (Char) -> Boolean): Boolean {
             if (phrase.isEmpty()) return true
@@ -161,8 +161,8 @@ public enum class CaseStyle {
 
 /**
  * Returns a string representation of this object with the specified [caseStyle] applied,
- * or the string representation with no case style applied if the original case style cannot be determined
- * (either automatically or by providing a [hint]).
+ * or the string representation with no case style applied if the original case style can't be determined—either
+ * automatically or by providing a [hint].
  */
 public fun Any.toCasedString(caseStyle: CaseStyle, hint: CaseStyle? = null): String {
     val phrase = toString()
@@ -178,97 +178,97 @@ public fun Any.toCasedString(caseStyle: CaseStyle, hint: CaseStyle? = null): Str
 
 /**
  * Returns a string representation of this object with [CaseStyle.camelCase] applied,
- * or the string representation with no case style applied if the original case style cannot be determined
- * (either automatically or by providing a [hint]).
+ * or the string representation with no case style applied if the original case style can't be determined—either
+ * automatically or by providing a [hint].
  */
 public fun Any.toCamelCasedString(hint: CaseStyle? = null): String = toCasedString(CaseStyle.camelCase, hint)
 
 /**
  * Returns a string representation of this object with [CaseStyle.PascalCase] applied,
- * or the string representation with no case style applied if the original case style cannot be determined
- * (either automatically or by providing a [hint]).
+ * or the string representation with no case style applied if the original case style can't be determined—either
+ * automatically or by providing a [hint].
  */
 public fun Any.toPascalCasedString(hint: CaseStyle? = null): String = toCasedString(CaseStyle.PascalCase, hint)
 
 /**
  * Returns a string representation of this object with [CaseStyle.SCREAMING_SNAKE_CASE] applied,
- * or the string representation with no case style applied if the original case style cannot be determined
- * (either automatically or by providing a [hint]).
+ * or the string representation with no case style applied if the original case style can't be determined—either
+ * automatically or by providing a [hint].
  */
 public fun Any.toScreamingSnakeCasedString(hint: CaseStyle? = null): String = toCasedString(CaseStyle.SCREAMING_SNAKE_CASE, hint)
 
 /**
  * Returns a string representation of this object with [CaseStyle.kebab-case] applied,
- * or the string representation with no case style applied if the original case style cannot be determined
- * (either automatically or by providing a [hint]).
+ * or the string representation with no case style applied if the original case style can't be determined—either
+ * automatically or by providing a [hint].
  */
 public fun Any.toKebabCasedString(hint: CaseStyle? = null): String = toCasedString(CaseStyle.`kebab-case`, hint)
 
 /**
- * Returns a string representation of this object with [CaseStyle.Title Case] applied,
- * or the string representation with no case style applied if the original case style cannot be determined
- * (either automatically or by providing a [hint]).
+ * Returns a string representation of this object with [CaseStyle.`Title Case`] applied,
+ * or the string representation with no case style applied if the original case style can't be determined—either
+ * automatically or by providing a [hint].
  */
 public fun Any.toTitleCasedString(hint: CaseStyle? = null): String = toCasedString(CaseStyle.`Title Case`, hint)
 
 
 /**
  * The [KClass.simpleName] of this class with [CaseStyle.camelCase] applied,
- * or the simple name with no case style applied if the original case style cannot be determined.
+ * or the simple name with no case style applied if the original case style can't be determined.
  */
 public val KClass<*>.simpleCamelCasedName: String? get() = simpleName?.toCamelCasedString()
 
 /**
  * The [KClass.simpleName] of this class with [CaseStyle.PascalCase] applied,
- * or the simple name with no case style applied if the original case style cannot be determined.
+ * or the simple name with no case style applied if the original case style can't be determined.
  */
 public val KClass<*>.simplePascalCasedName: String? get() = simpleName?.toPascalCasedString()
 
 /**
  * The [KClass.simpleName] of this class with [CaseStyle.SCREAMING_SNAKE_CASE] applied,
- * or the simple name with no case style applied if the original case style cannot be determined.
+ * or the simple name with no case style applied if the original case style can't be determined.
  */
 public val KClass<*>.simpleScreamingSnakeCasedName: String? get() = simpleName?.toScreamingSnakeCasedString()
 
 /**
  * The [KClass.simpleName] of this class with [CaseStyle.kebab-case] applied,
- * or the simple name with no case style applied if the original case style cannot be determined.
+ * or the simple name with no case style applied if the original case style can't be determined.
  */
 public val KClass<*>.simpleKebabCasedName: String? get() = simpleName?.toKebabCasedString()
 
 /**
- * The [KClass.simpleName] of this class with [CaseStyle.Title Case] applied,
- * or the simple name with no case style applied if the original case style cannot be determined.
+ * The [KClass.simpleName] of this class with [CaseStyle.`Title Case`] applied,
+ * or the simple name with no case style applied if the original case style can't be determined.
  */
 public val KClass<*>.simpleTitleCasedName: String? get() = simpleName?.toTitleCasedString()
 
 
 /**
  * The [Enum.name] of this enum constant with [CaseStyle.camelCase] applied,
- * or the enum constant name with no case style applied if the original case style cannot be determined.
+ * or the enum constant name with no case style applied if the original case style can't be determined.
  */
 public val Enum<*>.camelCasedName: String get() = name.toCamelCasedString()
 
 /**
  * The [Enum.name] of this enum constant with [CaseStyle.PascalCase] applied,
- * or the enum constant name with no case style applied if the original case style cannot be determined.
+ * or the enum constant name with no case style applied if the original case style can't be determined.
  */
 public val Enum<*>.pascalCasedName: String get() = name.toPascalCasedString()
 
 /**
  * The [Enum.name] of this enum constant with [CaseStyle.SCREAMING_SNAKE_CASE] applied,
- * or the enum constant name with no case style applied if the original case style cannot be determined.
+ * or the enum constant name with no case style applied if the original case style can't be determined.
  */
 public val Enum<*>.screamingSnakeCasedName: String get() = name.toScreamingSnakeCasedString()
 
 /**
  * The [Enum.name] of this enum constant with [CaseStyle.kebab-case] applied,
- * or the enum constant name with no case style applied if the original case style cannot be determined.
+ * or the enum constant name with no case style applied if the original case style can't be determined.
  */
 public val Enum<*>.kebabCasedName: String get() = name.toKebabCasedString()
 
 /**
- * The [Enum.name] of this enum constant with [CaseStyle.Title Case] applied,
- * or the enum constant name with no case style applied if the original case style cannot be determined.
+ * The [Enum.name] of this enum constant with [CaseStyle.`Title Case`] applied,
+ * or the enum constant name with no case style applied if the original case style can't be determined.
  */
 public val Enum<*>.titleCasedName: String get() = name.toTitleCasedString()

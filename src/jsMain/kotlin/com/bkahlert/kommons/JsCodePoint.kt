@@ -1,7 +1,7 @@
 package com.bkahlert.kommons
 
 /**
- * Contains the character pointed to and represented by a [String].
+ * The character pointed to and represented by a [String].
  */
 public actual val CodePoint.string: String
     get() = if (index < 0x10000) {

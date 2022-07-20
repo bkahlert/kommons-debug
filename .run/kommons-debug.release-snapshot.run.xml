@@ -21,4 +21,26 @@
     <DebugAllEnabled>false</DebugAllEnabled>
     <method v="2" />
   </configuration>
+  <configuration default="false" name="Release SNAPSHOT ➜ publish to local" type="GradleRunConfiguration" factoryName="Gradle" folderName="kommons-debug">
+    <ExternalSystemSettings>
+      <option name="executionName" />
+      <option name="externalProjectPath" value="$PROJECT_DIR$" />
+      <option name="externalSystemIdString" value="GRADLE" />
+      <option name="scriptParameters" value="-x signKotlinMultiplatformPublication -x signJsPublication -x signJvmPublication -x check" />
+      <option name="taskDescriptions">
+        <list />
+      </option>
+      <option name="taskNames">
+        <list>
+          <option value="snapshot" />
+          <option value="publishToMavenLocal" />
+        </list>
+      </option>
+      <option name="vmOptions" />
+    </ExternalSystemSettings>
+    <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+    <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+    <DebugAllEnabled>false</DebugAllEnabled>
+    <method v="2" />
+  </configuration>
 </component>

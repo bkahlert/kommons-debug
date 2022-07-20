@@ -12,7 +12,7 @@ public external interface Console : kotlin.js.Console {
 
     /**
      * Creates a new inline group with the specified [label] in this [Console] log,
-     * causing any subsequent console messages to be indented by an additional level,
+     * causing any later console messages to be indented by an extra level,
      * until [Console.groupEnd] is called.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/console/group">console.group()</a>
@@ -23,7 +23,7 @@ public external interface Console : kotlin.js.Console {
      * Creates a new inline group with the specified [label] in this [Console].
      *
      * Unlike [Console.grouping], however, the new group is created collapsed.
-     * The user will need to use the disclosure button next to it to expand it,
+     * The user needs to use the disclosure button next to it to expand it,
      * revealing the entries created in the group.
      *
      * Call [Console.groupEnd] to back out to the parent group.
@@ -52,7 +52,7 @@ public external val console: Console
 
 /**
  * Creates a new inline group with the optionally specified [label] in this [Console] log,
- * causing any subsequent console messages to be indented by an additional level,
+ * causing any later console messages to be indented by an extra level,
  * until [Console.groupEnd] is called.
  *
  * In case of [Result.isSuccess] the specified [render] applied to the result is logged,
@@ -75,7 +75,7 @@ public inline fun <reified R> Console.groupCatching(
 
 /**
  * Creates a new inline group with the optionally specified [label] in this [Console] log,
- * causing any subsequent console messages to be indented by an additional level,
+ * causing any later console messages to be indented by an extra level,
  * until [Console.groupEnd] is called.
  *
  * In case of [Result.isSuccess] the specified [render] applied to the result is logged,

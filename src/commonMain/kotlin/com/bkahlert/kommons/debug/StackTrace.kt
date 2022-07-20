@@ -14,22 +14,22 @@ public class StackTrace(elements: List<StackTraceElement>) : List<StackTraceElem
 /** Representation of a single element of a [StackTrace]. */
 public interface StackTraceElement {
 
-    /** Receiver of the [function] call. */
+    /** The receiver of the [function] call. */
     public val receiver: String?
 
-    /** Name of the invoked function. */
+    /** The name of the invoked function. */
     public val function: String?
 
-    /** Name of the invoked function with mangling information removed. */
+    /** The name of the invoked function with mangling information removed. */
     public val demangledFunction: String?
 
-    /** File in which the invocation takes place. */
+    /** The file in which the invocation takes place. */
     public val file: String?
 
-    /** Line in which the invocation takes place. */
+    /** The line in which the invocation takes place. */
     public val line: Int
 
-    /** Column in which the invocation takes place. */
+    /** The column in which the invocation takes place. */
     public val column: Int?
 }
 

@@ -22,7 +22,7 @@ import com.bkahlert.kommons.LineSeparators.isMultiline
  * chain().of.endless()
  * ```
  *
- * will be printed.
+ * is printed.
  */
 @Suppress("GrazieInspection", "DEPRECATION", "unused")
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
@@ -47,7 +47,7 @@ public inline val <T> T.traceJs: T get(): T = traceJs()
  * chain().of.endless()
  * ```
  *
- * will be printed.
+ * is printed.
  */
 @Suppress("GrazieInspection", "DEPRECATION", "unused")
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))

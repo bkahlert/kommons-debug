@@ -1,9 +1,6 @@
 package com.bkahlert.kommons
 
-
-/**
- * Named Unicode code points, like [UnicodeLineSeparatorsRegex.LINE_FEED] or [UnicodeLineSeparatorsRegex.SYMBOL_FOR_START_OF_HEADING].
- */
+/** Named Unicode code points, like [Unicode.LINE_FEED] or [Unicode.SYMBOL_FOR_START_OF_HEADING]. */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 public object Unicode {
 
@@ -150,6 +147,7 @@ public object Unicode {
     public const val LINE_SEPARATOR: Char = '\u2028'
 
     /** [PARAGRAPH SEPARATOR](https://codepoints.net/U+2029) */
+    @Suppress("GrazieInspection")
     public const val PARAGRAPH_SEPARATOR: Char = '\u2029'
 
     /** [NARROW NO-BREAK SPACE](https://codepoints.net/U+202F) */
@@ -177,6 +175,7 @@ public object Unicode {
     public const val SYMBOL_FOR_END_OF_TEXT: Char = '\u2403'
 
     /** [SYMBOL FOR END OF TRANSMISSION](https://codepoints.net/U+2404) `␄` */
+    @Suppress("GrazieInspection")
     public const val SYMBOL_FOR_END_OF_TRANSMISSION: Char = '\u2404'
 
     /** [SYMBOL FOR ENQUIRY](https://codepoints.net/U+2405) `␅` */
@@ -234,6 +233,7 @@ public object Unicode {
     public const val SYMBOL_FOR_SYNCHRONOUS_IDLE: Char = '\u2416'
 
     /** [SYMBOL FOR END OF TRANSMISSION BLOCK](https://codepoints.net/U+2417) `␗` */
+    @Suppress("GrazieInspection")
     public const val SYMBOL_FOR_END_OF_TRANSMISSION_BLOCK: Char = '\u2417'
 
     /** [SYMBOL FOR CANCEL](https://codepoints.net/U+2418) `␘` */

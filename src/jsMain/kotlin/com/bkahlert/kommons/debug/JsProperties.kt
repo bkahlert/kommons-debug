@@ -14,7 +14,7 @@ private fun sanitizeKey(key: String): String =
     key.replace("(?<key>.+)_\\d+".toRegex()) { it.groupValues.drop(1).first() }
 
 /**
- * Contains a [Map] of this object's properties with each [Map.Entry.key] representing
+ * A [Map] of this object's properties with each [Map.Entry.key] representing
  * a property name and [Map.Entry.value] the corresponding value.
  *
  * ***Important:** The property names are heuristically sanitized and can not reliably be used to
@@ -38,12 +38,12 @@ public actual fun <T, V> KProperty1<T, V>.getOrElse(receiver: T, onFailure: (Thr
     kotlin.runCatching { get(receiver) }.getOrElse(onFailure)
 
 
-/** Returns a simple JavaScript object (as [Json]) using this key-value pairs as names and values of its properties. */
+/** Returns a simple JavaScript object, as [Json], using this key-value pairs as names and values of its properties. */
 @Suppress("NOTHING_TO_INLINE")
 public inline fun Iterable<Pair<String, Any?>>.toJson(): Json =
     json(*map { (key, value) -> key to value }.toTypedArray())
 
-/** Returns a simple JavaScript object (as [Json]) using entries of this map as names and values of its properties. */
+/** Returns a simple JavaScript object, as [Json], using entries of this map as names and values of its properties. */
 @Suppress("NOTHING_TO_INLINE")
 public inline fun Map<String, Any?>.toJson(): Json = toList().toJson()
 
@@ -54,8 +54,8 @@ public fun Iterable<Any?>.toJsonArray(): Array<Json> = map { it.toJson() }.toTyp
 public fun Array<out Any?>.toJsonArray(): Array<Json> = map { it.toJson() }.toTypedArray()
 
 /**
- * Returns this object stringified, that is,
- * [JSON.stringify] applied to its [Any.properties] and a couple of internal properties filtered.
+ * Returns this object as a string by applying [JSON.stringify] to its [Any.properties] and
+ * by filtering a couple of internal properties.
  */
 public fun Any?.stringify(
     space: Int = 2,
@@ -106,11 +106,11 @@ public fun Any?.stringify(
     )
 }
 
-/** Returns a simple JavaScript object (as [Json]) by applying [JSON.parse] to this string. */
+/** Returns a simple JavaScript object, as [Json], by applying [JSON.parse] to this string. */
 public fun String.parseJson(): Json = when (this) {
     "null" -> json()
     else -> JSON.parse(this)
 }
 
-/** Returns a simple JavaScript object (as [Json]) by applying [JSON.stringify] to this object and [JSON.parse] to its output. */
+/** Returns a simple JavaScript object, as [Json], by applying [JSON.stringify] to this object and [JSON.parse] to its output. */
 public fun Any?.toJson(): Json = stringify().parseJson()

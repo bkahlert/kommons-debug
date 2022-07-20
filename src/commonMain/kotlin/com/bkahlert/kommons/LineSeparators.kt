@@ -211,14 +211,14 @@ public object LineSeparators : AbstractList<String>() {
         getLeadingLineSeparatorOrNull(lineSeparators = lineSeparators) != null
 
     /**
-     * Returns this character sequence with its leading line separator removed if it is contained in
+     * Returns this character sequence with its leading line separator removed if it's contained in
      * the specified [lineSeparators] (default: [Common]), or returns this character sequence otherwise.
      */
     public fun CharSequence.removeLeadingLineSeparator(vararg lineSeparators: String = Common): CharSequence =
         getLeadingLineSeparatorOrNull(lineSeparators = lineSeparators)?.let { removePrefix(it) } ?: this
 
     /**
-     * Returns this string with its leading line separator removed if it is contained in
+     * Returns this string with its leading line separator removed if it's contained in
      * the specified [lineSeparators] (default: [Common]), or returns this string otherwise.
      */
     public fun String.removeLeadingLineSeparator(vararg lineSeparators: String = Common): String =
@@ -226,7 +226,7 @@ public object LineSeparators : AbstractList<String>() {
 
     /**
      * Returns this character sequence with the specified [lineSeparator] (default: any) prepended
-     * if it is not already present and contained in
+     * if it's not already present and contained in
      * the specified [lineSeparators] (default: [Common]).
      */
     public fun CharSequence.withLeadingLineSeparator(lineSeparator: String? = null, vararg lineSeparators: String = Common): CharSequence =
@@ -243,7 +243,7 @@ public object LineSeparators : AbstractList<String>() {
 
     /**
      * Returns this string with the specified [lineSeparator] (default: any) prepended
-     * if it is not already present and contained in
+     * if it's not already present and contained in
      * the specified [lineSeparators] (default: [Common]).
      */
     public fun String.withLeadingLineSeparator(lineSeparator: String? = null, vararg lineSeparators: String = Common): String =
@@ -274,14 +274,14 @@ public object LineSeparators : AbstractList<String>() {
         getTrailingLineSeparatorOrNull(lineSeparators = lineSeparators) != null
 
     /**
-     * Returns this character sequence with its trailing line separator removed if it is contained in
+     * Returns this character sequence with its trailing line separator removed if it's contained in
      * the specified [lineSeparators] (default: [Common]), or returns this character sequence otherwise.
      */
     public fun CharSequence.removeTrailingLineSeparator(vararg lineSeparators: String = Common): CharSequence =
         getTrailingLineSeparatorOrNull(lineSeparators = lineSeparators)?.let { removeSuffix(it) } ?: this
 
     /**
-     * Returns this string with its trailing line separator removed if it is contained in
+     * Returns this string with its trailing line separator removed if it's contained in
      * the specified [lineSeparators] (default: [Common]), or returns this string otherwise.
      */
     public fun String.removeTrailingLineSeparator(vararg lineSeparators: String = Common): String =
@@ -289,7 +289,7 @@ public object LineSeparators : AbstractList<String>() {
 
     /**
      * Returns this character sequence with the specified [lineSeparator] (default: any) appended
-     * if it is not already present and contained in
+     * if it's not already present and contained in
      * the specified [lineSeparators] (default: [Common]).
      */
     public fun CharSequence.withTrailingLineSeparator(lineSeparator: String? = null, vararg lineSeparators: String = Common): CharSequence =
@@ -306,7 +306,7 @@ public object LineSeparators : AbstractList<String>() {
 
     /**
      * Returns this string with the specified [lineSeparator] (default: any) appended
-     * if it is not already present and contained in
+     * if it's not already present and contained in
      * the specified [lineSeparators] (default: [Common]).
      */
     public fun String.withTrailingLineSeparator(lineSeparator: String? = null, vararg lineSeparators: String = Common): String =

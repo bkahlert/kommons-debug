@@ -2,8 +2,8 @@ package com.bkahlert.kommons
 
 /**
  * Returns a new list wrapping this list with the following differences:
- * 1) Negative indices are supported and start from the end of this list
- *    (e.g. `this[-1]` returns the last element, `this[-2]` returns the second, and so on).
+ * 1) Negative indices are supported and start from the end of this list.
+ *    For example `this[-1]` returns the last element, `this[-2]` returns the second, ...
  * 2) Modulus operation is applied, that is,
  *    `listOf("a","b","c").withNegativeIndices(4)` returns `a`. `this[-4]` would return `c`.
  */

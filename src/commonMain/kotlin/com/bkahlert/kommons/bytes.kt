@@ -25,28 +25,28 @@ public inline val UByte.Companion.VALUE_RANGE: UIntRange get() = UByte.Companion
 public inline val Byte.Companion.VALUE_RANGE: IntRange get() = Byte.Companion.MIN_VALUE..Byte.Companion.MAX_VALUE
 
 
-/** Returns a new byte array — optionally [trimmed], that is, only containing necessary bytes — representing this [Int]. */
+/** Returns a new byte array—optionally [trimmed], that is, only containing necessary bytes—representing this [Int]. */
 public fun Int.toByteArray(trimmed: Boolean = false): ByteArray =
     0.until(Int.SIZE_BYTES)
         .map { i -> shr((Int.SIZE_BYTES - i - 1) * Byte.SIZE_BITS).toByte() }
         .let { if (trimmed) it.dropWhile { byte -> byte == Byte.ZERO } else it }
         .toByteArray().takeUnless { it.isEmpty() } ?: byteArrayOf(Byte.ZERO)
 
-/** Returns a new byte array — optionally [trimmed], that is, only containing necessary bytes — representing this [Long]. */
+/** Returns a new byte array—optionally [trimmed], that is, only containing necessary bytes—representing this [Long]. */
 public fun Long.toByteArray(trimmed: Boolean = false): ByteArray =
     0.until(Long.SIZE_BYTES)
         .map { i -> shr((Long.SIZE_BYTES - i - 1) * Byte.SIZE_BITS).toByte() }
         .let { if (trimmed) it.dropWhile { byte -> byte == Byte.ZERO } else it }
         .toByteArray().takeUnless { it.isEmpty() } ?: byteArrayOf(Byte.ZERO)
 
-/** Returns a new byte array — optionally [trimmed], that is, only containing necessary bytes — representing this [UInt]. */
+/** Returns a new byte array—optionally [trimmed], that is, only containing necessary bytes—representing this [UInt]. */
 public fun UInt.toUByteArray(trimmed: Boolean = false): UByteArray =
     0.until(UInt.SIZE_BYTES)
         .map { i -> shr((UInt.SIZE_BYTES - i - 1) * UByte.SIZE_BITS).toUByte() }
         .let { if (trimmed) it.dropWhile { byte -> byte == UByte.ZERO } else it }
         .toUByteArray().takeUnless { it.isEmpty() } ?: ubyteArrayOf(UByte.ZERO)
 
-/** Returns a new byte array — optionally [trimmed], that is, only containing necessary bytes — representing this [UInt]. */
+/** Returns a new byte array—optionally [trimmed], that is, only containing necessary bytes—representing this [UInt]. */
 public fun ULong.toUByteArray(trimmed: Boolean = false): UByteArray =
     0.until(ULong.SIZE_BYTES)
         .map { i -> shr((ULong.SIZE_BYTES - i - 1) * UByte.SIZE_BITS).toUByte() }
@@ -176,7 +176,7 @@ public fun ByteArray.encodeToBase64(urlSafe: Boolean = false, chunked: Boolean =
     else sb.toString()
 }
 
-/** Decodes this [Base64](https://en.wikipedia.org/wiki/Base64) encoded string into a newly-allocated byte array. */
+/** Decodes this [Base64](https://en.wikipedia.org/wiki/Base64) encoded string into a newly allocated byte array. */
 public fun String.decodeFromBase64(): ByteArray {
     if (isEmpty()) return ByteArray(0)
     val cleaned = base64UrlSafeReplacements

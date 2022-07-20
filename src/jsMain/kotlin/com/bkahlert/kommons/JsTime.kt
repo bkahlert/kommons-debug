@@ -8,7 +8,7 @@ import kotlin.time.Duration.Companion.minutes
 /** An instantaneous point on the time-line. */
 public actual typealias Instant = Date
 
-/** A date without a time-zone in the ISO-8601 calendar system, such as 2007-12-03. */
+/** A date without a time-zone in the [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601) calendar system, such as 2007-12-03. */
 public actual data class LocalDate(
     /** The year according to local time. */
     public val fullYear: Int,
@@ -22,7 +22,10 @@ public actual data class LocalDate(
     /** This local date as an [Instant]. */
     public val instant: Instant = Date(fullYear, month, date, 0, 0, 0, 0)
 
-    /** The number of milliseconds since [ECMAScript epoch](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#the_ecmascript_epoch_and_timestamps). */
+    /**
+     * The number of milliseconds since
+     * [ECMAScript epoch](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#the_ecmascript_epoch_and_timestamps).
+     */
     public val time: Double get() = instant.time
 
     override fun compareTo(other: LocalDate): Int = instant.compareTo(other.instant)
@@ -50,10 +53,13 @@ public actual inline val Tomorrow: LocalDate get() = Now.run { LocalDate(fullYea
 public actual inline val Timestamp: Long get() = Now.time.toLong()
 
 
-/** The number of milliseconds since [ECMAScript epoch](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#the_ecmascript_epoch_and_timestamps). */
+/**
+ * The number of milliseconds since
+ * [ECMAScript epoch](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date#the_ecmascript_epoch_and_timestamps).
+ */
 public inline val Date.time: Double get() = getTime()
 
-/** The difference between this date as evaluated in the UTC time zone, and the same date as evaluated in the local time zone. */
+/** The difference between this date as evaluated in the universal time zone, and the same date as evaluated in the local time zone. */
 public inline val Date.timezoneOffset: Duration get() = getTimezoneOffset().minutes
 
 /** The year according to local time. */
@@ -71,7 +77,7 @@ public inline val Date.utcMonth: Int get() = getUTCMonth()
 /** The day of the month according to local time. */
 public inline val Date.date: Int get() = getDate()
 
-/** The day of the month universal to local time. */
+/** The day of the month according to universal time. */
 public inline val Date.utcDate: Int get() = getUTCDate()
 
 /** The day of the week according to local time, where `0` represents Sunday. */

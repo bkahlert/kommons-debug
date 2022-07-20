@@ -1,5 +1,6 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.Platform
 import java.lang.reflect.Method
 import java.util.Locale
 import kotlin.reflect.KClass

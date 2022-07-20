@@ -39,10 +39,10 @@ public val Regex.groupContents: Regex
     } else this
 
 
-/** Returns a [Regex] that matches this regex followed by the specified [other]. */
+/** Returns a [Regex] that matches this regular expression followed by the specified [other]. */
 public operator fun Regex.plus(other: Regex): Regex = Regex("$pattern${other.pattern}")
 
-/** Returns a [Regex] that matches this regex followed by the specified [pattern]. */
+/** Returns a [Regex] that matches this regular expression followed by the specified [pattern]. */
 public operator fun Regex.plus(pattern: CharSequence): Regex = Regex("${this.pattern}$pattern")
 
 
@@ -70,7 +70,7 @@ private const val anyNonLineSeparatorPattern = "."
  * the specified [multilineWildcard] (default: `**`) to match across lines,
  * would.
  *
- * The returned regex render all specified [lineSeparators] (default: [LineSeparators.Common])
+ * The returned regular expression render all specified [lineSeparators] (default: [LineSeparators.Common])
  * matchable by any of the specified [lineSeparators].
  *
  * @see [CharSequence.matchesGlob]
@@ -132,7 +132,7 @@ public fun Regex.Companion.fromGlob(
  *     """
  *     foo
  *       .*()
- *     """.trimIndent())             // ❌ (* does not match across lines)
+ *     """.trimIndent())             // ❌ (* doesn't match across lines)
  * ```
  *
  * @see [Regex.Companion.fromGlob]
@@ -181,7 +181,7 @@ public fun CharSequence.matchesGlob(
  *     """
  *     foo
  *       .{}()
- *     """.trimIndent())             // ❌ ({} does not match across lines)
+ *     """.trimIndent())             // ❌ ({} doesn't match across lines)
  * ```
  *
  * @see [Regex.Companion.fromGlob]
@@ -195,12 +195,12 @@ public fun CharSequence.matchesCurly(
 /**
  * Returns a [Regex] that groups this [Regex].
  *
- * If a [name] is specified, a named group (e.g. `(?<name>foo)` is returned.
+ * If a [name] is specified, a named group, for example `(?<name>foo)`, is returned.
  *
- * If no [name] is specified **and** this regex is not already grouped,
+ * If no [name] is specified **and** this regex isn't yet grouped,
  * an anonymous/non-capturing group (e.g. `(?:foo)`) is returned.
  *
- * In other words: No unnecessary brackets are added.
+ * In other words: no unnecessary brackets are added.
  */
 public fun Regex.group(name: String? = null): Regex {
     return when (name) {
@@ -228,7 +228,7 @@ public fun Regex.group(name: String? = null): Regex {
  */
 public val Regex.grouped: Regex get() = group(null)
 
-/** Returns the specified [name] if it is a valid group name or throws an [IllegalArgumentException] otherwise. */
+/** Returns the specified [name] if it's a valid group name or throws an [IllegalArgumentException] otherwise. */
 private fun requireValidGroupName(name: String): String = name.apply {
     require(this.all { it in 'a'..'z' || it in 'A'..'Z' }) {
         "Group name $this must only consist of letters a..z and A..Z."
@@ -275,7 +275,7 @@ public fun Regex.repeat(min: Int? = 0, max: Int? = null): Regex {
 /**
  * Returns a named group with the specified [name].
  * @return An instance of [MatchGroup] if the group with the specified [name] was matched or `null` otherwise.
- * @throws IllegalArgumentException if there is no group with the specified [name] defined in the regex pattern.
+ * @throws IllegalArgumentException if there is no group with the specified [name] defined in the regular expression pattern.
  * @throws UnsupportedOperationException if this match group collection doesn't support getting match groups by name,
  * for example, when it's not supported by the current platform.
  */

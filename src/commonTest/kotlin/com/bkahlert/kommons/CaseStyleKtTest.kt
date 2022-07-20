@@ -107,7 +107,7 @@ class CaseStyleKtTest {
                     .filterNot { phrases.contains(it) }
                     .filterNot { exceptions.contains(it) }
                     .forEach { otherPhrase ->
-                        withClue("$caseStyle does not match ${otherPhrase.quoted} with case style $otherCaseStyle") {
+                        withClue("$caseStyle doesn't match ${otherPhrase.quoted} with case style $otherCaseStyle") {
                             caseStyle.matches(otherPhrase) shouldBe false
                         }
                     }
@@ -118,7 +118,7 @@ class CaseStyleKtTest {
         val phrases = caseJoinedWords.getValue(caseStyle)
         val expectedWords = caseSplitWords
         check(phrases.size == expectedWords.size) {
-            "number of phrases (${phrases.size} to test does not match number of expected words (${expectedWords.size})"
+            "number of phrases (${phrases.size} to test doesn't match number of expected words (${expectedWords.size})"
         }
         phrases.forEachIndexed { index, phrase ->
             caseStyle.split(phrase).shouldContainExactly(expectedWords[index])
@@ -129,7 +129,7 @@ class CaseStyleKtTest {
         val wordLists = caseSplitWords
         val expectedPhrases = caseJoinedWords.getValue(caseStyle)
         check(wordLists.size == expectedPhrases.size) {
-            "number of word lists (${wordLists.size} to test does not match number of expected phrases (${expectedPhrases.size})"
+            "number of word lists (${wordLists.size} to test doesn't match number of expected phrases (${expectedPhrases.size})"
         }
         wordLists.forEachIndexed { index, words ->
             caseStyle.join(words) shouldBe expectedPhrases[index]

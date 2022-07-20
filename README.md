@@ -13,7 +13,7 @@
     - [inspect](#anytrace--anyinspect)
     - [render](#anyrender--anyasstring)
     - [renderType](#anyrendertype)
-2. [runtime](#runtime) information on the currently running [program](#program), the [platform](#platform) it is running on and a
+2. [runtime](#runtime) information on the running [program](#program), its [platform](#platform) and a
    platform-independent [stack trace](#stack-trace)
 3. easily accessible [Unicode support](#unicode-support)
 4. [string handling](#string-handling) functions
@@ -22,7 +22,7 @@
 7. [factories](#factories) to easily implement `of`/`ofOrNull`, `from`/`fromOrNull`, and `parse`/`parseOrNull`
 8. [file handling](#file-handling-only-jvm) features such as locating source files and accessing the class path with the NIO2 API
 
-## Installation / Setup
+## Installation / setup
 
 Kommons Debug is hosted on GitHub with releases provided on Maven Central.
 
@@ -43,7 +43,7 @@ Kommons Debug is hosted on GitHub with releases provided on Maven Central.
 
 #### Any?.trace / Any?.inspect
 
-Print tracing information and easily cleanup afterwards using
+Print tracing information and easily cleanup afterward using
 IntelliJ's code cleanup feature.
 
 ##### Example
@@ -101,7 +101,7 @@ lambda.renderType()                 // (String)->Unit
 
 Renders any object depending on whether its `toString()` is overridden:
 
-- If there is a custom `toString()` it is simply used.
+- If there is a custom `toString()` it's simply used.
 - if there is *no custom* `toString()` the object is serialized in the form structurally
 
 ##### Examples
@@ -167,7 +167,7 @@ URL("file:///home/john/dev/project/src/jvm/kotlin/packages/source.kt").locate()
 
 #### Program
 
-Reflects the currently running program and provides:
+Reflects the running program and provides:
 
 - `Platform.isDebugging`: Returns whether the program is running in debug mode.
 - `Platform.isIntelliJ`: Returns whether the program is running in IntelliJ.
@@ -227,7 +227,7 @@ Transliterations and transforms can be done using `String.transform`.
 "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".truncate(7.codePoints)  // "a𝕓 … ‍👦"
 "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".truncate(7.graphemes)   // "a𝕓 … 👨🏾‍🦱👩‍👩‍👦‍👦"
 
-"© А-З ÄÖÜäöüẞß".transform("de_DE", "de_DE-ASCII")  // "(C) A-Z AEOEUeaeoeueSSss"
+"© А-З Ä-ö-ß".transform("de_DE", "de_DE-ASCII")  // "(C) A-Z AE-oe-ss"
 ```
 
 #### UTF-16 Char *vs* Code Point *vs* Grapheme Cluster
@@ -253,14 +253,14 @@ Transliterations and transforms can be done using `String.transform`.
 
 ### String Handling
 
-- `quoted`: Quotes and escapes an existing string.
-- `ansiRemoved`: Removes ANSI escape sequences.
-- `spaced`/`startSpaced`/`endSpaced`: Adds a space before and/or after a string if there is not already one.
-- `truncate`/`truncateStart`/`truncateEnd`: Truncates a string to a given length.
-- `consolidateWhitespaces`/`consolidateWhitespacesBy`: Intelligently consolidates whitespaces in order to reduce the length of a string.
-- `toIdentifier`: Create an identifier from any string that resembles it.
-- `randomString`: Create a random string.
-- [LineSeparators](src/commonMain/kotlin/com/bkahlert/kommons/LineSeparators.kt): Plethora extension function to work with everyday and exotic Unicode line
+- `quoted`: quotes and escapes an existing string
+- `ansiRemoved`: removes ANSI escape sequences
+- `spaced`/`startSpaced`/`endSpaced`: adds a space before and/or after a string if there isn't already one
+- `truncate`/`truncateStart`/`truncateEnd`: truncates a string to a given length
+- `consolidateWhitespaces`/`consolidateWhitespacesBy`: intelligently consolidates spaces to reduce the length of a string
+- `toIdentifier`: create an identifier from any string that resembles it
+- `randomString`: create a random string
+- [LineSeparators](src/commonMain/kotlin/com/bkahlert/kommons/LineSeparators.kt): many extension functions to work with usual and exotic Unicode line
   breaks.
 
 #### Examples
@@ -299,7 +299,7 @@ randomString()
 // returns "Ax-212kss0-xTzy5" (16 characters by default) 
 ```
 
-Capitalize / de-capitalize strings using `capitalize`/`decapitalize` or
+Capitalize / decapitalize strings using `capitalize`/`decapitalize` or
 manipulate the case style using `toCasesString` or any of its specializations.
 
 #### Examples
@@ -416,7 +416,7 @@ foo
     """
     foo
       .*()
-    """.trimIndent()              // ❌ (* does not match across lines)
+    """.trimIndent()              // ❌ (* doesn't match across lines)
 )
 ```
 
@@ -528,9 +528,9 @@ as shown in the following example:
 
 ```kotlin
 data class Version(val major: Int, val minor: Int, val patch: Int) {
-    companion object : Parser<Version> by (parser {                 // The `parsing` method allows the following outcomes:
-        it.split('.').let { (major, minor, patch) ->                // - If you return a Version this will be the successful result. 
-            Version(major.toInt(), minor.toInt(), patch.toInt())    // - If you return null a generic ParsingException is thrown.
+    companion object : Parser<Version> by (parser {                 // The `parsing` method supports the following outcomes:
+        it.split('.').let { (major, minor, patch) ->                // - return a `Version` instance in case of success 
+            Version(major.toInt(), minor.toInt(), patch.toInt())    // - return `null` a generic ParsingException is thrown.
         }                                                           // - If you throw an exception it will be wrapped in a ParsingException.
     })
 }
@@ -603,7 +603,7 @@ ClassPath("dir/to/resource").useBufferedReader { it.readLine() }
 #### Either
 
 Generic either type that can be used as a replacement for `Result`,
-i.e. in cases where the alternative value does not necessarily mean failure.
+i.e. in cases where the alternative value doesn't necessarily mean failure.
 
 Available methods are:
 

@@ -96,17 +96,17 @@ public fun Path.md5Checksum(): String = checksum(MessageDigestProviders.MD5)
 public fun Any.md5Checksum(): String = checksum(MessageDigestProviders.MD5)
 
 
-/** Computes the [MessageDigestProviders.SHA-1] hash of this input stream and returns it formatted as a hexadecimal checksum. */
+/** Computes the [MessageDigestProviders.`SHA-1`] hash of this input stream and returns it formatted as a hexadecimal checksum. */
 public fun InputStream.sha1Checksum(): String = checksum(MessageDigestProviders.`SHA-1`)
 
-/** Computes the [MessageDigestProviders.SHA-1] hash of this byte array and returns it formatted as a hexadecimal checksum. */
+/** Computes the [MessageDigestProviders.`SHA-1`] hash of this byte array and returns it formatted as a hexadecimal checksum. */
 public fun ByteArray.sha1Checksum(): String = checksum(MessageDigestProviders.`SHA-1`)
 
-/** Computes the [MessageDigestProviders.SHA-1] hash of this file and returns it formatted as a hexadecimal checksum. */
+/** Computes the [MessageDigestProviders.`SHA-1`] hash of this file and returns it formatted as a hexadecimal checksum. */
 public fun Path.sha1Checksum(): String = checksum(MessageDigestProviders.`SHA-1`)
 
 /**
- * Computes the [MessageDigestProviders.SHA-1] hash of this object using [Any.toString] and returns it formatted as a hexadecimal checksum.
+ * Computes the [MessageDigestProviders.`SHA-1`] hash of this object using [Any.toString] and returns it formatted as a hexadecimal checksum.
  *
  * ***Important:** The resultant checksum is as stable as the return value of [Any.toString].
  * The implementation **makes no use of [Any.hashCode]** as it produces less stable results
@@ -115,17 +115,17 @@ public fun Path.sha1Checksum(): String = checksum(MessageDigestProviders.`SHA-1`
 public fun Any.sha1Checksum(): String = checksum(MessageDigestProviders.`SHA-1`)
 
 
-/** Computes the [MessageDigestProviders.SHA-256] hash of this input stream and returns it formatted as a hexadecimal checksum. */
+/** Computes the [MessageDigestProviders.`SHA-256`] hash of this input stream and returns it formatted as a hexadecimal checksum. */
 public fun InputStream.sha256Checksum(): String = checksum(MessageDigestProviders.`SHA-256`)
 
-/** Computes the [MessageDigestProviders.SHA-256] hash of this byte array and returns it formatted as a hexadecimal checksum. */
+/** Computes the [MessageDigestProviders.`SHA-256`] hash of this byte array and returns it formatted as a hexadecimal checksum. */
 public fun ByteArray.sha256Checksum(): String = checksum(MessageDigestProviders.`SHA-256`)
 
-/** Computes the [MessageDigestProviders.SHA-256] hash of this file and returns it formatted as a hexadecimal checksum. */
+/** Computes the [MessageDigestProviders.`SHA-256`] hash of this file and returns it formatted as a hexadecimal checksum. */
 public fun Path.sha256Checksum(): String = checksum(MessageDigestProviders.`SHA-256`)
 
 /**
- * Computes the [MessageDigestProviders.SHA-256] hash of this object using [Any.toString] and returns it formatted as a hexadecimal checksum.
+ * Computes the [MessageDigestProviders.`SHA-256`] hash of this object using [Any.toString] and returns it formatted as a hexadecimal checksum.
  *
  * ***Important:** The resultant checksum is as stable as the return value of [Any.toString].
  * The implementation **makes no use of [Any.hashCode]** as it produces less stable results

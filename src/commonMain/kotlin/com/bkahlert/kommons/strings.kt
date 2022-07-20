@@ -16,7 +16,7 @@ import kotlin.reflect.KProperty
 /**
  * Returns `true` if this character sequence contains any of the specified [others] as a substring.
  *
- * @param ignoreCase `true` to ignore character case when comparing strings. By default `false`.
+ * @param ignoreCase `true` to ignore the character case when comparing strings. By default `false`.
  */
 public fun <T : CharSequence> CharSequence.containsAny(others: Iterable<T>, ignoreCase: Boolean = false): Boolean =
     others.any { contains(it, ignoreCase = ignoreCase) }
@@ -24,7 +24,7 @@ public fun <T : CharSequence> CharSequence.containsAny(others: Iterable<T>, igno
 /**
  * Returns `true` if this character sequence contains any of the specified [others] as a substring.
  *
- * @param ignoreCase `true` to ignore character case when comparing strings. By default `false`.
+ * @param ignoreCase `true` to ignore the character case when comparing strings. By default `false`.
  */
 public fun <T : CharSequence> CharSequence.containsAny(vararg others: T, ignoreCase: Boolean = false): Boolean =
     others.any { contains(it, ignoreCase = ignoreCase) }
@@ -167,11 +167,11 @@ private val ansiPattern: Regex = ansiPatterns.joinToString("|") { it.pattern }.t
 public val CharSequence.ansiContained: Boolean
     get() = ansiPattern.containsMatchIn(this)
 
-/** Contains this character sequence with all [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code) removed. */
+/** This character sequence with all [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code) removed. */
 public val CharSequence.ansiRemoved: CharSequence
     get() = if (ansiContained) ansiPattern.replace(this, "") else this
 
-/** Contains this character sequence with all [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code) removed. */
+/** This character sequence with all [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code) removed. */
 public val String.ansiRemoved: String
     get() = if (ansiContained) ansiPattern.replace(this, "") else this
 
@@ -272,7 +272,7 @@ public fun String.truncateEnd(length: TextLength = 15.codePoints, marker: String
 // consolidateWhitespaces ----------------------------------------------------------------------------------------------
 
 /**
- * Returns this string with its whitespaces intelligently consolidated
+ * Returns this string with its spaces intelligently consolidated
  * so that the resulting length is reduced by the specified [length].
  *
  * The algorithm guarantees that word borders are respected, that is,
@@ -285,7 +285,7 @@ public fun String.consolidateWhitespacesBy(length: TextLength, startIndex: Int =
     consolidateWhitespaces(this.length(length.unit) - length, startIndex, minWhitespaceLength)
 
 /**
- * Returns this string with its whitespaces intelligently consolidated
+ * Returns this string with its spaces intelligently consolidated
  * so that the resulting length is reduced to the specified [length]
  * (default: 0 [CODEPOINTS]).
  *
@@ -304,7 +304,7 @@ public fun String.consolidateWhitespaces(length: TextLength = 0.codePoints, star
         val trimmed = take(currentLength.value - trailingWhitespaces.length.coerceAtMost(difference.value))
         return if (trimmed.length <= length.value) trimmed else trimmed.consolidateWhitespaces(length, startIndex, minWhitespaceLength)
     }
-    val regex = Regex("\\p{Z}{${minWhitespaceLength + 1}}")
+    @Suppress("RegExpSimplifiable") val regex = Regex("\\p{Z}{${minWhitespaceLength + 1}}")
     val longestWhitespace = regex.findAll(this, startIndex).toList().reversed().maxByOrNull { it.value.length } ?: return this
     val whitespaceStart = longestWhitespace.range.first
     val truncated = replaceRange(whitespaceStart, whitespaceStart + 2, " ")
@@ -315,27 +315,27 @@ public fun String.consolidateWhitespaces(length: TextLength = 0.codePoints, star
 
 // withPrefix / withSuffix ---------------------------------------------------------------------------------------------
 
-/** Returns this char with the [prefix] prepended if it is not already present. */
+/** Returns this char with the [prefix] prepended if it's not already present. */
 public fun Char.withPrefix(prefix: CharSequence): String =
     toString().withPrefix(prefix)
 
-/** Returns this char with the [suffix] appended if it is not already present. */
+/** Returns this char with the [suffix] appended if it's not already present. */
 public fun Char.withSuffix(suffix: CharSequence): String =
     toString().withSuffix(suffix)
 
-/** Returns this character sequence with the [prefix] prepended if it is not already present. */
+/** Returns this character sequence with the [prefix] prepended if it's not already present. */
 public fun CharSequence.withPrefix(prefix: CharSequence): CharSequence =
     if (startsWith(prefix)) this else buildString { append(prefix); append(this@withPrefix) }
 
-/** Returns this character sequence with the [suffix] appended if it is not already present. */
+/** Returns this character sequence with the [suffix] appended if it's not already present. */
 public fun CharSequence.withSuffix(suffix: CharSequence): CharSequence =
     if (endsWith(suffix)) this else buildString { append(this@withSuffix);append(suffix) }
 
-/** Returns this string with the [prefix] prepended if it is not already present. */
+/** Returns this string with the [prefix] prepended if it's not already present. */
 public fun String.withPrefix(prefix: CharSequence): String =
     if (startsWith(prefix)) this else buildString { append(prefix); append(this@withPrefix) }
 
-/** Returns this string with the [suffix] appended if it is not already present. */
+/** Returns this string with the [suffix] appended if it's not already present. */
 public fun String.withSuffix(suffix: CharSequence): String =
     if (endsWith(suffix)) this else buildString { append(this@withSuffix);append(suffix) }
 
@@ -348,16 +348,16 @@ private const val randomSuffixSeparator = "--"
 @Suppress("RegExpSimplifiable")
 private val randomSuffixMatcher: Regex = Regex(".*$randomSuffixSeparator[\\da-zA-Z]{$randomSuffixLength}\$")
 
-/** Returns this char with a random suffix of two dashes dash and four alphanumeric characters. */
+/** Returns this char with a random suffix of two dashes and four alphanumeric characters. */
 public fun Char.withRandomSuffix(): String =
     toString().withRandomSuffix()
 
-/** Returns this character sequence with a random suffix of two dashes dash and four alphanumeric characters. */
+/** Returns this character sequence with a random suffix of two dashes and four alphanumeric characters. */
 public fun CharSequence.withRandomSuffix(): CharSequence =
     if (randomSuffixMatcher.matches(this)) this
     else buildString { append(this@withRandomSuffix); append(randomSuffixSeparator); append(randomString(length = randomSuffixLength)) }
 
-/** Returns this string with a random suffix of two dashes dash and four alphanumeric characters. */
+/** Returns this string with a random suffix of two dashes and four alphanumeric characters. */
 public fun String.withRandomSuffix(): String =
     if (randomSuffixMatcher.matches(this)) this
     else buildString { append(this@withRandomSuffix); append(randomSuffixSeparator); append(randomString(length = randomSuffixLength)) }
@@ -382,7 +382,7 @@ public fun Char.repeat(n: Int): String = toString().repeat(n)
  * Returns the index within this string of the first occurrence of the specified character,
  * starting from the specified [startIndex].
  *
- * @param ignoreCase `true` to ignore character case when matching a character. By default `false`.
+ * @param ignoreCase `true` to ignore the character case when matching a character. By default `false`.
  * @return An index of the first occurrence of [char] or `null` if none is found.
  */
 public fun CharSequence.indexOfOrNull(char: Char, startIndex: Int = 0, ignoreCase: Boolean = false): Int? =
@@ -392,7 +392,7 @@ public fun CharSequence.indexOfOrNull(char: Char, startIndex: Int = 0, ignoreCas
  * Returns the index within this character sequence of the first occurrence of the specified [string],
  * starting from the specified [startIndex].
  *
- * @param ignoreCase `true` to ignore character case when matching a string. By default `false`.
+ * @param ignoreCase `true` to ignore the character case when matching a string. By default `false`.
  * @return An index of the first occurrence of [string] or `null` if none is found.
  */
 public fun CharSequence.indexOfOrNull(string: String, startIndex: Int = 0, ignoreCase: Boolean = false): Int? =
@@ -406,7 +406,7 @@ public fun CharSequence.indexOfOrNull(string: String, startIndex: Int = 0, ignor
  * starting from the specified [startIndex].
  *
  * @param startIndex The index of character to start searching at. The search proceeds backward toward the beginning of the string.
- * @param ignoreCase `true` to ignore character case when matching a character. By default `false`.
+ * @param ignoreCase `true` to ignore the character case when matching a character. By default `false`.
  * @return An index of the last occurrence of [char] or `null` if none is found.
  */
 public fun CharSequence.lastIndexOfOrNull(char: Char, startIndex: Int = lastIndex, ignoreCase: Boolean = false): Int? =
@@ -417,7 +417,7 @@ public fun CharSequence.lastIndexOfOrNull(char: Char, startIndex: Int = lastInde
  * starting from the specified [startIndex].
  *
  * @param startIndex The index of character to start searching at. The search proceeds backward toward the beginning of the string.
- * @param ignoreCase `true` to ignore character case when matching a string. By default `false`.
+ * @param ignoreCase `true` to ignore the character case when matching a string. By default `false`.
  * @return An index of the last occurrence of [string] or `null` if none is found.
  */
 public fun CharSequence.lastIndexOfOrNull(string: String, startIndex: Int = lastIndex, ignoreCase: Boolean = false): Int? =
@@ -499,8 +499,8 @@ public fun CharSequence.splitMap(
  * Splits this character sequence to a sequence of strings around occurrences of the specified [delimiters].
  *
  * @param delimiters One or more strings to be used as delimiters.
- * @param keepDelimiters `true` to have string end with its corresponding delimiter.
- * @param ignoreCase `true` to ignore character case when matching a delimiter. By default `false`.
+ * @param keepDelimiters `true` to have strings end with its corresponding delimiter.
+ * @param ignoreCase `true` to ignore the character case when matching a delimiter. By default `false`.
  * @param limit The maximum number of substrings to return. Zero by default means no limit is set.
  *
  * To avoid ambiguous results when strings in [delimiters] have characters in common, this method proceeds from
@@ -528,7 +528,7 @@ public fun CharSequence.splitToSequence(
  * @param startIndex The index to start searching delimiters from.
  *  No range having its start value less than [startIndex] is returned.
  *  [startIndex] is coerced to be non-negative and not greater than length of this string.
- * @param ignoreCase `true` to ignore character case when matching a delimiter. By default `false`.
+ * @param ignoreCase `true` to ignore the character case when matching a delimiter. By default `false`.
  * @param limit The maximum number of substrings to return. Zero by default means no limit is set.
  *
  * To avoid ambiguous results when strings in [delimiters] have characters in common, this method proceeds from
@@ -542,11 +542,11 @@ private fun CharSequence.rangesDelimitedBy(
     limit: Int = 0,
 ): Sequence<IntRange> {
     require(limit >= 0) { "Limit must be non-negative, but was $limit." }
-    val delimitersList = delimiters.asList()
+    val delimiterList = delimiters.asList()
 
     return DelimitedRangesSequence(this, startIndex, limit) { currentIndex ->
         findAnyOf(
-            strings = delimitersList,
+            strings = delimiterList,
             startIndex = currentIndex,
             ignoreCase = ignoreCase,
             last = false
@@ -582,7 +582,7 @@ private fun CharSequence.findAnyOf(strings: Collection<String>, startIndex: Int,
 
 /**
  * Implementation of [regionMatches] for CharSequences.
- * Invoked when it's already known that arguments are not Strings, so that no additional type checks are performed.
+ * Invoked when it's already known that arguments aren't strings, so that no extra type checks are performed.
  */
 private fun CharSequence.regionMatchesImpl(thisOffset: Int, other: CharSequence, otherOffset: Int, length: Int, ignoreCase: Boolean): Boolean =
     if ((otherOffset < 0) || (thisOffset < 0) || (thisOffset > this.length - length) || (otherOffset > other.length - length)) false

@@ -1,13 +1,13 @@
 package com.bkahlert.kommons
 
-/** Contains this string escaped and wrapped with double quotes. */
+/** This string escaped and wrapped with double quotes. */
 public val Char.quoted: String get() = buildString { this@quoted.quoteTo(this) }
 
-/** Contains this string escaped and wrapped with double quotes. */
+/** This string escaped and wrapped with double quotes. */
 public val CharSequence.quoted: String get() = buildString { this@quoted.quoteTo(this) }
 
 /**
- * Contains the string returned by [Any.toString] escaped and wrapped with double quotes,
+ * The string returned by [Any.toString] escaped and wrapped with double quotes,
  * or the string "null" with no quotes if this object is `null`.
  */
 public val Any?.quoted: String get() = this?.toString()?.quoted ?: "null"

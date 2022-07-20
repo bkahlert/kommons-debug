@@ -30,7 +30,7 @@ public inline val <T> T.inspectJs: T get(): T = inspectJs()
  * chain().of.endless()
  * ```
  *
- * will be printed.
+ * is printed.
  */
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
 @Suppress("GrazieInspection", "DEPRECATION", "unused")
