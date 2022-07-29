@@ -8,7 +8,6 @@ import com.bkahlert.kommons.RoundingMode.HalfEven
 import com.bkahlert.kommons.RoundingMode.HalfUp
 import com.bkahlert.kommons.RoundingMode.Unnecessary
 import com.bkahlert.kommons.RoundingMode.Up
-import com.bkahlert.kommons.test.test
 import com.bkahlert.kommons.test.testAll
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
@@ -16,7 +15,7 @@ import kotlin.test.Test
 
 class RoundingModeTest {
 
-    @Test fun round_up() = test {
+    @Test fun round_up() = testAll {
         Up(-4.6, 1.0) shouldBe -5.0
         Up(-4.5, 1.0) shouldBe -5.0
         Up(-5.5, 1.0) shouldBe -6.0
@@ -42,7 +41,7 @@ class RoundingModeTest {
         Up(4.0, 0.5) shouldBe 4.0
     }
 
-    @Test fun round_down() = test {
+    @Test fun round_down() = testAll {
         Down(-4.6, 1.0) shouldBe -4.0
         Down(-4.5, 1.0) shouldBe -4.0
         Down(-5.5, 1.0) shouldBe -5.0
@@ -68,7 +67,7 @@ class RoundingModeTest {
         Down(4.0, 0.5) shouldBe 4.0
     }
 
-    @Test fun round_ceiling() = test {
+    @Test fun round_ceiling() = testAll {
         Ceiling(-4.6, 1.0) shouldBe -4.0
         Ceiling(-4.5, 1.0) shouldBe -4.0
         Ceiling(-5.5, 1.0) shouldBe -5.0
@@ -94,7 +93,7 @@ class RoundingModeTest {
         Ceiling(4.0, 0.5) shouldBe 4.0
     }
 
-    @Test fun round_floor() = test {
+    @Test fun round_floor() = testAll {
         Floor(-4.6, 1.0) shouldBe -5.0
         Floor(-4.5, 1.0) shouldBe -5.0
         Floor(-5.5, 1.0) shouldBe -6.0
@@ -120,7 +119,7 @@ class RoundingModeTest {
         Floor(4.0, 0.5) shouldBe 4.0
     }
 
-    @Test fun round_half_up() = test {
+    @Test fun round_half_up() = testAll {
         HalfUp(-4.6, 1.0) shouldBe -5.0
         HalfUp(-4.5, 1.0) shouldBe -5.0
         HalfUp(-5.5, 1.0) shouldBe -6.0
@@ -146,7 +145,7 @@ class RoundingModeTest {
         HalfUp(4.0, 0.5) shouldBe 4.0
     }
 
-    @Test fun round_half_down() = test {
+    @Test fun round_half_down() = testAll {
         HalfDown(-4.6, 1.0) shouldBe -5.0
         HalfDown(-4.5, 1.0) shouldBe -4.0
         HalfDown(-5.5, 1.0) shouldBe -5.0
@@ -172,7 +171,7 @@ class RoundingModeTest {
         HalfDown(4.0, 0.5) shouldBe 4.0
     }
 
-    @Test fun round_half_even() = test {
+    @Test fun round_half_even() = testAll {
         HalfEven(-4.6, 1.0) shouldBe -5.0
         HalfEven(-4.5, 1.0) shouldBe -4.0
         HalfEven(-5.5, 1.0) shouldBe -6.0
@@ -198,11 +197,11 @@ class RoundingModeTest {
         HalfEven(4.0, 0.5) shouldBe 4.0
     }
 
-    @Test fun rounding_unnecessary() = test {
+    @Test fun rounding_unnecessary() = testAll {
         shouldThrow<ArithmeticException> { Unnecessary(1.0, 1.0) }
     }
 
-    @Test fun extensions() = test {
+    @Test fun extensions() = testAll {
         2.25.ceil(0.5) shouldBe 2.5
         2.25f.ceil(0.5) shouldBe 2.5
         2.25.floor(0.5) shouldBe 2.0
@@ -211,7 +210,7 @@ class RoundingModeTest {
         2.25f.round(0.5) shouldBe 2.0
     }
 
-    @Test fun regression() = test {
+    @Test fun regression() = testAll {
         HalfEven(0.7, 0.001) shouldBe 0.7
         0.7.round(0.001) shouldBe 0.7
     }

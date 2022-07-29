@@ -36,7 +36,6 @@ class MiscTest {
         }
     }
 
-    @Suppress("unused")
     @Test fun map_to_json_array() = test {
         emptyArray<Any?>().toJsonArray().entries shouldBe json().entries
         arrayOf(42, null, mapOf("foo" to "bar")).toJsonArray() should {

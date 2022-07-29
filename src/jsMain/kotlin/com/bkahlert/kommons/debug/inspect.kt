@@ -1,5 +1,6 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.EMPTY
 import kotlin.js.Json
 import kotlin.js.json
 
@@ -7,7 +8,7 @@ import kotlin.js.json
  * Special version of [inspectJs] that inspects the structure of
  * each object, no matter if a custom [Any.toString] exists or not.
  */
-@Suppress("GrazieInspection", "DEPRECATION", "unused")
+@Suppress("DEPRECATION")
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
 public inline val <T> T.inspectJs: T get(): T = inspectJs()
 
@@ -33,7 +34,6 @@ public inline val <T> T.inspectJs: T get(): T = inspectJs()
  * is printed.
  */
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
-@Suppress("GrazieInspection", "DEPRECATION", "unused")
 public inline fun <T> T.inspectJs(
     caption: CharSequence? = null,
     includeCallSite: Boolean = true,
@@ -42,7 +42,7 @@ public inline fun <T> T.inspectJs(
     noinline transform: Inspector<T>? = null,
 ): T {
     if (transform != null) {
-        json((caption?.toString() ?: "") to inspect(this@inspectJs), "transformed" to inspect(transform(this@inspectJs)))
+        json((caption?.toString() ?: String.EMPTY) to inspect(this@inspectJs), "transformed" to inspect(transform(this@inspectJs)))
     } else {
         inspect(this@inspectJs)
     }.also {

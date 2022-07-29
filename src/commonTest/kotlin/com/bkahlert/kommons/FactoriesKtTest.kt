@@ -12,7 +12,7 @@ import com.bkahlert.kommons.Creator.Creator2
 import com.bkahlert.kommons.Creator.Creator3
 import com.bkahlert.kommons.Parser.Companion.parser
 import com.bkahlert.kommons.Parser.ParsingException
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.should
@@ -22,7 +22,7 @@ import kotlin.test.Test
 
 class FactoriesKtTest {
 
-    @Test fun creation_exception() = test {
+    @Test fun creation_exception() = testAll {
         CreationException(Int::class, "value1", "value2") should {
             it.message shouldBe "Failed to create an instance of Int of \"value1\", \"value2\""
             it.cause shouldBe null
@@ -44,7 +44,7 @@ class FactoriesKtTest {
         }
     }
 
-    @Test fun of_or_null() = test {
+    @Test fun of_or_null() = testAll {
         intCreator1.ofOrNull("1") shouldBe 1
         intCreator1.ofOrNull("-1-") shouldBe null
         throwingCreator1.ofOrNull("1") shouldBe 1
@@ -61,7 +61,7 @@ class FactoriesKtTest {
         throwingCreator3.ofOrNull("-1-", 2, 3) shouldBe null
     }
 
-    @Test fun of() = test {
+    @Test fun of() = testAll {
         intCreator1.of("1") shouldBe 1
         shouldThrow<NumberFormatException> { intCreator1.of("-1-") }
         throwingCreator1.of("1") shouldBe 1
@@ -78,7 +78,7 @@ class FactoriesKtTest {
         shouldThrow<CreationException> { throwingCreator3.of("-1-", 2, 3) }.cause shouldBe null
     }
 
-    @Test fun creator() = test {
+    @Test fun creator() = testAll {
         creator(intCreator1::of) should { creator ->
             creator.ofOrNull("1") shouldBe 1
             creator.ofOrNull("-1-") shouldBe null
@@ -137,7 +137,7 @@ class FactoriesKtTest {
         }
     }
 
-    @Test fun conversion_exception() = test {
+    @Test fun conversion_exception() = testAll {
         ConversionException(Int::class, "value1", "value2") should {
             it.message shouldBe "Failed to convert \"value1\", \"value2\" to an instance of Int"
             it.cause shouldBe null
@@ -159,7 +159,7 @@ class FactoriesKtTest {
         }
     }
 
-    @Test fun from_or_null() = test {
+    @Test fun from_or_null() = testAll {
         intConverter1.fromOrNull("1") shouldBe 1
         intConverter1.fromOrNull("-1-") shouldBe null
         throwingConverter1.fromOrNull("1") shouldBe 1
@@ -176,7 +176,7 @@ class FactoriesKtTest {
         throwingConverter3.fromOrNull("-1-", 2, 3) shouldBe null
     }
 
-    @Test fun from() = test {
+    @Test fun from() = testAll {
         intConverter1.from("1") shouldBe 1
         shouldThrow<NumberFormatException> { intConverter1.from("-1-") }
         throwingConverter1.from("1") shouldBe 1
@@ -193,7 +193,7 @@ class FactoriesKtTest {
         shouldThrow<ConversionException> { throwingConverter3.from("-1-", 2, 3) }.cause shouldBe null
     }
 
-    @Test fun converter() = test {
+    @Test fun converter() = testAll {
         converter(intConverter1::from) should { converter ->
             converter.fromOrNull("1") shouldBe 1
             converter.fromOrNull("-1-") shouldBe null
@@ -253,7 +253,7 @@ class FactoriesKtTest {
     }
 
 
-    @Test fun parsing_exception() = test {
+    @Test fun parsing_exception() = testAll {
         listOf(
             ParsingException("value".cs, Int::class),
             ParsingException("value", Int::class),
@@ -285,7 +285,7 @@ class FactoriesKtTest {
         }
     }
 
-    @Test fun parse_or_null() = test {
+    @Test fun parse_or_null() = testAll {
         intParser.parseOrNull("1".cs) shouldBe 1
         intParser.parseOrNull("-1-".cs) shouldBe null
         intParser.parseOrNull("1") shouldBe 1
@@ -297,7 +297,7 @@ class FactoriesKtTest {
         throwingParser.parseOrNull("-1-") shouldBe null
     }
 
-    @Test fun parse() = test {
+    @Test fun parse() = testAll {
         intParser.parse("1".cs) shouldBe 1
         shouldThrow<NumberFormatException> { intParser.parse("-1-".cs) }
         intParser.parse("1") shouldBe 1
@@ -309,7 +309,7 @@ class FactoriesKtTest {
         shouldThrow<ParsingException> { throwingParser.parse("-1-") }.cause shouldBe null
     }
 
-    @Test fun parser() = test {
+    @Test fun parser() = testAll {
         parser(intParser::parse) should { parser ->
             parser.parseOrNull("1".cs) shouldBe 1
             parser.parseOrNull("-1-".cs) shouldBe null

@@ -24,7 +24,7 @@ import com.bkahlert.kommons.LineSeparators.isMultiline
  *
  * is printed.
  */
-@Suppress("GrazieInspection", "DEPRECATION", "unused")
+@Suppress("DEPRECATION")
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
 public inline val <T> T.traceJs: T get(): T = traceJs()
 
@@ -49,7 +49,7 @@ public inline val <T> T.traceJs: T get(): T = traceJs()
  *
  * is printed.
  */
-@Suppress("GrazieInspection", "DEPRECATION", "unused")
+@Suppress("DEPRECATION")
 @Deprecated("Don't forget to remove after you finished debugging.", replaceWith = ReplaceWith("this"))
 public inline fun <T> T.traceJs(
     caption: CharSequence? = null,

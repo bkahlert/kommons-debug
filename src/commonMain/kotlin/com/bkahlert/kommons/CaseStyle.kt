@@ -47,7 +47,7 @@ public enum class CaseStyle {
         }
 
         override fun join(words: Iterable<CharSequence>): String =
-            words.joinToString("") { word ->
+            words.joinToString(String.EMPTY) { word ->
                 when (word.length) {
                     1 -> word.toString().uppercase()
                     2 -> word.toString().uppercase()
@@ -56,8 +56,8 @@ public enum class CaseStyle {
             }
 
         private fun CharSequence.takeWord(isUpperCase: (Char) -> Boolean): Pair<String, CharSequence> = when (length) {
-            1 -> first().lowercase() to ""
-            2 -> toString().lowercase() to ""
+            1 -> first().lowercase() to String.EMPTY
+            2 -> toString().lowercase() to String.EMPTY
             else -> {
                 if (isUpperCase(get(2))) {
                     val word = substring(0, 2)

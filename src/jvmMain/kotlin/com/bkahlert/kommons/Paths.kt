@@ -337,11 +337,11 @@ public fun Path.resolveBetweenFileSystems(path: Path): Path =
  *
  * The newly created [Path] is guaranteed to not already exist.
  */
-public tailrec fun Path.resolveRandom(prefix: String = randomString(4), suffix: String = ""): Path {
+public tailrec fun Path.resolveRandom(prefix: String = randomString(4), suffix: String = String.EMPTY): Path {
     val minLength = 6
     val length = prefix.length + suffix.length
     val randomSuffix = randomString((minLength - length).coerceAtLeast(3))
-    val randomPath = resolve("${prefix.takeUnlessEmpty()?.let { "$it--" } ?: ""}$randomSuffix$suffix")
+    val randomPath = resolve("${prefix.takeUnlessEmpty()?.let { "$it--" } ?: String.EMPTY}$randomSuffix$suffix")
     return randomPath.takeUnless { it.exists() } ?: resolveRandom(prefix, suffix)
 }
 

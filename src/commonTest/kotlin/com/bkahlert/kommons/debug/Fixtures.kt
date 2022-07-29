@@ -7,7 +7,6 @@ import kotlin.reflect.KProperty1
 
 internal expect fun nativeObject(): Any
 
-@Suppress("unused")
 internal open class BaseClass {
     val baseProperty: String = "base-property"
     open val openBaseProperty: Int = 42
@@ -83,7 +82,7 @@ internal class OrdinaryClass : BaseClass() {
 
 internal sealed class SealedClass {
     @Suppress("unused", "CanSealedSubClassBeObject") class NestedClass : SealedClass()
-    @Suppress("unused") object NestedObject : SealedClass()
+    object NestedObject : SealedClass()
 }
 
 internal data class DataClass(
@@ -91,7 +90,7 @@ internal data class DataClass(
     override val openBaseProperty: Int = 37,
 ) : BaseClass() {
     override val protectedOpenBaseProperty: String = "overridden-protected-open-base-property"
-    @Suppress("unused") private val privateDataProperty: String = "private-data-property"
+    private val privateDataProperty: String = "private-data-property"
 
     override fun kProperties0(): Set<KProperty0<Any?>> = buildSet {
         addAll(super.kProperties0())
@@ -112,15 +111,15 @@ internal data class DataClass(
     }
 }
 
-internal class ClassWithDefaultToString(@Suppress("unused") val foo: Any? = null) {
+internal class ClassWithDefaultToString(val foo: Any? = null) {
     val bar: String = "baz"
 }
 
-internal class ClassWithCustomToString(@Suppress("unused") val foo: Any? = null) {
+internal class ClassWithCustomToString(val foo: Any? = null) {
     override fun toString(): String = "custom toString"
 }
 
-internal class ClassWithRenderingToString(@Suppress("unused") val foo: Any? = null) {
+internal class ClassWithRenderingToString(val foo: Any? = null) {
     override fun toString(): String = render()
 }
 

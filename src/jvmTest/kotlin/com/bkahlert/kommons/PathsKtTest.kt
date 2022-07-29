@@ -245,7 +245,7 @@ class PathsKtTest {
         }
 
         shouldThrow<NoSuchFileException> { tempDir.resolve("missing").age }
-        shouldThrow<NoSuchFileException> { tempDir.resolve("missing").age = 42.days; @Suppress("RedundantUnitExpression") Unit }
+        shouldThrow<NoSuchFileException> { tempDir.resolve("missing").age = 42.days; Unit }
     }
 
 

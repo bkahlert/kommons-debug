@@ -8,7 +8,7 @@ import com.bkahlert.kommons.LineSeparators.NEL
 import com.bkahlert.kommons.LineSeparators.PS
 import com.bkahlert.kommons.Platform.JS
 import com.bkahlert.kommons.test.fixtures.GifImageFixture
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.withClue
 import io.kotest.inspectors.forAll
@@ -36,7 +36,7 @@ import kotlin.test.Test
 )
 class RegexKtTest {
 
-    @Test fun is_group() = test {
+    @Test fun is_group() = testAll {
         Regex("").isGroup shouldBe false
         Regex(" ").isGroup shouldBe false
         Regex("   ").isGroup shouldBe false
@@ -72,7 +72,7 @@ class RegexKtTest {
         Regex("\\((())").isGroup shouldBe false
     }
 
-    @Test fun is_named_group() = test {
+    @Test fun is_named_group() = testAll {
         Regex("()").isNamedGroup shouldBe false
         Regex("(foo)").isNamedGroup shouldBe false
         Regex("(())").isNamedGroup shouldBe false
@@ -90,7 +90,7 @@ class RegexKtTest {
         Regex("(?<name>()foo)").isNamedGroup shouldBe true
     }
 
-    @Test fun is_anonymous_group() = test {
+    @Test fun is_anonymous_group() = testAll {
         Regex("()").isAnonymousGroup shouldBe false
         Regex("(foo)").isAnonymousGroup shouldBe false
         Regex("(())").isAnonymousGroup shouldBe false
@@ -108,7 +108,7 @@ class RegexKtTest {
         Regex("(?<name>()foo)").isAnonymousGroup shouldBe false
     }
 
-    @Test fun is_indexed_group() = test {
+    @Test fun is_indexed_group() = testAll {
         Regex("()").isIndexedGroup shouldBe true
         Regex("(foo)").isIndexedGroup shouldBe true
         Regex("(())").isIndexedGroup shouldBe true
@@ -126,7 +126,7 @@ class RegexKtTest {
         Regex("(?<name>()foo)").isIndexedGroup shouldBe false
     }
 
-    @Test fun group_contents() = test {
+    @Test fun group_contents() = testAll {
         Regex("").groupContents shouldBe Regex("")
         Regex(" ").groupContents shouldBe Regex(" ")
         Regex("   ").groupContents shouldBe Regex("   ")
@@ -163,17 +163,17 @@ class RegexKtTest {
     }
 
 
-    @Test fun plus() = test {
+    @Test fun plus() = testAll {
         Regex("foo") + Regex("bar") shouldBe Regex("foobar")
         Regex("foo") + "bar" shouldBe Regex("foobar")
     }
 
-    @Test fun or() = test {
+    @Test fun or() = testAll {
         Regex("foo") or Regex("bar") shouldBe Regex("foo|bar")
         Regex("foo") or "bar" shouldBe Regex("foo|bar")
     }
 
-    @Test fun from_literal_alternates() = test {
+    @Test fun from_literal_alternates() = testAll {
         Regex.fromLiteralAlternates() shouldBe Regex("")
         Regex.fromLiteralAlternates("foo") shouldBe Regex(Regex.escape("foo"))
         Regex.fromLiteralAlternates("foo", "bar") shouldBe Regex("${Regex.escape("foo")}|${Regex.escape("bar")}")
@@ -183,7 +183,7 @@ class RegexKtTest {
         Regex.fromLiteralAlternates(listOf("foo", "bar")) shouldBe Regex("${Regex.escape("foo")}|${Regex.escape("bar")}")
     }
 
-    @Test fun from_glob() = test {
+    @Test fun from_glob() = testAll {
         val input = """
             foo.bar()
             bar[0]++
@@ -258,7 +258,7 @@ class RegexKtTest {
         }
     }
 
-    @Test fun matches_glob() = test {
+    @Test fun matches_glob() = testAll {
         "foo.bar()".matchesGlob("foo.*") shouldBe true
         "foo.bar()".matchesGlob("foo.{}", wildcard = "{}") shouldBe true
 
@@ -292,7 +292,7 @@ class RegexKtTest {
         ) shouldBe false
     }
 
-    @Test fun matches_curly() = test {
+    @Test fun matches_curly() = testAll {
         "foo.bar()".matchesCurly("foo.{}") shouldBe true
 
         multilineGlobMatchInput.matchesCurly(
@@ -318,7 +318,7 @@ class RegexKtTest {
     }
 
 
-    @Test fun group() = test {
+    @Test fun group() = testAll {
         Regex("foo").group("other") shouldBe Regex("(?<other>foo)")
         Regex("(foo)").group("other") shouldBe Regex("(?<other>foo)")
         Regex("(?:foo)").group("other") shouldBe Regex("(?<other>foo)")
@@ -331,28 +331,28 @@ class RegexKtTest {
         Regex("(?<name>foo)").group() shouldBe Regex("(?<name>foo)")
     }
 
-    @Test fun grouped() = test {
+    @Test fun grouped() = testAll {
         Regex("foo").group() shouldBe Regex("(?:foo)")
         Regex("(foo)").group() shouldBe Regex("(foo)")
         Regex("(?:foo)").group() shouldBe Regex("(?:foo)")
         Regex("(?<name>foo)").group() shouldBe Regex("(?<name>foo)")
     }
 
-    @Test fun optional() = test {
+    @Test fun optional() = testAll {
         Regex("foo").optional() shouldBe Regex("(?:foo)?")
         Regex("(foo)").optional() shouldBe Regex("(foo)?")
         Regex("(?:foo)").optional() shouldBe Regex("(?:foo)?")
         Regex("(?<name>foo)").optional() shouldBe Regex("(?<name>foo)?")
     }
 
-    @Test fun repeat_any() = test {
+    @Test fun repeat_any() = testAll {
         Regex("foo").repeatAny() shouldBe Regex("(?:foo)*")
         Regex("(foo)").repeatAny() shouldBe Regex("(foo)*")
         Regex("(?:foo)").repeatAny() shouldBe Regex("(?:foo)*")
         Regex("(?<name>foo)").repeatAny() shouldBe Regex("(?<name>foo)*")
     }
 
-    @Test fun repeat_at_least_once() = test {
+    @Test fun repeat_at_least_once() = testAll {
         Regex("foo").repeatAtLeastOnce() shouldBe Regex("(?:foo)+")
         Regex("(foo)").repeatAtLeastOnce() shouldBe Regex("(foo)+")
         Regex("(?:foo)").repeatAtLeastOnce() shouldBe Regex("(?:foo)+")
@@ -360,7 +360,7 @@ class RegexKtTest {
     }
 
 
-    @Test fun repeat() = test {
+    @Test fun repeat() = testAll {
         Regex("foo").repeat(2, 5) shouldBe Regex("(?:foo){2,5}")
         Regex("(foo)").repeat(2, 5) shouldBe Regex("(foo){2,5}")
         Regex("(?:foo)").repeat(2, 5) shouldBe Regex("(?:foo){2,5}")
@@ -368,7 +368,7 @@ class RegexKtTest {
     }
 
 
-    @Test fun named_groups() = test {
+    @Test fun named_groups() = testAll {
         val string = "foo bar baz"
 
         // built-in
@@ -387,7 +387,7 @@ class RegexKtTest {
     }
 
 
-    @Test fun find_all_values() = test {
+    @Test fun find_all_values() = testAll {
         val string = "foo bar baz"
 
         Regex("(ba.)").findAllValues(string).shouldContainExactly("bar", "baz")
@@ -398,7 +398,7 @@ class RegexKtTest {
     }
 
 
-    @Test fun any_character_regex() = test {
+    @Test fun any_character_regex() = testAll {
         stringWithAllLineSeparators.replace(Regex.AnyCharacterRegex, "-") shouldBe "----------------------------"
         stringWithAllLineSeparators.replace(Regex("."), "-") shouldBe when (Platform.Current) {
             is JS -> "---${CRLF}---${LF}---${CR}-------${PS}---${LS}---"
@@ -406,7 +406,7 @@ class RegexKtTest {
         }
     }
 
-    @Test fun url_regex() = test {
+    @Test fun url_regex() = testAll {
         Regex.UrlRegex.findAllValues(
             """
                http://example.net
@@ -427,7 +427,7 @@ class RegexKtTest {
     }
 
 
-    @Test fun uri_regex() = test {
+    @Test fun uri_regex() = testAll {
         Regex.UriRegex.findAllValues(
             """
                http://example.net

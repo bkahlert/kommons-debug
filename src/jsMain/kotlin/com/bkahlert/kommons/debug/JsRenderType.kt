@@ -1,5 +1,6 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.EMPTY
 import kotlin.reflect.KClass
 import kotlin.reflect.KClassifier
 import kotlin.reflect.KType
@@ -34,7 +35,7 @@ internal actual fun KClassifier.renderKClassifierTo(out: StringBuilder, simplifi
         else -> {
             out.append(kClass.js.name.let {
                 if (objectRegex.containsMatchIn(it)) "<object>"
-                else if (implRegex.containsMatchIn(it)) it.replace(implRegex, "")
+                else if (implRegex.containsMatchIn(it)) it.replace(implRegex, String.EMPTY)
                 else it
             })
         }

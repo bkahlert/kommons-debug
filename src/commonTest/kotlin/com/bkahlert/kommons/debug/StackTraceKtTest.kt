@@ -3,7 +3,7 @@ package com.bkahlert.kommons.debug
 import com.bkahlert.kommons.Platform
 import com.bkahlert.kommons.Platform.JS
 import com.bkahlert.kommons.Platform.JVM
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.inspectors.shouldForAll
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.nulls.shouldBeNull
@@ -19,7 +19,7 @@ import kotlin.test.fail
 
 class StackTraceTest {
 
-    @Test fun to_string() = test {
+    @Test fun to_string() = testAll {
         var stackTrace = ""
         foo { bar { StackTrace.get().also { stackTrace = it.toString() }.firstOrNull() } }
         stackTrace.lines() should {
@@ -29,7 +29,7 @@ class StackTraceTest {
         }
     }
 
-    @Test fun get_first() = test {
+    @Test fun get_first() = testAll {
         StackTrace.get().first() should {
             when (Platform.Current) {
                 JS.Browser -> {
@@ -39,6 +39,7 @@ class StackTraceTest {
                     it.line shouldBeGreaterThan 0
                     it.column.shouldNotBeNull().shouldBeGreaterThan(0)
                 }
+
                 JS.NodeJS -> {
                     it.receiver shouldBe "StackTraceTest"
                     it.function shouldStartWith "get_first"
@@ -46,6 +47,7 @@ class StackTraceTest {
                     it.line shouldBeGreaterThan 0
                     it.column.shouldNotBeNull().shouldBeGreaterThan(0)
                 }
+
                 JVM -> {
                     it.receiver shouldBe "com.bkahlert.kommons.debug.StackTraceTest"
                     it.function shouldBe "get_first"
@@ -53,17 +55,18 @@ class StackTraceTest {
                     it.line shouldBeGreaterThan 0
                     it.column.shouldBeNull()
                 }
+
                 else -> fail("untested platform")
             }
         }
     }
 
-    @Test fun find_or_null() = test {
+    @Test fun find_or_null() = testAll {
         foo { bar { StackTrace.get().findOrNull { it.function == "foo" } } } should { it?.function shouldStartWith "find_or_null" }
         foo { bar { StackTrace.get().findOrNull { false } } }.shouldBeNull()
     }
 
-    @Test fun find_by_last_known_call_null() = test {
+    @Test fun find_by_last_known_call_null() = testAll {
         foo { bar { StackTrace.get().findByLastKnownCallsOrNull("bar") } } should { it?.function shouldStartWith "foo" }
         foo { bar { StackTrace.get().findByLastKnownCallsOrNull(::bar) } } should { it?.function shouldStartWith "foo" }
 

@@ -1,6 +1,5 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.test.test
 import com.bkahlert.kommons.test.testAll
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.should
@@ -9,7 +8,7 @@ import kotlin.test.Test
 
 class BytesTest {
 
-    @Test fun to_byte_array() = test {
+    @Test fun to_byte_array() = testAll {
         Int.MIN_VALUE.toByteArray() shouldBe byteArrayOf(-128, 0, 0, 0)
         Int.MIN_VALUE.toByteArray(trimmed = false) shouldBe Int.MIN_VALUE.toByteArray()
         Int.MIN_VALUE.toByteArray(trimmed = true) shouldBe byteArrayOf(-128, 0, 0, 0)
@@ -31,7 +30,7 @@ class BytesTest {
         Long.MAX_VALUE.toByteArray(trimmed = true) shouldBe byteArrayOf(127, -1, -1, -1, -1, -1, -1, -1)
     }
 
-    @Test fun to_ubyte_array() = test {
+    @Test fun to_ubyte_array() = testAll {
         UInt.MIN_VALUE.toUByteArray() shouldBe ubyteArrayOf(0u, 0u, 0u, 0u)
         UInt.MIN_VALUE.toUByteArray(trimmed = false) shouldBe UInt.MIN_VALUE.toUByteArray()
         UInt.MIN_VALUE.toUByteArray(trimmed = true) shouldBe ubyteArrayOf(0u)
@@ -48,7 +47,7 @@ class BytesTest {
     }
 
     @Suppress("SpellCheckingInspection")
-    @Test fun to_hexadecimal_string() = test {
+    @Test fun to_hexadecimal_string() = testAll {
         byteArray should { array ->
             array.map { it.toHexadecimalString() } shouldContainExactly listOf("00", "7f", "80", "ff")
             array.toHexadecimalString() shouldBe "007f80ff"
@@ -76,7 +75,7 @@ class BytesTest {
         ULong.MAX_VALUE.toHexadecimalString() shouldBe "ffffffffffffffff"
     }
 
-    @Test fun to_decimal_string() = test {
+    @Test fun to_decimal_string() = testAll {
         byteArray should { array ->
             array.map { it.toDecimalString() } shouldContainExactly listOf("0", "127", "128", "255")
         }
@@ -86,7 +85,7 @@ class BytesTest {
         }
     }
 
-    @Test fun to_octal_string() = test {
+    @Test fun to_octal_string() = testAll {
         byteArray should { array ->
             array.map { it.toOctalString() } shouldContainExactly listOf("000", "177", "200", "377")
             array.toOctalString() shouldBe "000177200377"
@@ -115,7 +114,7 @@ class BytesTest {
     }
 
     @Suppress("LongLine")
-    @Test fun to_binary_string() = test {
+    @Test fun to_binary_string() = testAll {
         byteArray should { array ->
             array.map { it.toBinaryString() } shouldContainExactly listOf("00000000", "01111111", "10000000", "11111111")
             array.toBinaryString() shouldBe "00000000011111111000000011111111"

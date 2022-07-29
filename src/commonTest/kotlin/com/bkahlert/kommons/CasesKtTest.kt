@@ -1,6 +1,6 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.test.Test
@@ -8,7 +8,7 @@ import kotlin.test.Test
 class CasesKtTest {
 
     @Test
-    fun is_lower_case() = test {
+    fun is_lower_case() = testAll {
         'a'.isLowerCase() shouldBe true
         'A'.isLowerCase() shouldBe false
         '9'.isLowerCase() shouldBe false
@@ -16,7 +16,7 @@ class CasesKtTest {
     }
 
     @Test
-    fun is_upper_case() = test {
+    fun is_upper_case() = testAll {
         'a'.isUpperCase() shouldBe false
         'A'.isUpperCase() shouldBe true
         '9'.isUpperCase() shouldBe false
@@ -24,7 +24,7 @@ class CasesKtTest {
     }
 
     @Test
-    fun capitalize_char_sequence() = test {
+    fun capitalize_char_sequence() = testAll {
         charSequence_aa.capitalize() shouldBe "Aa"
         charSequence_aA.capitalize() shouldBe "AA"
         charSequence_a9.capitalize() shouldBe "A9"
@@ -44,7 +44,7 @@ class CasesKtTest {
     }
 
     @Test
-    fun capitalize_string() = test {
+    fun capitalize_string() = testAll {
         string_aa.capitalize() shouldBe "Aa"
         string_aA.capitalize() shouldBe "AA"
         string_a9.capitalize() shouldBe "A9"
@@ -63,9 +63,8 @@ class CasesKtTest {
         string___.capitalize() shouldBeSameInstanceAs string___
     }
 
-    @Suppress("SpellCheckingInspection")
     @Test
-    fun decapitalize_char_sequence() = test {
+    fun decapitalize_char_sequence() = testAll {
         charSequence_aa.decapitalize() shouldBeSameInstanceAs charSequence_aa
         charSequence_aA.decapitalize() shouldBeSameInstanceAs charSequence_aA
         charSequence_a9.decapitalize() shouldBeSameInstanceAs charSequence_a9
@@ -84,9 +83,8 @@ class CasesKtTest {
         charSequence___.decapitalize() shouldBeSameInstanceAs charSequence___
     }
 
-    @Suppress("SpellCheckingInspection")
     @Test
-    fun decapitalize_string() = test {
+    fun decapitalize_string() = testAll {
         string_aa.decapitalize() shouldBeSameInstanceAs string_aa
         string_aA.decapitalize() shouldBeSameInstanceAs string_aA
         string_a9.decapitalize() shouldBeSameInstanceAs string_a9

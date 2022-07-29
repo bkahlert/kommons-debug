@@ -1,10 +1,12 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
-import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.sequences.shouldBeEmpty
+import io.kotest.matchers.sequences.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test
@@ -12,47 +14,114 @@ import kotlin.test.Test
 
 class GraphemeTest {
 
-    @Test fun to_grapheme_list() = test {
-        "".toGraphemeList().shouldBeEmpty()
-        "a".toGraphemeList().shouldContainExactly(Grapheme("a"))
-        "¶".toGraphemeList().shouldContainExactly(Grapheme("¶"))
-        "☰".toGraphemeList().shouldContainExactly(Grapheme("☰"))
-        "𝕓".toGraphemeList().shouldContainExactly(Grapheme("𝕓"))
-        "a̳o".toGraphemeList().shouldContainExactly(Grapheme("a̳"), Grapheme("o")) // combining mark
+    @Test fun as_grapheme_indices_sequence() = testAll {
+        "".asGraphemeIndicesSequence().shouldBeEmpty()
+        "a".asGraphemeIndicesSequence().shouldContainExactly(0..0)
+        "¶".asGraphemeIndicesSequence().shouldContainExactly(0..0)
+        "☰".asGraphemeIndicesSequence().shouldContainExactly(0..0)
+        "𝕓".asGraphemeIndicesSequence().shouldContainExactly(0..1)
+        "a̳o".asGraphemeIndicesSequence().shouldContainExactly(0..1, 2..2) // combining mark
+        "a̳o".asGraphemeIndicesSequence(startIndex = 1).shouldContainExactly(1..1, 2..2)
+        "a̳o".asGraphemeIndicesSequence(startIndex = 2).shouldContainExactly(2..2)
+        "a̳o".asGraphemeIndicesSequence(startIndex = 3).shouldBeEmpty()
+        "a̳o".asGraphemeIndicesSequence(endIndex = 1).shouldContainExactly(0..0)
+        "a̳o".asGraphemeIndicesSequence(endIndex = 2).shouldContainExactly(0..1)
+        "a̳o".asGraphemeIndicesSequence(endIndex = 3).shouldContainExactly(0..1, 2..2)
 
-        "🫠".toGraphemeList().shouldContainExactly(Grapheme("🫠")) // emoji
-        "🇩🇪".toGraphemeList().shouldContainExactly(Grapheme("🇩🇪")) // regional indicators
-        "👨🏾‍🦱".toGraphemeList().shouldContainExactly(Grapheme("👨🏾‍🦱")) // emoji + skin tone modifier + ZWJ + curly hair
-        "👩‍👩‍👦‍👦".toGraphemeList().shouldContainExactly(Grapheme("👩‍👩‍👦‍👦")) // long ZWJ sequence
+        shouldThrowWithMessage<IndexOutOfBoundsException>("begin -1, end 0, length 0") { "".asGraphemeIndicesSequence(startIndex = -1).toList() }
+        shouldThrowWithMessage<IndexOutOfBoundsException>("begin 0, end -1, length 0") { "".asGraphemeIndicesSequence(endIndex = -1).toList() }
+
+        "🫠".asGraphemeIndicesSequence().shouldContainExactly(0..1) // emoji
+        "🇩🇪".asGraphemeIndicesSequence().shouldContainExactly(0..3) // regional indicators
+        "👨🏾‍🦱".asGraphemeIndicesSequence().shouldContainExactly(0..6) // emoji + skin tone modifier + ZWJ + curly hair
+        "👩‍👩‍👦‍👦".asGraphemeIndicesSequence().shouldContainExactly(0..10) // long ZWJ sequence
     }
 
-    @Test fun grapheme_count() = test {
+    @Test fun as_grapheme_sequence() = testAll {
+        "".asGraphemeSequence().shouldBeEmpty()
+        "a".asGraphemeSequence().shouldContainExactly(Grapheme("a", 0..0))
+        "¶".asGraphemeSequence().shouldContainExactly(Grapheme("¶", 0..0))
+        "☰".asGraphemeSequence().shouldContainExactly(Grapheme("☰", 0..0))
+        "𝕓".asGraphemeSequence().shouldContainExactly(Grapheme("𝕓", 0..1))
+        "a̳o".asGraphemeSequence().shouldContainExactly(Grapheme("a̳o", 0..1), Grapheme("a̳o", 2..2)) // combining mark
+        "a̳o".asGraphemeSequence(startIndex = 1).shouldContainExactly(Grapheme("a̳o", 1..1), Grapheme("a̳o", 2..2))
+        "a̳o".asGraphemeSequence(startIndex = 2).shouldContainExactly(Grapheme("a̳o", 2..2))
+        "a̳o".asGraphemeSequence(startIndex = 3).shouldBeEmpty()
+        "a̳o".asGraphemeSequence(endIndex = 1).shouldContainExactly(Grapheme("a̳o", 0..0))
+        "a̳o".asGraphemeSequence(endIndex = 2).shouldContainExactly(Grapheme("a̳o", 0..1))
+        "a̳o".asGraphemeSequence(endIndex = 3).shouldContainExactly(Grapheme("a̳o", 0..1), Grapheme("a̳o", 2..2))
+
+        shouldThrowWithMessage<IndexOutOfBoundsException>("begin -1, end 0, length 0") { "".asGraphemeSequence(startIndex = -1).toList() }
+        shouldThrowWithMessage<IndexOutOfBoundsException>("begin 0, end -1, length 0") { "".asGraphemeSequence(endIndex = -1).toList() }
+
+        "🫠".asGraphemeSequence().shouldContainExactly(Grapheme("🫠", 0..1)) // emoji
+        "🇩🇪".asGraphemeSequence().shouldContainExactly(Grapheme("🇩🇪", 0..3)) // regional indicators
+        "👨🏾‍🦱".asGraphemeSequence().shouldContainExactly(Grapheme("👨🏾‍🦱", 0..6)) // emoji + skin tone modifier + ZWJ + curly hair
+        "👩‍👩‍👦‍👦".asGraphemeSequence().shouldContainExactly(Grapheme("👩‍👩‍👦‍👦", 0..10)) // long ZWJ sequence
+    }
+
+    @Test fun to_grapheme_list() = testAll {
+        "".toGraphemeList().shouldBeEmpty()
+        "a".toGraphemeList().shouldContainExactly(Grapheme("a", 0..0))
+        "¶".toGraphemeList().shouldContainExactly(Grapheme("¶", 0..0))
+        "☰".toGraphemeList().shouldContainExactly(Grapheme("☰", 0..0))
+        "𝕓".toGraphemeList().shouldContainExactly(Grapheme("𝕓", 0..1))
+        "a̳o".toGraphemeList().shouldContainExactly(Grapheme("a̳o", 0..1), Grapheme("a̳o", 2..2)) // combining mark
+        "a̳o".toGraphemeList(startIndex = 1).shouldContainExactly(Grapheme("a̳o", 1..1), Grapheme("a̳o", 2..2))
+        "a̳o".toGraphemeList(startIndex = 2).shouldContainExactly(Grapheme("a̳o", 2..2))
+        "a̳o".toGraphemeList(startIndex = 3).shouldBeEmpty()
+        "a̳o".toGraphemeList(endIndex = 1).shouldContainExactly(Grapheme("a̳o", 0..0))
+        "a̳o".toGraphemeList(endIndex = 2).shouldContainExactly(Grapheme("a̳o", 0..1))
+        "a̳o".toGraphemeList(endIndex = 3).shouldContainExactly(Grapheme("a̳o", 0..1), Grapheme("a̳o", 2..2))
+
+        shouldThrowWithMessage<IndexOutOfBoundsException>("begin -1, end 0, length 0") { "".toGraphemeList(startIndex = -1) }
+        shouldThrowWithMessage<IndexOutOfBoundsException>("begin 0, end -1, length 0") { "".toGraphemeList(endIndex = -1) }
+
+        "🫠".toGraphemeList().shouldContainExactly(Grapheme("🫠", 0..1)) // emoji
+        "🇩🇪".toGraphemeList().shouldContainExactly(Grapheme("🇩🇪", 0..3)) // regional indicators
+        "👨🏾‍🦱".toGraphemeList().shouldContainExactly(Grapheme("👨🏾‍🦱", 0..6)) // emoji + skin tone modifier + ZWJ + curly hair
+        "👩‍👩‍👦‍👦".toGraphemeList().shouldContainExactly(Grapheme("👩‍👩‍👦‍👦", 0..10)) // long ZWJ sequence
+    }
+
+    @Test fun grapheme_count() = testAll {
         "".graphemeCount() shouldBe 0
         "a".graphemeCount() shouldBe 1
+        "¶".graphemeCount() shouldBe 1
+        "☰".graphemeCount() shouldBe 1
+        "𝕓".graphemeCount() shouldBe 1
         "a̳o".graphemeCount() shouldBe 2
-        "🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".graphemeCount() shouldBe 4
-        "🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".graphemeCount(startIndex = 2) shouldBe 3
-        "🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".graphemeCount(endIndex = 6) shouldBe 2
+        "a̳o".graphemeCount(startIndex = 1) shouldBe 2
+        "a̳o".graphemeCount(startIndex = 2) shouldBe 1
+        "a̳o".graphemeCount(startIndex = 3) shouldBe 0
+        "a̳o".graphemeCount(endIndex = 1) shouldBe 1
+        "a̳o".graphemeCount(endIndex = 2) shouldBe 1
+        "a̳o".graphemeCount(endIndex = 3) shouldBe 2
 
-        "\uD83C\uDFF3\u200D\uD83C\uDF08".toGraphemeList() shouldHaveSize 1 // rainbow flag
-        "\uD83C\uDFF3️\uFE0E\u200D\uD83C\uDF08".toGraphemeList() shouldHaveSize 1 // text-variant flag + ZWJ + rainbow
-        "\uD83C\uDFF3️\uFE0F\u200D\uD83C\uDF08".toGraphemeList() shouldHaveSize 1 // emoji-variant flag + ZWJ + rainbow
+        shouldThrowWithMessage<IndexOutOfBoundsException>("begin -1, end 0, length 0") { "".graphemeCount(startIndex = -1) }
+        shouldThrowWithMessage<IndexOutOfBoundsException>("begin 0, end -1, length 0") { "".graphemeCount(endIndex = -1) }
+
+        "🫠".graphemeCount() shouldBe 1 // emoji
+        "🇩🇪".graphemeCount() shouldBe 1 // regional indicators
+        "👨🏾‍🦱".graphemeCount() shouldBe 1 // emoji + skin tone modifier + ZWJ + curly hair
+        "👩‍👩‍👦‍👦".graphemeCount() shouldBe 1 // long ZWJ sequence
     }
 
-    @Test fun equality() = test {
+    @Test fun equality() = testAll {
         Grapheme("a") shouldNotBe Grapheme("¶")
         Grapheme("¶") shouldBe Grapheme("¶")
+        Grapheme("¶") shouldBe Grapheme("¶", null)
+        Grapheme("¶") shouldBe Grapheme("¶", 0..0)
     }
 
-    @Test fun string() = test {
-        Grapheme("a").string shouldBe "a"
-        Grapheme("¶").string shouldBe "¶"
-        Grapheme("☰").string shouldBe "☰"
-        Grapheme("𝕓").string shouldBe "𝕓"
-        Grapheme("a̳").string shouldBe "a̳"
+    @Test fun value() = testAll {
+        Grapheme("a").value shouldBe DelegatingCharSequence("a")
+        Grapheme("¶").value shouldBe DelegatingCharSequence("¶")
+        Grapheme("☰").value shouldBe DelegatingCharSequence("☰")
+        Grapheme("𝕓").value shouldBe DelegatingCharSequence("𝕓")
+        Grapheme("a̳").value shouldBe DelegatingCharSequence("a̳")
     }
 
-    @Test fun to_string() = test {
+    @Test fun to_string() = testAll {
         Grapheme("a").toString() shouldBe "a"
         Grapheme("¶").toString() shouldBe "¶"
         Grapheme("☰").toString() shouldBe "☰"
@@ -60,7 +129,7 @@ class GraphemeTest {
         Grapheme("a̳").toString() shouldBe "a̳"
     }
 
-    @Test fun code_points() = test {
+    @Test fun code_points() = testAll {
         Grapheme("a").codePoints shouldBe "a".toCodePointList()
         Grapheme("¶").codePoints shouldBe "¶".toCodePointList()
         Grapheme("☰").codePoints shouldBe "☰".toCodePointList()
@@ -68,7 +137,7 @@ class GraphemeTest {
         Grapheme("a̳").codePoints shouldBe "a̳".toCodePointList()
     }
 
-    @Test fun as_grapheme() = test {
+    @Test fun as_grapheme() = testAll {
         shouldThrow<IllegalArgumentException> { "".asGrapheme() }
         "👨🏾‍🦱".asGrapheme() shouldBe Grapheme("👨🏾‍🦱")
         shouldThrow<IllegalArgumentException> { "👨🏾‍🦱👩‍👩‍👦‍👦".asGrapheme() }

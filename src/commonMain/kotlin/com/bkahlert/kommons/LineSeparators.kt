@@ -155,7 +155,7 @@ public object LineSeparators : AbstractList<String>() {
         val lines = lineSequence(lineSeparators = lineSeparators, keepDelimiters = false)
         return lines.flatMap { line: String ->
             val iterator = line.chunkedSequence(size, transform).iterator()
-            if (iterator.hasNext()) iterator.asSequence() else sequenceOf(transform(""))
+            if (iterator.hasNext()) iterator.asSequence() else sequenceOf(transform(String.EMPTY))
         }
     }
 

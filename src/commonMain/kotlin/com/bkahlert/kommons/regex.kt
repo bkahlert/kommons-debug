@@ -265,8 +265,8 @@ public fun Regex.repeat(min: Int? = 0, max: Int? = null): Regex {
     if (min == 0 && max == 1) return optional()
     if (min == 0 && max == null) return repeatAny()
     if (min == 1 && max == null) return repeatAtLeastOnce()
-    val minString = min?.toString() ?: ""
-    val maxString = max?.toString() ?: ""
+    val minString = min?.toString() ?: String.EMPTY
+    val maxString = max?.toString() ?: String.EMPTY
     @Suppress("RegExpSimplifiable")
     return Regex("${grouped.pattern}{$minString,$maxString}")
 }

@@ -9,31 +9,45 @@ import kotlin.jvm.JvmInline
  * @see <a href="https://unicode.org/reports/tr29/#Grapheme_Cluster_Boundary_Rules">Grapheme Cluster Boundary Rules</a>
  */
 @JvmInline
-public value class Grapheme(
+public value class Grapheme private constructor(
     /** The string this grapheme consists of. */
-    public val string: String,
-) {
+    public val value: CharSequence,
+) : CharSequence by value {
+    public constructor(delegate: CharSequence, range: IntRange? = null) : this(DelegatingCharSequence(delegate, range))
+
     /** The [CodePoint] instances this grapheme consists of. */
-    public val codePoints: List<CodePoint> get() = string.toCodePointList()
-    override fun toString(): String = string
+    public val codePoints: List<CodePoint> get() = value.toCodePointList()
+    override fun toString(): String = value.toString()
 }
 
 /** Returns the [Grapheme] with the same value, or throws an [IllegalArgumentException] otherwise. */
-public fun String.asGrapheme(): Grapheme = asGraphemeOrNull() ?: throw IllegalArgumentException("invalid grapheme: $this")
+public fun CharSequence.asGrapheme(): Grapheme = asGraphemeOrNull() ?: throw IllegalArgumentException("invalid grapheme: $this")
 
 /** Returns the [Grapheme] with the same value, or `null` otherwise. */
-public fun String.asGraphemeOrNull(): Grapheme? = asGraphemeSequence().singleOrNull()
+public fun CharSequence.asGraphemeOrNull(): Grapheme? = asGraphemeSequence().singleOrNull()
 
-/** Returns a sequence yielding the [Grapheme] instances this string consists of. */
-public expect fun String.asGraphemeSequence(): Sequence<Grapheme>
+/** Returns a sequence yielding the indices describing the [Grapheme] instances contained in the specified text range of this string. */
+public expect fun CharSequence.asGraphemeIndicesSequence(
+    startIndex: Int = 0,
+    endIndex: Int = length,
+): Sequence<IntRange>
 
-/** Returns a list containing the [Grapheme] instances this string consists of. */
-public fun String.toGraphemeList(): List<Grapheme> = asGraphemeSequence().toList()
-
-/** Returns the number of [Grapheme] instances in the specified text range of this string. */
-public fun String.graphemeCount(startIndex: Int = 0, endIndex: Int = length): Int {
-    if (endIndex < startIndex || startIndex < 0 || endIndex > length) throw IndexOutOfBoundsException("begin $startIndex, end $endIndex, length $length")
-    val substring = substring(startIndex, endIndex)
-    if (substring.isEmpty()) return 0
-    return substring.asGraphemeSequence().count()
+/** Returns a sequence yielding the [Grapheme] instances contained in the specified text range of this string. */
+public fun CharSequence.asGraphemeSequence(
+    startIndex: Int = 0,
+    endIndex: Int = length,
+): Sequence<Grapheme> = asGraphemeIndicesSequence(startIndex, endIndex).map {
+    Grapheme(DelegatingCharSequence(this, it))
 }
+
+/** Returns the [Grapheme] instances contained in the specified text range of this string. */
+public fun CharSequence.toGraphemeList(
+    startIndex: Int = 0,
+    endIndex: Int = length,
+): List<Grapheme> = asGraphemeSequence(startIndex, endIndex).toList()
+
+/** Returns the number of [Grapheme] instances contained in the specified text range of this string. */
+public fun CharSequence.graphemeCount(
+    startIndex: Int = 0,
+    endIndex: Int = length,
+): Int = asGraphemeIndicesSequence(startIndex, endIndex).count()

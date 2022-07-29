@@ -58,7 +58,7 @@ public fun ULong.toUByteArray(trimmed: Boolean = false): UByteArray =
 public fun Byte.toHexadecimalString(): String = (toInt() and 0xFF).toString(16).padStart(2, '0')
 
 /** Returns a hexadecimal string representation of this [ByteArray] value. */
-public fun ByteArray.toHexadecimalString(): String = joinToString("") { it.toHexadecimalString() }
+public fun ByteArray.toHexadecimalString(): String = joinToString(String.EMPTY) { it.toHexadecimalString() }
 
 /** Returns a hexadecimal string representation of this [Int] value. */
 public fun Int.toHexadecimalString(): String = toString(16)
@@ -70,7 +70,7 @@ public fun Long.toHexadecimalString(): String = toString(16)
 public fun UByte.toHexadecimalString(): String = toString(16).padStart(2, '0')
 
 /** Returns a hexadecimal string representation of this [UByteArray] value. */
-public fun UByteArray.toHexadecimalString(): String = joinToString("") { it.toHexadecimalString() }
+public fun UByteArray.toHexadecimalString(): String = joinToString(String.EMPTY) { it.toHexadecimalString() }
 
 /** Returns a hexadecimal string representation of this [UInt] value. */
 public fun UInt.toHexadecimalString(): String = toString(16)
@@ -90,7 +90,7 @@ public fun UByte.toDecimalString(): String = toString(10)
 public fun Byte.toOctalString(): String = (toInt() and 0xFF).toString(8).padStart(3, '0')
 
 /** Returns an octal string representation of this [ByteArray] value. */
-public fun ByteArray.toOctalString(): String = joinToString("") { it.toOctalString() }
+public fun ByteArray.toOctalString(): String = joinToString(String.EMPTY) { it.toOctalString() }
 
 /** Returns an octal string representation of this [Int] value. */
 public fun Int.toOctalString(): String = toString(8)
@@ -102,7 +102,7 @@ public fun Long.toOctalString(): String = toString(8)
 public fun UByte.toOctalString(): String = toString(8).padStart(3, '0')
 
 /** Returns an octal string representation of this [UByteArray] value. */
-public fun UByteArray.toOctalString(): String = joinToString("") { it.toOctalString() }
+public fun UByteArray.toOctalString(): String = joinToString(String.EMPTY) { it.toOctalString() }
 
 /** Returns an octal string representation of this [UInt] value. */
 public fun UInt.toOctalString(): String = toString(8)
@@ -115,7 +115,7 @@ public fun ULong.toOctalString(): String = toString(8)
 public fun Byte.toBinaryString(): String = (toInt() and 0xFF).toString(2).padStart(8, '0')
 
 /** Returns a binary string representation of this [ByteArray] value. */
-public fun ByteArray.toBinaryString(): String = joinToString("") { it.toBinaryString() }
+public fun ByteArray.toBinaryString(): String = joinToString(String.EMPTY) { it.toBinaryString() }
 
 /** Returns a binary string representation of this [Int] value. */
 public fun Int.toBinaryString(): String = toString(2)
@@ -127,7 +127,7 @@ public fun Long.toBinaryString(): String = toString(2)
 public fun UByte.toBinaryString(): String = toString(2).padStart(8, '0')
 
 /** Returns a binary string representation of this [UByteArray] value. */
-public fun UByteArray.toBinaryString(): String = joinToString("") { it.toBinaryString() }
+public fun UByteArray.toBinaryString(): String = joinToString(String.EMPTY) { it.toBinaryString() }
 
 /** Returns a binary string representation of this [UInt] value. */
 public fun UInt.toBinaryString(): String = toString(2)
@@ -136,7 +136,7 @@ public fun UInt.toBinaryString(): String = toString(2)
 public fun ULong.toBinaryString(): String = toString(2)
 
 
-private val base64Characters = ("" +
+private val base64Characters = (String.EMPTY +
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
     "abcdefghijklmnopqrstuvwxyz" +
     "0123456789+/"

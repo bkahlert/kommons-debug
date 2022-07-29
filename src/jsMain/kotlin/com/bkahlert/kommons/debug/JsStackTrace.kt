@@ -1,5 +1,6 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.EMPTY
 import com.bkahlert.kommons.Parser
 import com.bkahlert.kommons.Parser.Companion.parser
 import com.bkahlert.kommons.Platform
@@ -73,7 +74,7 @@ public fun StackTrace.Companion.unify(renderedStackTraceElement: String): String
 
 /** Returns the specified [function] with mangling information removed. */
 public actual fun StackTrace.Companion.demangleFunction(function: String): String =
-    function.replace(functionMangleRegex, "")
+    function.replace(functionMangleRegex, String.EMPTY)
 
 /** Gets the current [StackTrace]. */
 public inline fun StackTrace.Companion.get(stackTrace: () -> Sequence<String>): StackTrace = stackTrace()
@@ -95,10 +96,10 @@ public actual inline fun StackTrace.Companion.get(): StackTrace = get {
 
 private fun String.jsBeanMethodToKotlinProperty() = takeUnless {
     length >= 6 && substring(0, 5).let { it == "_get_" || it == "_set_" }
-} ?: substring(5).replace("__\\d+$".toRegex(), "")
+} ?: substring(5).replace("__\\d+$".toRegex(), String.EMPTY)
 
 private fun String.simplifyFunction() =
-    replace(generatedFunctionRegex, "").jsBeanMethodToKotlinProperty()
+    replace(generatedFunctionRegex, String.EMPTY).jsBeanMethodToKotlinProperty()
 
 /**
  * Finds the [StackTraceElement] that represents the caller

@@ -3,17 +3,22 @@ package com.bkahlert.kommons
 private val nextGraphemeClusterBreak = js("require('@stdlib/string-next-grapheme-cluster-break')")
 
 /** Returns a sequence yielding the [Grapheme] instances this string consists of. */
-public actual fun String.asGraphemeSequence(): Sequence<Grapheme> {
-    if (isEmpty()) return emptySequence()
+public actual fun CharSequence.asGraphemeIndicesSequence(
+    startIndex: Int,
+    endIndex: Int,
+): Sequence<IntRange> {
+    checkBoundsIndexes(length, startIndex, endIndex)
+    val subSequence = subSequence(startIndex, endIndex)
+    if (subSequence.isEmpty()) return emptySequence()
     var index = 0
     return sequence {
         while (true) {
-            val breakIndex = nextGraphemeClusterBreak(this@asGraphemeSequence, index) as Int
+            val breakIndex = nextGraphemeClusterBreak(subSequence, index) as Int
             if (breakIndex == -1) {
-                yield(Grapheme(this@asGraphemeSequence.substring(index, this@asGraphemeSequence.length)))
+                yield(index + startIndex until subSequence.length + startIndex)
                 break
             }
-            yield(Grapheme(this@asGraphemeSequence.substring(index, breakIndex)))
+            yield(index + startIndex until breakIndex + startIndex)
             index = breakIndex
         }
     }

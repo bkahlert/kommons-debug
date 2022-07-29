@@ -1,5 +1,6 @@
 package com.bkahlert.kommons.debug
 
+import com.bkahlert.kommons.EMPTY
 import com.bkahlert.kommons.Platform
 import java.lang.reflect.Method
 import java.util.Locale
@@ -19,7 +20,7 @@ public data class JvmStackTraceElement(
 
     public override val demangledFunction: String = StackTrace.demangleFunction(function)
 
-    override fun toString(): String = "$receiver.$function($file:$line${column?.let { ":$it" } ?: ""})"
+    override fun toString(): String = "$receiver.$function($file:$line${column?.let { ":$it" } ?: String.EMPTY})"
 }
 
 private val functionMangleRegex: Regex = "\\$.*$".toRegex()
@@ -27,7 +28,7 @@ private val generatedFunctionRegex = "\\\$.*".toRegex()
 
 /** Returns the specified [function] with mangling information removed. */
 public actual fun StackTrace.Companion.demangleFunction(function: String): String =
-    function.replace(functionMangleRegex, "")
+    function.replace(functionMangleRegex, String.EMPTY)
 
 
 /** The [Class] containing the execution point represented by this element. */
@@ -77,7 +78,7 @@ private fun String.javaBeanMethodToKotlinProperty() = takeUnless {
 } ?: substring(3).replaceFirstChar { it.lowercase(Locale.getDefault()) }
 
 private fun String.simplifyFunction() =
-    replace(generatedFunctionRegex, "").javaBeanMethodToKotlinProperty()
+    replace(generatedFunctionRegex, String.EMPTY).javaBeanMethodToKotlinProperty()
 
 /**
  * Finds the [StackTraceElement] that represents the caller

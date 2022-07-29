@@ -171,6 +171,7 @@ internal class RenderingContext(
                     obj.renderTypeTo(out, simplified = true)
                     out.append(" ")
                 }
+
                 FullyTyped -> {
                     out.append("!")
                     obj.renderTypeTo(out, simplified = false)
@@ -235,6 +236,7 @@ internal fun RenderingContext.renderStringTo(out: StringBuilder, string: CharSeq
         Always -> {
             out.append(string.quoted)
         }
+
         Never, is Auto -> {
             if (string.isMultiline()) {
                 out.append("\"\"\"\n")
@@ -250,24 +252,28 @@ internal fun RenderingContext.renderStringTo(out: StringBuilder, string: CharSeq
 internal fun renderPrimitive(primitive: Any): String =
     buildString { renderPrimitiveTo(this, primitive) }
 
+private fun Byte.toDecimalAndHexadecimalString() = "${toInt()}／0x${toHexadecimalString()}"
+private fun UByte.toDecimalAndHexadecimalString() = "${toInt()}／0x${toHexadecimalString()}"
+
 internal fun renderPrimitiveTo(out: StringBuilder, primitive: Any) {
     when (primitive) {
         is Boolean -> out.append(primitive)
         is Char -> out.append(primitive)
         is Float -> if (primitive.toLong() in Byte.VALUE_RANGE && primitive.mod(1.0f) == 0.0f)
-            out.append("0x" + primitive.toInt().toByte().toHexadecimalString()) else out.append(primitive)
+            out.append(primitive.toInt().toByte().toDecimalAndHexadecimalString()) else out.append(primitive)
+
         is Double -> if (primitive.toLong() in Byte.VALUE_RANGE && primitive.mod(1.0) == 0.0)
-            out.append("0x" + primitive.toInt().toByte().toHexadecimalString()) else out.append(primitive)
+            out.append(primitive.toInt().toByte().toDecimalAndHexadecimalString()) else out.append(primitive)
 
-        is UByte -> out.append("0x" + primitive.toHexadecimalString())
-        is UShort -> if (primitive in UByte.VALUE_RANGE) out.append("0x" + primitive.toUByte().toHexadecimalString()) else out.append(primitive)
-        is UInt -> if (primitive in UByte.VALUE_RANGE) out.append("0x" + primitive.toUByte().toHexadecimalString()) else out.append(primitive)
-        is ULong -> if (primitive in UByte.VALUE_RANGE) out.append("0x" + primitive.toUByte().toHexadecimalString()) else out.append(primitive)
+        is UByte -> out.append(primitive.toDecimalAndHexadecimalString())
+        is UShort -> if (primitive in UByte.VALUE_RANGE) out.append(primitive.toUByte().toDecimalAndHexadecimalString()) else out.append(primitive)
+        is UInt -> if (primitive in UByte.VALUE_RANGE) out.append(primitive.toUByte().toDecimalAndHexadecimalString()) else out.append(primitive)
+        is ULong -> if (primitive in UByte.VALUE_RANGE) out.append(primitive.toUByte().toDecimalAndHexadecimalString()) else out.append(primitive)
 
-        is Byte -> out.append("0x" + primitive.toHexadecimalString())
-        is Short -> if (primitive in Byte.VALUE_RANGE) out.append("0x" + primitive.toByte().toHexadecimalString()) else out.append(primitive)
-        is Int -> if (primitive in Byte.VALUE_RANGE) out.append("0x" + primitive.toByte().toHexadecimalString()) else out.append(primitive)
-        is Long -> if (primitive in Byte.VALUE_RANGE) out.append("0x" + primitive.toByte().toHexadecimalString()) else out.append(primitive)
+        is Byte -> out.append(primitive.toDecimalAndHexadecimalString())
+        is Short -> if (primitive in Byte.VALUE_RANGE) out.append(primitive.toByte().toDecimalAndHexadecimalString()) else out.append(primitive)
+        is Int -> if (primitive in Byte.VALUE_RANGE) out.append(primitive.toByte().toDecimalAndHexadecimalString()) else out.append(primitive)
+        is Long -> if (primitive in Byte.VALUE_RANGE) out.append(primitive.toByte().toDecimalAndHexadecimalString()) else out.append(primitive)
         else -> out.append("⁉️")
     }
 }

@@ -9,7 +9,7 @@ import com.bkahlert.kommons.debug.CustomToString.Ignore
 import com.bkahlert.kommons.debug.CustomToString.IgnoreForPlainCollectionsAndMaps
 import com.bkahlert.kommons.debug.Typing.SimplyTyped
 import com.bkahlert.kommons.debug.Typing.Untyped
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import kotlin.test.Test
@@ -17,12 +17,12 @@ import kotlin.test.fail
 
 class RenderTest {
 
-    @Test fun render_null() = test {
+    @Test fun render_null() = testAll {
         null.render() shouldBe "null"
     }
 
     @Suppress("SpellCheckingInspection")
-    @Test fun render_string() = test {
+    @Test fun render_string() = testAll {
         renderString("") { compression = Always } shouldBe "\"\""
         renderString(" ") { compression = Always } shouldBe "\" \""
         renderString("string") { compression = Always } shouldBe "\"string\""
@@ -49,7 +49,7 @@ class RenderTest {
         """.trimIndent()
     }
 
-    @Test fun render_char_sequence() = test {
+    @Test fun render_char_sequence() = testAll {
         val charSequenceWithNoCustomToString = object : CharSequence by "string" {}
         val charSequenceWithCustomToString = object : CharSequence by "string" {
             override fun toString(): String = "custom"
@@ -58,44 +58,44 @@ class RenderTest {
         renderString(charSequenceWithCustomToString) shouldBe "\"string\""
     }
 
-    @Test fun render_primitive() = test {
+    @Test fun render_primitive() = testAll {
         renderPrimitive(PrimitiveTypes.boolean) shouldBe "true"
         renderPrimitive(PrimitiveTypes.char) shouldBe "*"
         renderPrimitive(PrimitiveTypes.float) shouldBe "42.1"
         renderPrimitive(PrimitiveTypes.double) shouldBe "42.12"
 
-        renderPrimitive(PrimitiveTypes.uByte) shouldBe "0x27"
-        renderPrimitive(PrimitiveTypes.uShort) shouldBe "0x28"
-        renderPrimitive(PrimitiveTypes.uInt) shouldBe "0x29"
-        renderPrimitive(PrimitiveTypes.uLong) shouldBe "0x2a"
+        renderPrimitive(PrimitiveTypes.uByte) shouldBe "39／0x27"
+        renderPrimitive(PrimitiveTypes.uShort) shouldBe "40／0x28"
+        renderPrimitive(PrimitiveTypes.uInt) shouldBe "41／0x29"
+        renderPrimitive(PrimitiveTypes.uLong) shouldBe "42／0x2a"
 
-        renderPrimitive(PrimitiveTypes.byte) shouldBe "0x27"
-        renderPrimitive(PrimitiveTypes.short) shouldBe "0x28"
-        renderPrimitive(PrimitiveTypes.int) shouldBe "0x29"
-        renderPrimitive(PrimitiveTypes.long) shouldBe "0x2a"
+        renderPrimitive(PrimitiveTypes.byte) shouldBe "39／0x27"
+        renderPrimitive(PrimitiveTypes.short) shouldBe "40／0x28"
+        renderPrimitive(PrimitiveTypes.int) shouldBe "41／0x29"
+        renderPrimitive(PrimitiveTypes.long) shouldBe "42／0x2a"
 
         renderPrimitive("string") shouldBe "⁉️"
     }
 
-    @Test fun render_primitive_array() = test {
+    @Test fun render_primitive_array() = testAll {
         renderPrimitiveArray(PrimitiveTypes.booleanArray) shouldBe "[true, false, false]"
         renderPrimitiveArray(PrimitiveTypes.charArray) shouldBe "[a, r, r, a, y]"
-        renderPrimitiveArray(PrimitiveTypes.floatArray) shouldBe "[0x61, 0x72, 0x72, 0x61, 0x79]"
-        renderPrimitiveArray(PrimitiveTypes.doubleArray) shouldBe "[0x61, 0x72, 0x72, 0x61, 0x79]"
+        renderPrimitiveArray(PrimitiveTypes.floatArray) shouldBe "[97／0x61, 114／0x72, 114／0x72, 97／0x61, 121／0x79]"
+        renderPrimitiveArray(PrimitiveTypes.doubleArray) shouldBe "[97／0x61, 114／0x72, 114／0x72, 97／0x61, 121／0x79]"
 
         renderPrimitiveArray(PrimitiveTypes.uByteArray) shouldBe "0x6172726179"
-        renderPrimitiveArray(PrimitiveTypes.uShortArray) shouldBe "[0x61, 0x72, 0x72, 0x61, 0x79]"
-        renderPrimitiveArray(PrimitiveTypes.uIntArray) shouldBe "[0x61, 0x72, 0x72, 0x61, 0x79]"
-        renderPrimitiveArray(PrimitiveTypes.uLongArray) shouldBe "[0x61, 0x72, 0x72, 0x61, 0x79]"
+        renderPrimitiveArray(PrimitiveTypes.uShortArray) shouldBe "[97／0x61, 114／0x72, 114／0x72, 97／0x61, 121／0x79]"
+        renderPrimitiveArray(PrimitiveTypes.uIntArray) shouldBe "[97／0x61, 114／0x72, 114／0x72, 97／0x61, 121／0x79]"
+        renderPrimitiveArray(PrimitiveTypes.uLongArray) shouldBe "[97／0x61, 114／0x72, 114／0x72, 97／0x61, 121／0x79]"
 
         renderPrimitiveArray(PrimitiveTypes.byteArray) shouldBe "0x6172726179"
-        renderPrimitiveArray(PrimitiveTypes.shortArray) shouldBe "[0x61, 0x72, 0x72, 0x61, 0x79]"
-        renderPrimitiveArray(PrimitiveTypes.intArray) shouldBe "[0x61, 0x72, 0x72, 0x61, 0x79]"
-        renderPrimitiveArray(PrimitiveTypes.longArray) shouldBe "[0x61, 0x72, 0x72, 0x61, 0x79]"
+        renderPrimitiveArray(PrimitiveTypes.shortArray) shouldBe "[97／0x61, 114／0x72, 114／0x72, 97／0x61, 121／0x79]"
+        renderPrimitiveArray(PrimitiveTypes.intArray) shouldBe "[97／0x61, 114／0x72, 114／0x72, 97／0x61, 121／0x79]"
+        renderPrimitiveArray(PrimitiveTypes.longArray) shouldBe "[97／0x61, 114／0x72, 114／0x72, 97／0x61, 121／0x79]"
     }
 
     @Suppress("SpellCheckingInspection")
-    @Test fun render_array() = test {
+    @Test fun render_array() = testAll {
         renderArray(arrayOf<String>()) { compression = Always } shouldBe "[]"
         renderArray(arrayOf("string")) { compression = Always } shouldBe "[ \"string\" ]"
         renderArray(arrayOf("string", null)) { compression = Always } shouldBe "[ \"string\", null ]"
@@ -147,7 +147,7 @@ class RenderTest {
     }
 
     @Suppress("SpellCheckingInspection")
-    @Test fun render_collection() = test {
+    @Test fun render_collection() = testAll {
         renderCollection(listOf<String>()) { compression = Always } shouldBe "[]"
         renderCollection(listOf("string")) { compression = Always } shouldBe "[ \"string\" ]"
         renderCollection(listOf("string", null)) { compression = Always } shouldBe "[ \"string\", null ]"
@@ -199,7 +199,7 @@ class RenderTest {
     }
 
     @Suppress("SpellCheckingInspection")
-    @Test fun render_map() = test {
+    @Test fun render_map() = testAll {
         renderObject(emptyMap<String, Any?>()) { compression = Always } shouldBe "{}"
         renderObject(mapOf("foo" to "string")) { compression = Always } shouldBe "{ foo: \"string\" }"
         renderObject(mapOf("foo" to "string", "bar" to null)) { compression = Always } shouldBe "{ foo: \"string\", bar: null }"
@@ -250,7 +250,7 @@ class RenderTest {
         """.trimIndent()
     }
 
-    @Test fun render_map_with_any_key() = test {
+    @Test fun render_map_with_any_key() = testAll {
         renderObject(mapOf(DataClass() to "foo", null to "bar")) { compression = Always } shouldBe """
             { DataClass(dataProperty=data-property, openBaseProperty=37): "foo", null: "bar" }
         """.trimIndent()
@@ -275,7 +275,7 @@ class RenderTest {
     }
 
     @Suppress("SpellCheckingInspection")
-    @Test fun render_object() = test {
+    @Test fun render_object() = testAll {
         renderObject(ClassWithDefaultToString()) { compression = Always } shouldBe "{ foo: null, bar: \"baz\" }"
         renderObject(ClassWithDefaultToString("string")) { compression = Always } shouldBe "{ foo: \"string\", bar: \"baz\" }"
         renderObject(ClassWithDefaultToString("line 1\nline 2")) { compression = Always } shouldBe "{ foo: \"line 1\\nline 2\", bar: \"baz\" }"
@@ -352,13 +352,13 @@ class RenderTest {
     // render
 
     @Suppress("SpellCheckingInspection")
-    @Test fun render() = test {
+    @Test fun render() = testAll {
 
         val simplyTypedAlwaysCompressingSettings = RenderingSettings.build { typing = SimplyTyped; compression = Always }
         null.render(simplyTypedAlwaysCompressingSettings) shouldBe "null"
         "line 1\nline 2".render(simplyTypedAlwaysCompressingSettings) shouldBe "!String \"line 1\\nline 2\""
         PrimitiveTypes.double.render(simplyTypedAlwaysCompressingSettings) shouldBe "!Double 42.12"
-        PrimitiveTypes.doubleArray.render(simplyTypedAlwaysCompressingSettings) shouldBe "!DoubleArray [0x61, 0x72, 0x72, 0x61, 0x79]"
+        PrimitiveTypes.doubleArray.render(simplyTypedAlwaysCompressingSettings) shouldBe "!DoubleArray [97／0x61, 114／0x72, 114／0x72, 97／0x61, 121／0x79]"
         arrayOf("string", "line 1\nline 2").render(simplyTypedAlwaysCompressingSettings) shouldBe "!Array [ !String \"string\", !String \"line 1\\nline 2\" ]"
         listOf("string", "line 1\nline 2").render(simplyTypedAlwaysCompressingSettings) shouldBe "!List [ !String \"string\", !String \"line 1\\nline 2\" ]"
         mapOf(
@@ -380,7 +380,7 @@ class RenderTest {
             "${"\""}"
         """.trimIndent()
         PrimitiveTypes.double.render(simplyTypedNeverCompressingSettings) shouldBe "!Double 42.12"
-        PrimitiveTypes.doubleArray.render(simplyTypedNeverCompressingSettings) shouldBe "!DoubleArray [0x61, 0x72, 0x72, 0x61, 0x79]"
+        PrimitiveTypes.doubleArray.render(simplyTypedNeverCompressingSettings) shouldBe "!DoubleArray [97／0x61, 114／0x72, 114／0x72, 97／0x61, 121／0x79]"
         arrayOf("string", "line 1\nline 2").render(simplyTypedNeverCompressingSettings) shouldBe """
             !Array [
                 !String "string",
@@ -428,7 +428,7 @@ class RenderTest {
         null.render(untypedAlwaysCompressingSettings) shouldBe "null"
         "line 1\nline 2".render(untypedAlwaysCompressingSettings) shouldBe "\"line 1\\nline 2\""
         PrimitiveTypes.double.render(untypedAlwaysCompressingSettings) shouldBe "42.12"
-        PrimitiveTypes.doubleArray.render(untypedAlwaysCompressingSettings) shouldBe "[0x61, 0x72, 0x72, 0x61, 0x79]"
+        PrimitiveTypes.doubleArray.render(untypedAlwaysCompressingSettings) shouldBe "[97／0x61, 114／0x72, 114／0x72, 97／0x61, 121／0x79]"
         arrayOf("string", "line 1\nline 2").render(untypedAlwaysCompressingSettings) shouldBe "[ \"string\", \"line 1\\nline 2\" ]"
         listOf("string", "line 1\nline 2").render(untypedAlwaysCompressingSettings) shouldBe "[ \"string\", \"line 1\\nline 2\" ]"
         mapOf("foo" to "string", "bar" to "line 1\nline 2").render(untypedAlwaysCompressingSettings) shouldBe "{ foo: \"string\", bar: \"line 1\\nline 2\" }"
@@ -446,7 +446,7 @@ class RenderTest {
             "${"\""}"
         """.trimIndent()
         PrimitiveTypes.double.render(untypedNeverCompressingSettings) shouldBe "42.12"
-        PrimitiveTypes.doubleArray.render(untypedNeverCompressingSettings) shouldBe "[0x61, 0x72, 0x72, 0x61, 0x79]"
+        PrimitiveTypes.doubleArray.render(untypedNeverCompressingSettings) shouldBe "[97／0x61, 114／0x72, 114／0x72, 97／0x61, 121／0x79]"
         arrayOf("string", "line 1\nline 2").render(untypedNeverCompressingSettings) shouldBe """
             [
                 "string",
@@ -498,7 +498,7 @@ class RenderTest {
             "${"\""}"
         """.trimIndent()
         PrimitiveTypes.double.render() shouldBe "42.12"
-        PrimitiveTypes.doubleArray.render() shouldBe "[0x61, 0x72, 0x72, 0x61, 0x79]"
+        PrimitiveTypes.doubleArray.render() shouldBe "[97／0x61, 114／0x72, 114／0x72, 97／0x61, 121／0x79]"
         arrayOf("string", "line 1\nline 2").render() shouldBe "[ \"string\", \"line 1\\nline 2\" ]"
         listOf("string", "line 1\nline 2").render() shouldBe "[ \"string\", \"line 1\\nline 2\" ]"
         mapOf("foo" to "string", "bar" to "line 1\nline 2").render() shouldBe "{ foo: \"string\", bar: \"line 1\\nline 2\" }"
@@ -511,11 +511,11 @@ class RenderTest {
         ClassWithDefaultToString(ClassWithDefaultToString()).render() shouldBe "{ foo: { foo: null, bar: \"baz\" }, bar: \"baz\" }"
     }
 
-    @Test fun render_object_with_rendering_to_string() = test {
+    @Test fun render_object_with_rendering_to_string() = testAll {
         ClassWithRenderingToString().render() shouldBe "{ foo: null }"
     }
 
-    @Test fun render_option_custom_to_string() = test {
+    @Test fun render_option_custom_to_string() = testAll {
         val plainCollectionsAndMapsToStringIgnoringSettings = RenderingSettings.build { customToString = IgnoreForPlainCollectionsAndMaps }
         val toStringIgnoringSettings = RenderingSettings.build { customToString = Ignore }
 
@@ -530,7 +530,7 @@ class RenderTest {
         ClassWithCustomToString().render(toStringIgnoringSettings) shouldBe "{ foo: null }"
     }
 
-    @Test fun render_with_filter() = test {
+    @Test fun render_with_filter() = testAll {
         ClassWithDefaultToString(ClassTypes.triple).render() shouldBe """
             { foo: (39, 40, 41), bar: "baz" }
         """.trimIndent()
@@ -542,20 +542,22 @@ class RenderTest {
         """.trimIndent()
     }
 
-    @Test fun render_circular_reference() = test {
+    @Test fun render_circular_reference() = testAll {
         SelfReferencingClass().render() shouldContain "selfProperty: <SelfReferencingClass@-?\\d+>".toRegex()
     }
 
-    @Test fun render_function() = test {
+    @Test fun render_function() = testAll {
         ({ }).render() shouldBe when (Platform.Current) {
             is JS -> """
                 function () {
                       return Unit_getInstance();
                     }
             """.trimIndent()
+
             is JVM -> """
                 () -> kotlin.Unit
             """.trimIndent()
+
             else -> fail("untested platform")
         }
     }

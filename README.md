@@ -257,7 +257,6 @@ Transliterations and transforms can be done using `String.transform`.
 - `ansiRemoved`: removes ANSI escape sequences
 - `spaced`/`startSpaced`/`endSpaced`: adds a space before and/or after a string if there isn't already one
 - `truncate`/`truncateStart`/`truncateEnd`: truncates a string to a given length
-- `consolidateWhitespaces`/`consolidateWhitespacesBy`: intelligently consolidates spaces to reduce the length of a string
 - `toIdentifier`: create an identifier from any string that resembles it
 - `randomString`: create a random string
 - [LineSeparators](src/commonMain/kotlin/com/bkahlert/kommons/LineSeparators.kt): many extension functions to work with usual and exotic Unicode line
@@ -289,9 +288,6 @@ line 1
 "12345678901234567890".truncate()        // "123456 … 567890"
 "12345678901234567890".truncateStart()   // " … 901234567890"
 "12345678901234567890".truncateEnd()     // "123456789012 … "
-
-"a   b   c".consolidateWhitespacesBy(2)  // "a  b  c"
-"a   b   c".consolidateWhitespaces()     // "a b c"
 
 "1👋 xy-z".toIdentifier()     // "i__xy-z3"
 

@@ -3,7 +3,7 @@ package com.bkahlert.kommons.debug
 import com.bkahlert.kommons.Platform
 import com.bkahlert.kommons.Platform.JS
 import com.bkahlert.kommons.Platform.JVM
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.inspectors.shouldForAll
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
@@ -18,7 +18,7 @@ import kotlin.test.fail
 
 class RenderTypeTest {
 
-    @Test fun render_primitive_types() = test {
+    @Test fun render_primitive_types() = testAll {
         when (Platform.Current) {
             is JS -> {
                 PrimitiveTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
@@ -44,6 +44,7 @@ class RenderTypeTest {
                     "Array",
                 )
             }
+
             is JVM -> {
                 PrimitiveTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
                     "String",
@@ -68,11 +69,12 @@ class RenderTypeTest {
                     "kotlin.Array",
                 )
             }
+
             else -> fail("untested platform")
         }
     }
 
-    @Test fun render_collections() = test {
+    @Test fun render_collections() = testAll {
         when (Platform.Current) {
             is JS -> {
                 CollectionTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
@@ -82,6 +84,7 @@ class RenderTypeTest {
                     "<object>", "EmptySet", "ArrayList", "ArrayList"
                 )
             }
+
             is JVM -> {
                 CollectionTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
                     "Iterable", "Set", "List", "List"
@@ -90,11 +93,12 @@ class RenderTypeTest {
                     "<object>", "kotlin.collections.EmptySet", "java.util.Arrays.ArrayList", "java.util.ArrayList",
                 )
             }
+
             else -> fail("untested platform")
         }
     }
 
-    @Test fun render_classes() = test {
+    @Test fun render_classes() = testAll {
         when (Platform.Current) {
             is JS -> {
                 ClassTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
@@ -128,6 +132,7 @@ class RenderTypeTest {
                     "KClass"
                 )
             }
+
             is JVM -> {
                 ClassTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
                     "Singleton",
@@ -160,11 +165,12 @@ class RenderTypeTest {
                     "kotlin.reflect.jvm.internal.KClassImpl"
                 )
             }
+
             else -> fail("untested platform")
         }
     }
 
-    @Test fun test_functions() = test {
+    @Test fun test_functions() = testAll {
         when (Platform.Current) {
             is JS -> {
                 FunctionTypes.allValues.filterIsInstance<Function<*>>()
@@ -174,6 +180,7 @@ class RenderTypeTest {
                     .map { it.renderFunctionType(simplified = false) }.shouldForAll { it shouldBe "Function" }
                 ({}).renderFunctionType(simplified = false) shouldBe "Function"
             }
+
             is JVM -> {
                 FunctionTypes.allValues.filterIsInstance<Function<*>>()
                     .map { it.renderFunctionType() } shouldContainExactly listOf(
@@ -208,6 +215,7 @@ class RenderTypeTest {
                 )
                 ({}).renderFunctionType(simplified = false) shouldBe "() -> kotlin.Unit"
             }
+
             else -> fail("untested platform")
         }
     }

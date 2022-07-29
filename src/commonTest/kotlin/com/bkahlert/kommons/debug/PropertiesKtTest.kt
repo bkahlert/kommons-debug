@@ -3,7 +3,7 @@ package com.bkahlert.kommons.debug
 import com.bkahlert.kommons.Platform
 import com.bkahlert.kommons.Platform.JS
 import com.bkahlert.kommons.Platform.JVM
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -12,7 +12,7 @@ import kotlin.test.fail
 
 class PropertiesTest {
 
-    @Test fun properties() = test {
+    @Test fun properties() = testAll {
         nativeObject().properties shouldBe mapOf(
             "property" to "Function-property",
         )
@@ -63,6 +63,7 @@ class PropertiesTest {
                     put("values", MapImplementingSingleton.values)
                     put("entries", MapImplementingSingleton.entries)
                 }
+
                 else -> fail("untested platform")
             }
             put("singletonProperty", "singleton-property")
@@ -111,7 +112,7 @@ class PropertiesTest {
         )
     }
 
-    @Test fun get_or_else() = test {
+    @Test fun get_or_else() = testAll {
         val instance = DataClass()
         listOf(
             instance::baseProperty,
@@ -122,7 +123,7 @@ class PropertiesTest {
         )
     }
 
-    @Test fun get_or_else_0() = test {
+    @Test fun get_or_else_0() = testAll {
         DataClass().kProperties0().associate { prop -> prop.name to prop.getOrElse { it } } shouldBe mapOf(
             "baseProperty" to "base-property",
             "openBaseProperty" to 37,
@@ -138,7 +139,7 @@ class PropertiesTest {
         )
     }
 
-    @Test fun get_or_else_1() = test {
+    @Test fun get_or_else_1() = testAll {
         DataClass.kProperties1().associate { prop -> prop.name to prop.getOrElse(DataClass()) { it } } shouldBe mapOf(
             "baseProperty" to "base-property",
             "openBaseProperty" to 37,

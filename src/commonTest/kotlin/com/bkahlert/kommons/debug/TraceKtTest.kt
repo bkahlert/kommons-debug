@@ -5,7 +5,7 @@ import com.bkahlert.kommons.Platform.JS
 import com.bkahlert.kommons.Platform.JVM
 import com.bkahlert.kommons.debug.CustomToString.Ignore
 import com.bkahlert.kommons.debug.Typing.SimplyTyped
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldMatch
@@ -15,7 +15,7 @@ import kotlin.test.fail
 @Suppress("DEPRECATION")
 class TraceTest {
 
-    @Test fun trace_with_no_arguments() = test {
+    @Test fun trace_with_no_arguments() = testAll {
         buildString {
             "subject".trace(highlight = false, includeCallSite = false, out = this::append)
         } shouldBe """
@@ -23,7 +23,7 @@ class TraceTest {
         """.trimIndent()
     }
 
-    @Test fun trace_with_caption() = test {
+    @Test fun trace_with_caption() = testAll {
         buildString {
             "subject".trace("caption", highlight = false, includeCallSite = false, out = this::append)
         } shouldBe """
@@ -31,38 +31,40 @@ class TraceTest {
         """.trimIndent()
     }
 
-    @Test fun trace_with_inspect() = test {
+    @Test fun trace_with_inspect() = testAll {
         buildString {
             "subject".trace(highlight = false, includeCallSite = false, out = this::append) { it.length }
         } shouldBe """
-            ⟨ "subject" ⟩ { 0x07 }
+            ⟨ "subject" ⟩ { 7／0x07 }
         """.trimIndent()
     }
 
-    @Test fun trace_with_caption_and_inspect() = test {
+    @Test fun trace_with_caption_and_inspect() = testAll {
         buildString {
             "subject".trace("caption", highlight = false, includeCallSite = false, out = this::append) { it.length }
         } shouldBe """
-            caption ⟨ "subject" ⟩ { 0x07 }
+            caption ⟨ "subject" ⟩ { 7／0x07 }
         """.trimIndent()
     }
 
     @Suppress("LongLine")
-    @Test fun trace_with_highlighting() = test {
+    @Test fun trace_with_highlighting() = testAll {
         buildString {
             "subject".trace("caption", highlight = true, includeCallSite = false, out = this::append) { it.length.toString() }
         } shouldBe when (Platform.Current) {
             is JS -> """
                 <span style="color:#01818F;font-weight:bold;">caption</span> <span style="color:#01818F;font-weight:bold;">⟨</span> <span style="color:#01E6FF;">"subject"</span> <span style="color:#01818F;font-weight:bold;">⟩</span> <span style="color:#01818F;font-weight:bold;">{</span> <span style="color:#01E6FF;">"7"</span> <span style="color:#01818F;font-weight:bold;">}</span>
             """.trimIndent()
+
             is JVM -> """
                 [1;36mcaption[0m [1;36m⟨[0m [96m"subject"[0m [1;36m⟩[0m [1;36m{[0m [96m"7"[0m [1;36m}[0m
             """.trimIndent()
+
             else -> fail("untested platform")
         }
     }
 
-    @Test fun trace_with_call_site() = test {
+    @Test fun trace_with_call_site() = testAll {
         buildString {
             "subject".trace(highlight = false, out = this::append) { it.length.toString() }
         } should {
@@ -71,18 +73,21 @@ class TraceTest {
                 JS.Browser -> it shouldMatch """
                     .ͭ \(.*/commons\.js.*\) ⟨ "subject" ⟩ \{ "7" \}
                 """.trimIndent().toRegex()
+
                 JS.NodeJS -> it shouldMatch """
-                    .ͭ \(.*TraceKtTest\.kt:67\) ⟨ "subject" ⟩ \{ "7" \}
+                    .ͭ \(.*TraceKtTest\.kt:69\) ⟨ "subject" ⟩ \{ "7" \}
                 """.trimIndent().toRegex()
+
                 JVM -> it shouldBe """
-                    .ͭ (TraceKtTest.kt:67) ⟨ "subject" ⟩ { "7" }
+                    .ͭ (TraceKtTest.kt:69) ⟨ "subject" ⟩ { "7" }
                 """.trimIndent()
+
                 else -> fail("untested platform")
             }
         }
     }
 
-    @Test fun trace_with_custom_render() = test {
+    @Test fun trace_with_custom_render() = testAll {
         buildString {
             "subject".trace("caption", highlight = false, includeCallSite = false, render = { ">>> $it <<<" }, out = this::append) { it.length.toString() }
         } shouldBe """
@@ -90,7 +95,7 @@ class TraceTest {
         """.trimIndent()
     }
 
-    @Test fun trace_with_multiline() = test {
+    @Test fun trace_with_multiline() = testAll {
         buildString {
             "subject 1\nsubject 2".trace(
                 highlight = false,
@@ -176,7 +181,7 @@ class TraceTest {
         """.trimIndent()
     }
 
-    @Test fun inspect() = test {
+    @Test fun inspect() = testAll {
         buildString {
             "subject".inspect(
                 highlight = false,
@@ -193,7 +198,7 @@ class TraceTest {
         }
     }
 
-    @Test fun inspect_with_call_site() = test {
+    @Test fun inspect_with_call_site() = testAll {
         buildString {
             "subject".inspect(highlight = false, out = this::append)
         } should {
@@ -202,12 +207,15 @@ class TraceTest {
                 JS.Browser -> it shouldMatch """
                     .ͭ \(.*/commons\.js.*\) ⟨ !String "subject" ⟩
                 """.trimIndent().toRegex()
+
                 JS.NodeJS -> it shouldMatch """
-                    .ͭ \(.*/TraceKtTest\.kt:198\) ⟨ !String "subject" ⟩
+                    .ͭ \(.*/TraceKtTest\.kt:203\) ⟨ !String "subject" ⟩
                 """.trimIndent().toRegex()
+
                 JVM -> it shouldBe """
-                    .ͭ (TraceKtTest.kt:198) ⟨ !String "subject" ⟩
+                    .ͭ (TraceKtTest.kt:203) ⟨ !String "subject" ⟩
                 """.trimIndent()
+
                 else -> fail("untested platform")
             }
         }

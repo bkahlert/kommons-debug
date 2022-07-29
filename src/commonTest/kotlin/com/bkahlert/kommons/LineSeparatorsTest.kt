@@ -26,7 +26,7 @@ import com.bkahlert.kommons.LineSeparators.startsWithLineSeparator
 import com.bkahlert.kommons.LineSeparators.unifyLineSeparators
 import com.bkahlert.kommons.LineSeparators.withLeadingLineSeparator
 import com.bkahlert.kommons.LineSeparators.withTrailingLineSeparator
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.inspectors.forAll
 import io.kotest.inspectors.forAny
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -40,7 +40,7 @@ import kotlin.test.Test
 
 class LineSeparatorsTest {
 
-    @Test fun constants() = test {
+    @Test fun constants() = testAll {
         CRLF shouldBe "\r\n"
         LF shouldBe "\n"
         CR shouldBe "\r"
@@ -49,40 +49,40 @@ class LineSeparatorsTest {
         LS shouldBe "\u2028"
     }
 
-    @Test fun default() = test {
+    @Test fun default() = testAll {
         LineSeparators.Common.forAny { it shouldBe Default }
     }
 
-    @Test fun list() = test {
+    @Test fun list() = testAll {
         LineSeparators.shouldContainExactly(CRLF, LF, CR)
     }
 
-    @Test fun common() = test {
+    @Test fun common() = testAll {
         LineSeparators.Common.shouldContainExactly(CRLF, LF, CR)
     }
 
-    @Test fun unicode() = test {
+    @Test fun unicode() = testAll {
         LineSeparators.Unicode.shouldContainExactly(CRLF, LF, CR, NEL, PS, LS)
     }
 
-    @Test fun uncommon() = test {
+    @Test fun uncommon() = testAll {
         LineSeparators.Uncommon.shouldContainExactly(NEL, PS, LS)
     }
 
-    @Test fun common_regex() = test {
+    @Test fun common_regex() = testAll {
         stringWithAllLineSeparators.replace(LineSeparators.CommonRegex, "-") shouldBe "foo-foo-foo-foo${NEL}foo${PS}foo${LS}foo"
     }
 
-    @Test fun unicode_regex() = test {
+    @Test fun unicode_regex() = testAll {
         stringWithAllLineSeparators.replace(LineSeparators.UnicodeRegex, "-") shouldBe "foo-foo-foo-foo-foo-foo-foo"
     }
 
-    @Test fun uncommon_regex() = test {
+    @Test fun uncommon_regex() = testAll {
         stringWithAllLineSeparators.replace(LineSeparators.UncommonRegex, "-") shouldBe "foo${CRLF}foo${LF}foo${CR}foo-foo-foo-foo"
     }
 
 
-    @Test fun get_first_line_separator_or_null() = test {
+    @Test fun get_first_line_separator_or_null() = testAll {
         LineSeparators.Unicode.forAll {
             "foo".cs.getFirstLineSeparatorOrNull(*LineSeparators.Unicode) shouldBe null
             "foo${it}$stringWithAllLineSeparators".cs.getFirstLineSeparatorOrNull(* LineSeparators.Unicode) shouldBe it
@@ -96,7 +96,7 @@ class LineSeparatorsTest {
         }
     }
 
-    @Test fun get_first_line_separator_length() = test {
+    @Test fun get_first_line_separator_length() = testAll {
         "foo".cs.getFirstLineSeparatorLength() shouldBe 0
         "foo".getFirstLineSeparatorLength() shouldBe 0
 
@@ -113,7 +113,7 @@ class LineSeparatorsTest {
         }
     }
 
-    @Test fun get_most_frequent_line_separator_or_default() = test {
+    @Test fun get_most_frequent_line_separator_or_default() = testAll {
         "".cs.getMostFrequentLineSeparatorOrDefault(*LineSeparators.Unicode) shouldBe Default
         "foo".cs.getMostFrequentLineSeparatorOrDefault(*LineSeparators.Unicode) shouldBe Default
         LineSeparators.Unicode.asIterable().zipWithNext().forAll { (self, other) ->
@@ -142,7 +142,7 @@ class LineSeparatorsTest {
         }
     }
 
-    @Test fun unify_line_separators() = test {
+    @Test fun unify_line_separators() = testAll {
         stringWithAllLineSeparators.cs.unifyLineSeparators(LineSeparators.Unicode) shouldBe stringWithDefaultLineSeparators
         stringWithAllLineSeparators.cs.unifyLineSeparators(CRLF, LineSeparators.Unicode) shouldBe stringWithWindowsLineSeparators
         stringWithAllLineSeparators.unifyLineSeparators(LineSeparators.Unicode) shouldBe stringWithDefaultLineSeparators
@@ -155,7 +155,7 @@ class LineSeparatorsTest {
     }
 
 
-    @Test fun line_sequence() = test {
+    @Test fun line_sequence() = testAll {
         LineSeparators.Unicode.forAny {
             (null as String?)?.cs.lineSequence(*LineSeparators.Unicode).shouldBeEmpty()
             "".cs.lineSequence(*LineSeparators.Unicode).shouldContainExactly("")
@@ -175,7 +175,7 @@ class LineSeparatorsTest {
         }
     }
 
-    @Test fun lines() = test {
+    @Test fun lines() = testAll {
         LineSeparators.Unicode.forAny {
             (null as String?)?.cs.lines(*LineSeparators.Unicode).shouldBeEmpty()
             "".cs.lines(*LineSeparators.Unicode).shouldContainExactly("")
@@ -195,7 +195,7 @@ class LineSeparatorsTest {
         }
     }
 
-    @Test fun chunked_line_sequence() = test {
+    @Test fun chunked_line_sequence() = testAll {
         LineSeparators.Unicode.forAll { sep ->
             (null as String?)?.cs.chunkedLineSequence(3, *LineSeparators.Unicode) { ">$it<" }.shouldBeEmpty()
             "".cs.chunkedLineSequence(3, *LineSeparators.Unicode) { ">$it<" }.shouldContainExactly("><")
@@ -209,7 +209,7 @@ class LineSeparatorsTest {
         }
     }
 
-    @Test fun chunked_lines() = test {
+    @Test fun chunked_lines() = testAll {
         LineSeparators.Unicode.forAll { sep ->
             (null as String?)?.cs.chunkedLines(3, *LineSeparators.Unicode) { ">$it<" }.shouldBeEmpty()
             "".cs.chunkedLines(3, *LineSeparators.Unicode) { ">$it<" }.shouldContainExactly("><")
@@ -223,7 +223,7 @@ class LineSeparatorsTest {
         }
     }
 
-    @Test fun map_lines() = test {
+    @Test fun map_lines() = testAll {
         LineSeparators.Unicode.forAny { sep ->
             "".cs.mapLines(*LineSeparators.Unicode) { ">$it<" } shouldBe "><"
             "foo".cs.mapLines(*LineSeparators.Unicode) { ">$it<" } shouldBe ">foo<"
@@ -236,7 +236,7 @@ class LineSeparatorsTest {
         }
     }
 
-    @Test fun is_multiline() = test {
+    @Test fun is_multiline() = testAll {
         (null as String?)?.cs.isMultiline() shouldBe false
         "".cs.isMultiline() shouldBe false
         "foo".cs.isMultiline() shouldBe false
@@ -274,7 +274,7 @@ class LineSeparatorsTest {
         }
     }
 
-    @Test fun is_single_line() = test {
+    @Test fun is_single_line() = testAll {
         (null as String?)?.cs.isSingleLine() shouldBe false
         "".cs.isSingleLine() shouldBe true
         "foo".cs.isSingleLine() shouldBe true
@@ -313,7 +313,7 @@ class LineSeparatorsTest {
     }
 
 
-    @Test fun get_leading_line_separator_or_null() = test {
+    @Test fun get_leading_line_separator_or_null() = testAll {
         LineSeparators.Unicode.forAll {
             "foo".cs.getLeadingLineSeparatorOrNull(*LineSeparators.Unicode) shouldBe null
             "${it}foo".cs.getLeadingLineSeparatorOrNull(*LineSeparators.Unicode) shouldBe it
@@ -328,7 +328,7 @@ class LineSeparatorsTest {
         }
     }
 
-    @Test fun starts_with_line_separator() = test {
+    @Test fun starts_with_line_separator() = testAll {
         LineSeparators.Unicode.forAll {
             "foo".cs.startsWithLineSeparator(*LineSeparators.Unicode) shouldBe false
             "${it}foo".cs.startsWithLineSeparator(*LineSeparators.Unicode) shouldBe true
@@ -343,7 +343,7 @@ class LineSeparatorsTest {
         }
     }
 
-    @Test fun remove_leading_line_separator() = test {
+    @Test fun remove_leading_line_separator() = testAll {
         LineSeparators.Unicode.forAll { sep ->
             "foo".cs should { it.removeLeadingLineSeparator(* LineSeparators.Unicode) shouldBeSameInstanceAs it }
             "${sep}foo".cs should { it.removeLeadingLineSeparator(* LineSeparators.Unicode) shouldBe "foo" }
@@ -358,7 +358,7 @@ class LineSeparatorsTest {
         }
     }
 
-    @Test fun with_leading_line_separator() = test {
+    @Test fun with_leading_line_separator() = testAll {
         LineSeparators.Unicode.forAll { sep ->
             "foo".cs.withLeadingLineSeparator(lineSeparators = LineSeparators.Unicode) shouldBe "${Default}foo"
             "foo".cs.withLeadingLineSeparator(CRLF, lineSeparators = LineSeparators.Unicode) shouldBe "${CRLF}foo"
@@ -380,7 +380,7 @@ class LineSeparatorsTest {
     }
 
 
-    @Test fun get_trailing_line_separator_or_null() = test {
+    @Test fun get_trailing_line_separator_or_null() = testAll {
         LineSeparators.Unicode.forAll {
             "foo".cs.getTrailingLineSeparatorOrNull(*LineSeparators.Unicode) shouldBe null
             "foo${it}".cs.getTrailingLineSeparatorOrNull(*LineSeparators.Unicode) shouldBe it
@@ -395,7 +395,7 @@ class LineSeparatorsTest {
         }
     }
 
-    @Test fun ends_with_line_separator() = test {
+    @Test fun ends_with_line_separator() = testAll {
         LineSeparators.Unicode.forAll {
             "foo".cs.endsWithLineSeparator(*LineSeparators.Unicode) shouldBe false
             "foo${it}".cs.endsWithLineSeparator(*LineSeparators.Unicode) shouldBe true
@@ -410,7 +410,7 @@ class LineSeparatorsTest {
         }
     }
 
-    @Test fun remove_trailing_line_separator() = test {
+    @Test fun remove_trailing_line_separator() = testAll {
         LineSeparators.Unicode.forAll { sep ->
             "foo".cs should { it.removeTrailingLineSeparator(* LineSeparators.Unicode) shouldBeSameInstanceAs it }
             "foo${sep}".cs should { it.removeTrailingLineSeparator(* LineSeparators.Unicode) shouldBe "foo" }
@@ -425,7 +425,7 @@ class LineSeparatorsTest {
         }
     }
 
-    @Test fun with_trailing_line_separator() = test {
+    @Test fun with_trailing_line_separator() = testAll {
         LineSeparators.Unicode.forAll { sep ->
             "foo".cs.withTrailingLineSeparator(lineSeparators = LineSeparators.Unicode) shouldBe "foo${Default}"
             "foo".cs.withTrailingLineSeparator(CRLF, lineSeparators = LineSeparators.Unicode) shouldBe "foo${CRLF}"

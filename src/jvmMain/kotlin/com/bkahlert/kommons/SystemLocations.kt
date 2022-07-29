@@ -20,23 +20,19 @@ public object SystemLocations {
     /**
      * Working directory, that is, the directory in which this binary is located.
      */
-    @Suppress("PropertyName")
-    public val Work: Path by lazy { FileSystems.getDefault().getPath("").toAbsolutePath() }
+    public val Work: Path by lazy { FileSystems.getDefault().getPath(String.EMPTY).toAbsolutePath() }
 
     /**
      * Home directory of the logged-in user.
      */
-    @Suppress("PropertyName")
     public val Home: Path by lazy { Paths.get(System.getProperty("user.home")) }
 
     /**
      * Directory, in which temporary data can be stored.
      */
-    @Suppress("PropertyName")
     public val Temp: Path by lazy { Paths.get(System.getProperty("java.io.tmpdir")) }
 
     /** Directory of the running Java distribution. */
-    @Suppress("PropertyName")
     public val JavaHome: Path by lazy { Paths.get(System.getProperty("java.home")) }
 }
 
@@ -44,7 +40,7 @@ public object SystemLocations {
  * Runs the given [block] with a temporary directory that
  * is automatically deleted on completion.
  */
-public fun <T> withTempDirectory(prefix: String = "", block: Path.() -> T): T =
+public fun <T> withTempDirectory(prefix: String = String.EMPTY, block: Path.() -> T): T =
     createTempDirectory(prefix).run {
         val result = runCatching(block)
         deleteRecursively()

@@ -1,6 +1,6 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.days
@@ -11,12 +11,12 @@ import kotlin.time.Duration.Companion.seconds
 
 class TimeKtTest {
 
-    @Test fun to_local_date_string() = test {
+    @Test fun to_local_date_string() = testAll {
         instant2232.toLocalDateString() shouldBe "February 2, 2020"
         localDate.toLocalDateString() shouldBe "February 2, 2020"
     }
 
-    @Test fun to_moment_string() = test {
+    @Test fun to_moment_string() = testAll {
         42.seconds.toMomentString() shouldBe 42.seconds.toMomentString(true)
         42.seconds.toMomentString() shouldBe "in 42s"
         (-42).seconds.toMomentString() shouldBe "42s ago"

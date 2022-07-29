@@ -1,13 +1,13 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class EnumKtTest {
 
-    @Test fun first_enum_value_of_or_null() = test {
+    @Test fun first_enum_value_of_or_null() = testAll {
         firstEnumValueOfOrNull<RoundingMode> { it.name == "HalfEven" } shouldBe RoundingMode.HalfEven
         firstEnumValueOfOrNull(RoundingMode::name) { it == "HalfEven" } shouldBe RoundingMode.HalfEven
         firstEnumValueOfOrNull(RoundingMode::name, "HalfEven") shouldBe RoundingMode.HalfEven
@@ -17,7 +17,7 @@ class EnumKtTest {
         firstEnumValueOfOrNull(RoundingMode::name, "-") shouldBe null
     }
 
-    @Test fun first_enum_value_of() = test {
+    @Test fun first_enum_value_of() = testAll {
         firstEnumValueOf<RoundingMode> { it.name == "HalfEven" } shouldBe RoundingMode.HalfEven
         firstEnumValueOf(RoundingMode::name) { it == "HalfEven" } shouldBe RoundingMode.HalfEven
         firstEnumValueOf(RoundingMode::name, "HalfEven") shouldBe RoundingMode.HalfEven
