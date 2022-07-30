@@ -14,6 +14,9 @@ public value class CodePoint(
      */
     public val value: Int,
 ) : Comparable<CodePoint>, CharSequence {
+    public constructor(char: Char) : this(char.code)
+    public constructor(high: Char, low: Char) : this(makeCharFromSurrogatePair(high, low))
+
     init {
         if (value !in INDEX_RANGE) throw IndexOutOfBoundsException("index out of range $INDEX_RANGE: $value")
     }
@@ -91,6 +94,60 @@ public value class CodePoint(
         public val INDEX_RANGE: IntRange = MIN_INDEX..MAX_INDEX
     }
 }
+
+/** An [Iterator] that iterates [CodePoint] positions. */
+public class CodePointPositionIterator(
+    private val text: CharSequence,
+    private val throwOnInvalidSequence: Boolean = false,
+) : PositionIterator {
+    private var index = 0
+    override fun hasNext(): Boolean = index < text.length
+
+    override fun next(): IntRange {
+        val ch = text[index]
+        return when {
+            ch.isHighSurrogate() -> {
+                val low = if (index + 1 < text.length) text[index + 1] else null
+                if (low?.isLowSurrogate() == true) {
+                    index += 2
+                    (index - 2) until index
+                } else {
+                    if (throwOnInvalidSequence) throw CharacterCodingException(index)
+                    else {
+                        index++
+                        index - 1 until index
+                    }
+                }
+            }
+
+            ch.isLowSurrogate() -> {
+                if (throwOnInvalidSequence) throw CharacterCodingException(index)
+                else {
+                    index++
+                    index - 1 until index
+                }
+            }
+
+            else -> {
+                index++
+                index - 1 until index
+            }
+        }
+    }
+}
+
+/** An [Iterator] that iterates [CodePoint] instances. */
+public class CodePointIterator(
+    private val text: CharSequence,
+    private val throwOnInvalidSequence: Boolean = false,
+) : ChunkIterator<CodePoint> by ChunkingIterator(CodePointPositionIterator(text, throwOnInvalidSequence), {
+    val sub = text.subSequence(it)
+    when (sub.length) {
+        1 -> CodePoint(sub[0])
+        2 -> CodePoint(sub[0], sub[1])
+        else -> error("cannot convert $sub to code point")
+    }
+})
 
 /** The character pointed to and represented by a [String]. */
 internal expect val CodePoint.string: String

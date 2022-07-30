@@ -219,9 +219,9 @@ Transliterations and transforms can be done using `String.transform`.
 "a𝕓c̳🔤".toCodePointList()  // "a", "𝕓", "c", "̳", "🫠"
 "a𝕓c̳🔤".toGraphemeList()   // "a", "𝕓", "c̳", "🫠"
 
-"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".length               // 27 (= number of Java chars)
-"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".length(CODEPOINTS)   // 16 (= number of Unicode code points)
-"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".length(GRAPHEMES)    //  6 (= visually perceivable units)
+"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".length                       // 27 (= number of Java chars)
+"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".asText<CodePoints>().length  // 16 (= number of Unicode code points)
+"a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".asText<Graphemes>().length   //  6 (= visually perceivable units)
 
 "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".truncate(7.chars)       // "a\uD835 … 👦"
 "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".truncate(7.codePoints)  // "a𝕓 … ‍👦"

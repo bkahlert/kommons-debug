@@ -20,24 +20,28 @@ public value class Grapheme private constructor(
     override fun toString(): String = value.toString()
 }
 
+/** An [Iterator] that iterates [Grapheme] positions. */
+public expect class GraphemePositionIterator(
+    text: CharSequence,
+) : PositionIterator
+
+/** An [Iterator] that iterates [Grapheme] instances. */
+public class GraphemeIterator(private val text: CharSequence) :
+    ChunkIterator<Grapheme> by ChunkingIterator(GraphemePositionIterator(text), { Grapheme(text, it) })
+
 /** Returns the [Grapheme] with the same value, or throws an [IllegalArgumentException] otherwise. */
 public fun CharSequence.asGrapheme(): Grapheme = asGraphemeOrNull() ?: throw IllegalArgumentException("invalid grapheme: $this")
 
 /** Returns the [Grapheme] with the same value, or `null` otherwise. */
 public fun CharSequence.asGraphemeOrNull(): Grapheme? = asGraphemeSequence().singleOrNull()
 
-/** Returns a sequence yielding the indices describing the [Grapheme] instances contained in the specified text range of this string. */
-public expect fun CharSequence.asGraphemeIndicesSequence(
-    startIndex: Int = 0,
-    endIndex: Int = length,
-): Sequence<IntRange>
-
 /** Returns a sequence yielding the [Grapheme] instances contained in the specified text range of this string. */
 public fun CharSequence.asGraphemeSequence(
     startIndex: Int = 0,
     endIndex: Int = length,
-): Sequence<Grapheme> = asGraphemeIndicesSequence(startIndex, endIndex).map {
-    Grapheme(DelegatingCharSequence(this, it))
+): Sequence<Grapheme> {
+    checkBoundsIndexes(length, startIndex, endIndex)
+    return GraphemeIterator(subSequence(startIndex, endIndex)).asSequence()
 }
 
 /** Returns the [Grapheme] instances contained in the specified text range of this string. */
@@ -50,4 +54,4 @@ public fun CharSequence.toGraphemeList(
 public fun CharSequence.graphemeCount(
     startIndex: Int = 0,
     endIndex: Int = length,
-): Int = asGraphemeIndicesSequence(startIndex, endIndex).count()
+): Int = asGraphemeSequence(startIndex, endIndex).count()

@@ -14,27 +14,30 @@ import kotlin.test.Test
 
 class GraphemeTest {
 
-    @Test fun as_grapheme_indices_sequence() = testAll {
-        "".asGraphemeIndicesSequence().shouldBeEmpty()
-        "a".asGraphemeIndicesSequence().shouldContainExactly(0..0)
-        "¶".asGraphemeIndicesSequence().shouldContainExactly(0..0)
-        "☰".asGraphemeIndicesSequence().shouldContainExactly(0..0)
-        "𝕓".asGraphemeIndicesSequence().shouldContainExactly(0..1)
-        "a̳o".asGraphemeIndicesSequence().shouldContainExactly(0..1, 2..2) // combining mark
-        "a̳o".asGraphemeIndicesSequence(startIndex = 1).shouldContainExactly(1..1, 2..2)
-        "a̳o".asGraphemeIndicesSequence(startIndex = 2).shouldContainExactly(2..2)
-        "a̳o".asGraphemeIndicesSequence(startIndex = 3).shouldBeEmpty()
-        "a̳o".asGraphemeIndicesSequence(endIndex = 1).shouldContainExactly(0..0)
-        "a̳o".asGraphemeIndicesSequence(endIndex = 2).shouldContainExactly(0..1)
-        "a̳o".asGraphemeIndicesSequence(endIndex = 3).shouldContainExactly(0..1, 2..2)
+    @Test fun grapheme_position_iterator() = testAll {
+        GraphemePositionIterator("").asSequence().shouldBeEmpty()
+        GraphemePositionIterator("a").asSequence().shouldContainExactly(0..0)
+        GraphemePositionIterator("¶").asSequence().shouldContainExactly(0..0)
+        GraphemePositionIterator("☰").asSequence().shouldContainExactly(0..0)
+        GraphemePositionIterator("𝕓").asSequence().shouldContainExactly(0..1)
+        GraphemePositionIterator("a̳o").asSequence().shouldContainExactly(0..1, 2..2) // combining mark
+        GraphemePositionIterator("🫠").asSequence().shouldContainExactly(0..1) // emoji
+        GraphemePositionIterator("🇩🇪").asSequence().shouldContainExactly(0..3) // regional indicators
+        GraphemePositionIterator("👨🏾‍🦱").asSequence().shouldContainExactly(0..6) // emoji + skin tone modifier + ZWJ + curly hair
+        GraphemePositionIterator("👩‍👩‍👦‍👦").asSequence().shouldContainExactly(0..10) // long ZWJ sequence
+    }
 
-        shouldThrowWithMessage<IndexOutOfBoundsException>("begin -1, end 0, length 0") { "".asGraphemeIndicesSequence(startIndex = -1).toList() }
-        shouldThrowWithMessage<IndexOutOfBoundsException>("begin 0, end -1, length 0") { "".asGraphemeIndicesSequence(endIndex = -1).toList() }
-
-        "🫠".asGraphemeIndicesSequence().shouldContainExactly(0..1) // emoji
-        "🇩🇪".asGraphemeIndicesSequence().shouldContainExactly(0..3) // regional indicators
-        "👨🏾‍🦱".asGraphemeIndicesSequence().shouldContainExactly(0..6) // emoji + skin tone modifier + ZWJ + curly hair
-        "👩‍👩‍👦‍👦".asGraphemeIndicesSequence().shouldContainExactly(0..10) // long ZWJ sequence
+    @Test fun grapheme_iterator() = testAll {
+        GraphemeIterator("").asSequence().shouldBeEmpty()
+        GraphemeIterator("a").asSequence().shouldContainExactly(Grapheme("a"))
+        GraphemeIterator("¶").asSequence().shouldContainExactly(Grapheme("¶"))
+        GraphemeIterator("☰").asSequence().shouldContainExactly(Grapheme("☰"))
+        GraphemeIterator("𝕓").asSequence().shouldContainExactly(Grapheme("𝕓"))
+        GraphemeIterator("a̳o").asSequence().shouldContainExactly(Grapheme("a̳"), Grapheme("o")) // combining mark
+        GraphemeIterator("🫠").asSequence().shouldContainExactly(Grapheme("🫠")) // emoji
+        GraphemeIterator("🇩🇪").asSequence().shouldContainExactly(Grapheme("🇩🇪")) // regional indicators
+        GraphemeIterator("👨🏾‍🦱").asSequence().shouldContainExactly(Grapheme("👨🏾‍🦱")) // emoji + skin tone modifier + ZWJ + curly hair
+        GraphemeIterator("👩‍👩‍👦‍👦").asSequence().shouldContainExactly(Grapheme("👩‍👩‍👦‍👦")) // long ZWJ sequence
     }
 
     @Test fun as_grapheme_sequence() = testAll {

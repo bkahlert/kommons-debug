@@ -2,24 +2,24 @@ package com.bkahlert.kommons
 
 import com.ibm.icu.text.BreakIterator
 
+/** An [Iterator] that iterates [Grapheme] positions. */
+public actual class GraphemePositionIterator actual constructor(
+    private val text: CharSequence,
+) : PositionIterator by text.asGraphemeIndicesSequence().iterator()
+
 /** Returns a sequence yielding the [Grapheme] instances this string consists of. */
-public actual fun CharSequence.asGraphemeIndicesSequence(
-    startIndex: Int,
-    endIndex: Int,
-): Sequence<IntRange> {
-    checkBoundsIndexes(length, startIndex, endIndex)
-    val iterator = BreakIterator.getCharacterInstance()
-    iterator.setText(subSequence(startIndex, endIndex))
+private fun CharSequence.asGraphemeIndicesSequence(): Sequence<IntRange> {
+    val iterator = BreakIterator.getCharacterInstance().also { it.setText(this) }
     var index = iterator.first()
     return sequence {
         while (true) {
             val breakIndex = iterator.next()
             if (breakIndex == BreakIterator.DONE) break
-            if (breakIndex > endIndex) {
-                yield(index + startIndex until endIndex + startIndex)
+            if (breakIndex > this@asGraphemeIndicesSequence.length) {
+                yield(index until this@asGraphemeIndicesSequence.length)
                 break
             }
-            yield(index + startIndex until breakIndex + startIndex)
+            yield(index until breakIndex)
             index = breakIndex
         }
     }

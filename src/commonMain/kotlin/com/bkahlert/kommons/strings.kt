@@ -1,7 +1,8 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.Text.Companion.toText
 import com.bkahlert.kommons.TextLength.Companion.codePoints
-import com.bkahlert.kommons.TextLengthUnit.CODEPOINTS
+import com.bkahlert.kommons.TextLength.Companion.toTextLength
 import com.bkahlert.kommons.debug.Compression.Always
 import com.bkahlert.kommons.debug.Typing.Untyped
 import com.bkahlert.kommons.debug.getOrNull
@@ -10,6 +11,14 @@ import com.bkahlert.kommons.debug.render
 import com.bkahlert.kommons.debug.renderType
 import kotlin.random.Random
 import kotlin.reflect.KProperty
+
+// String companion extensions -----------------------------------------------------------------------------------------
+
+private const val EMPTY_STRING: String = ""
+
+/** An empty string. */
+public val String.Companion.EMPTY: String get() = EMPTY_STRING
+
 
 // containsAny ---------------------------------------------------------------------------------------------------------
 
@@ -30,6 +39,31 @@ public fun <T : CharSequence> CharSequence.containsAny(vararg others: T, ignoreC
     others.any { contains(it, ignoreCase = ignoreCase) }
 
 
+// checkBoundsIndex ----------------------------------------------------------------------------------------------------
+
+/**
+ * Returns the specified [index] if it in the specified [range].
+ * Otherwise, throws an [IndexOutOfBoundsException].
+ */
+@Suppress("NOTHING_TO_INLINE")
+public inline fun checkBoundsIndex(range: IntRange, index: Int): Int {
+    if (range.contains(index)) return index
+    throw IndexOutOfBoundsException("index out of range: $index")
+}
+
+// checkBoundsIndexes --------------------------------------------------------------------------------------------------
+
+/**
+ * Returns if the specified [endIndex] is greater or equal to the specified [startIndex] and if both are in the range `0`..[length].
+ * Otherwise, throws an [IndexOutOfBoundsException].
+ */
+@Suppress("NOTHING_TO_INLINE")
+public inline fun checkBoundsIndexes(length: Int, startIndex: Int, endIndex: Int): IntRange {
+    if (startIndex in 0..endIndex && endIndex <= length) return startIndex until endIndex
+    throw IndexOutOfBoundsException("begin $startIndex, end $endIndex, length $length")
+}
+
+
 // requireNotEmpty -----------------------------------------------------------------------------------------------------
 
 /** Throws an [IllegalArgumentException] if the specified [charSequence] [isEmpty]. */
@@ -41,12 +75,10 @@ public inline fun requireNotEmpty(charSequence: CharSequence): CharSequence = ch
 public inline fun requireNotEmpty(string: String): String = string.also { require(it.isNotEmpty()) }
 
 /** Throws an [IllegalArgumentException] with the result of calling [lazyMessage] if the specified [charSequence] [isEmpty]. */
-@Suppress("NOTHING_TO_INLINE")
 public inline fun requireNotEmpty(charSequence: CharSequence, lazyMessage: () -> Any): CharSequence =
     charSequence.also { require(it.isNotEmpty(), lazyMessage) }
 
 /** Throws an [IllegalArgumentException] with the result of calling [lazyMessage] if the specified [string] [isEmpty]. */
-@Suppress("NOTHING_TO_INLINE")
 public inline fun requireNotEmpty(string: String, lazyMessage: () -> Any): String = string.also { require(it.isNotEmpty(), lazyMessage) }
 
 
@@ -61,12 +93,10 @@ public inline fun requireNotBlank(charSequence: CharSequence): CharSequence = ch
 public inline fun requireNotBlank(string: String): String = string.also { require(string.isNotBlank()) }
 
 /** Throws an [IllegalArgumentException] with the result of calling [lazyMessage] if the specified [charSequence] [isBlank]. */
-@Suppress("NOTHING_TO_INLINE")
 public inline fun requireNotBlank(charSequence: CharSequence, lazyMessage: () -> Any): CharSequence =
     charSequence.also { require(it.isNotBlank(), lazyMessage) }
 
 /** Throws an [IllegalArgumentException] with the result of calling [lazyMessage] if the specified [string] [isBlank]. */
-@Suppress("NOTHING_TO_INLINE")
 public inline fun requireNotBlank(string: String, lazyMessage: () -> Any): String = string.also { require(it.isNotBlank(), lazyMessage) }
 
 
@@ -80,11 +110,9 @@ public inline fun checkNotEmpty(charSequence: CharSequence): CharSequence = char
 public inline fun checkNotEmpty(string: String): String = string.also { check(it.isNotEmpty()) }
 
 /** Throws an [IllegalStateException] with the result of calling [lazyMessage] if the specified [charSequence] [isEmpty]. */
-@Suppress("NOTHING_TO_INLINE")
 public inline fun checkNotEmpty(charSequence: CharSequence, lazyMessage: () -> Any): CharSequence = charSequence.also { check(it.isNotEmpty(), lazyMessage) }
 
 /** Throws an [IllegalStateException] with the result of calling [lazyMessage] if the specified [string] [isEmpty]. */
-@Suppress("NOTHING_TO_INLINE")
 public inline fun checkNotEmpty(string: String, lazyMessage: () -> Any): String = string.also { check(it.isNotEmpty(), lazyMessage) }
 
 
@@ -99,11 +127,9 @@ public inline fun checkNotBlank(charSequence: CharSequence): CharSequence = char
 public inline fun checkNotBlank(string: String): String = string.also { check(it.isNotBlank()) }
 
 /** Throws an [IllegalStateException] with the result of calling [lazyMessage] if the specified [charSequence] [isBlank]. */
-@Suppress("NOTHING_TO_INLINE")
 public inline fun checkNotBlank(charSequence: CharSequence, lazyMessage: () -> Any): CharSequence = charSequence.also { check(it.isNotBlank(), lazyMessage) }
 
 /** Throws an [IllegalStateException] with the result of calling [lazyMessage] if the specified [string] [isBlank]. */
-@Suppress("NOTHING_TO_INLINE")
 public inline fun checkNotBlank(string: String, lazyMessage: () -> Any): String = string.also { check(it.isNotBlank(), lazyMessage) }
 
 
@@ -169,148 +195,152 @@ public val CharSequence.ansiContained: Boolean
 
 /** This character sequence with all [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code) removed. */
 public val CharSequence.ansiRemoved: CharSequence
-    get() = if (ansiContained) ansiPattern.replace(this, "") else this
+    get() = if (ansiContained) ansiPattern.replace(this, String.EMPTY) else this
 
 /** This character sequence with all [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code) removed. */
 public val String.ansiRemoved: String
-    get() = if (ansiContained) ansiPattern.replace(this, "") else this
+    get() = if (ansiContained) ansiPattern.replace(this, String.EMPTY) else this
 
 
 // spaced / startSpaced / endSpaced ------------------------------------------------------------------------------------
 
-/** Returns this char with a space added to each side if not already present. */
-public inline val Char.spaced: String get() = startSpaced.endSpaced
+/** Returns this char with a space added to each side if not already present, or an empty string otherwise. */
+public inline val Char?.spaced: String get() = startSpaced.endSpaced
 
-/** Returns this char with a space added to the beginning if not already present. */
-public inline val Char.startSpaced: String get() = withPrefix(" ")
+/** Returns this char with a space added to the beginning if not already present, or an empty string otherwise. */
+public inline val Char?.startSpaced: String get() = this?.run { withPrefix(" ") } ?: String.EMPTY
 
-/** Returns this char with a space added to the end if not already present. */
-public inline val Char.endSpaced: String get() = withSuffix(" ")
+/** Returns this char with a space added to the end if not already present, or an empty string otherwise. */
+public inline val Char?.endSpaced: String get() = this?.run { withSuffix(" ") } ?: String.EMPTY
 
-/** Returns this character sequence with a space added to each side if not already present. */
-public inline val CharSequence.spaced: CharSequence get() = startSpaced.endSpaced
+/** Returns this character sequence with a space added to each side if not already present, or an empty string otherwise. */
+public inline val CharSequence?.spaced: CharSequence get() = startSpaced.endSpaced
 
-/** Returns this character sequence with a space added to the beginning if not already present. */
-public inline val CharSequence.startSpaced: CharSequence get() = withPrefix(" ")
+/** Returns this character sequence with a space added to the beginning if not already present, or an empty string otherwise. */
+public inline val CharSequence?.startSpaced: CharSequence get() = if (this == null) String.EMPTY else if (isBlank()) this else withPrefix(" ")
 
-/** Returns this character sequence with a space added to the end if not already present. */
-public inline val CharSequence.endSpaced: CharSequence get() = withSuffix(" ")
+/** Returns this character sequence with a space added to the end if not already present, or an empty string otherwise. */
+public inline val CharSequence?.endSpaced: CharSequence get() = if (this == null) String.EMPTY else if (isBlank()) this else withSuffix(" ")
 
-/** Returns this string with a space added to each side if not already present. */
-public inline val String.spaced: String get() = startSpaced.endSpaced
+/** Returns this string with a space added to each side if not already present, or an empty string otherwise. */
+public inline val String?.spaced: String get() = startSpaced.endSpaced
 
-/** Returns this string with a space added to the beginning if not already present. */
-public inline val String.startSpaced: String get() = withPrefix(" ")
+/** Returns this string with a space added to the beginning if not already present, or an empty string otherwise. */
+public inline val String?.startSpaced: String get() = if (this == null) String.EMPTY else if (isBlank()) this else withPrefix(" ")
 
-/** Returns this string with a space added to the end if not already present. */
-public inline val String.endSpaced: String get() = withSuffix(" ")
+/** Returns this string with a space added to the end if not already present, or an empty string otherwise. */
+public inline val String?.endSpaced: String get() = if (this == null) String.EMPTY else if (isBlank()) this else withSuffix(" ")
 
 
 // truncate ------------------------------------------------------------------------------------------------------------
 
-private fun requirePositiveLength(length: TextLength): Unit =
-    require(!length.isNegative()) { "length $length must be positive" }
-
-private fun targetLengthFor(length: TextLength, marker: String): Pair<TextLength, List<CharSequence>> {
-    requirePositiveLength(length)
-    val markerUnits = length.unit.split(marker)
-    val markerLength = markerUnits.size.toTextLength(length.unit)
-    require(length >= markerLength) {
-        "The specified length ($length) must be greater or equal than the length of the marker ${marker.quoted} (${markerLength})."
-    }
-    return (length - markerLength) to markerUnits
+public fun <T : CharSequence, S : CharSequence> S.transformText(
+    unit: TextUnit<T>,
+    transform: (Text<T>) -> Text<CharSequence>,
+    join: (Text<CharSequence>) -> S,
+): S {
+    val text: Text<T> = unit.transform(this)
+    return transform(text).takeUnless { it == text }?.let(join) ?: this
 }
 
+public inline fun <reified T : CharSequence> CharSequence.transformText(
+    noinline transform: (Text<T>) -> Text<*>,
+): CharSequence = transformText(TextUnit.of(), transform) { it.subSequence() }
+
+public inline fun <reified T : CharSequence> String.transformText(
+    noinline transform: (Text<T>) -> Text<CharSequence>,
+): String = transformText(TextUnit.of(), transform) { it.toString() }
 
 /**
- * Returns this string truncated from the center to the specified [length] (default: 15 [CODEPOINTS])
+ * Returns this character sequence truncated from the center to up to 15 code points
  * including the [marker] (default: " … ").
  */
-public fun String.truncate(length: TextLength = 15.codePoints, marker: String = Unicode.ELLIPSIS.spaced): String {
-    requirePositiveLength(length)
-    return length.unit.transform(this) {
-        if (size <= length.value) return this@truncate
-        val (targetLength, _) = targetLengthFor(length, marker)
-        val left = truncateEnd(targetLength.copy(value = -(-targetLength.value).floorDiv(2)), "")
-        val right = truncateStart(targetLength.copy(value = targetLength.value.floorDiv(2)), "")
-        removeAll { true }
-        add(left)
-        add(marker)
-        add(right)
-    }
-}
+public fun CharSequence.truncate(marker: CharSequence = Unicode.ELLIPSIS.spaced): CharSequence = truncate(15.codePoints, marker)
 
 /**
- * Returns this string truncated from the start to the specified [length] (default: 15 [CODEPOINTS])
+ * Returns this string truncated from the center to up to 15 code points
  * including the [marker] (default: " … ").
  */
-public fun String.truncateStart(length: TextLength = 15.codePoints, marker: String = Unicode.ELLIPSIS.spaced): String {
-    requirePositiveLength(length)
-    return length.unit.transform(this) {
-        if (size <= length.value) return this@truncateStart
-        val (targetLength, markerUnits) = targetLengthFor(length, marker)
-        while (size > targetLength.value) removeFirst()
-        addAll(0, markerUnits)
-    }
-}
+public fun String.truncate(marker: CharSequence = Unicode.ELLIPSIS.spaced): String = truncate(15.codePoints, marker)
+
 
 /**
- * Returns this string truncated from the end to the specified [length] (default: 15 [CODEPOINTS])
+ * Returns this character sequence truncated from the center to the specified [length] (default: 15)
  * including the [marker] (default: " … ").
  */
-public fun String.truncateEnd(length: TextLength = 15.codePoints, marker: String = Unicode.ELLIPSIS.spaced): String {
-    requirePositiveLength(length)
-    return length.unit.transform(this) {
-        if (size <= length.value) return this@truncateEnd
-        val (targetLength, markerUnits) = targetLengthFor(length, marker)
-        while (size > targetLength.value) removeLast()
-        addAll(markerUnits)
-    }
-}
-
-
-// consolidateWhitespaces ----------------------------------------------------------------------------------------------
+public inline fun <reified T : CharSequence> CharSequence.truncate(
+    length: TextLength<T> = 15.toTextLength(),
+    marker: CharSequence = Unicode.ELLIPSIS.spaced,
+): CharSequence = transformText<T> { it.truncate(length.value, marker.toText()) }
 
 /**
- * Returns this string with its spaces intelligently consolidated
- * so that the resulting length is reduced by the specified [length].
- *
- * The algorithm guarantees that word borders are respected, that is,
- * two words never become one (unless [minWhitespaceLength] is set to 0).
- *
- * Therefore, the length of the returned string might be reduced by less
- * than the specified [length].
+ * Returns this string truncated from the center to the specified [length] (default: 15)
+ * including the [marker] (default: " … ").
  */
-public fun String.consolidateWhitespacesBy(length: TextLength, startIndex: Int = 0, minWhitespaceLength: Int = 1): String =
-    consolidateWhitespaces(this.length(length.unit) - length, startIndex, minWhitespaceLength)
+public inline fun <reified T : CharSequence> String.truncate(
+    length: TextLength<T> = 15.toTextLength(),
+    marker: CharSequence = Unicode.ELLIPSIS.spaced,
+): String = transformText<T> { it.truncate(length.value, marker.toText()) }
 
 /**
- * Returns this string with its spaces intelligently consolidated
- * so that the resulting length is reduced to the specified [length]
- * (default: 0 [CODEPOINTS]).
- *
- * The algorithm guarantees that word borders are respected, that is,
- * two words never become one (unless [minWhitespaceLength] is set to 0).
- *
- * Therefore, the length of the returned string might be reduced to less
- * than the specified [length].
+ * Returns this character sequence truncated from the start to up to 15 code points
+ * including the [marker] (default: "… ").
  */
-public fun String.consolidateWhitespaces(length: TextLength = 0.codePoints, startIndex: Int = 0, minWhitespaceLength: Int = 1): String {
-    val currentLength = this.length(length.unit)
-    val difference = currentLength - length
-    if (!difference.isPositive()) return this
-    val trailingWhitespaces = takeLastWhile { it.isWhitespace() }
-    if (trailingWhitespaces.isNotEmpty()) {
-        val trimmed = take(currentLength.value - trailingWhitespaces.length.coerceAtMost(difference.value))
-        return if (trimmed.length <= length.value) trimmed else trimmed.consolidateWhitespaces(length, startIndex, minWhitespaceLength)
-    }
-    @Suppress("RegExpSimplifiable") val regex = Regex("\\p{Z}{${minWhitespaceLength + 1}}")
-    val longestWhitespace = regex.findAll(this, startIndex).toList().reversed().maxByOrNull { it.value.length } ?: return this
-    val whitespaceStart = longestWhitespace.range.first
-    val truncated = replaceRange(whitespaceStart, whitespaceStart + 2, " ")
-    if (truncated.length(length.unit) >= currentLength) return truncated
-    return truncated.consolidateWhitespaces(length, startIndex, minWhitespaceLength)
-}
+public fun CharSequence.truncateStart(marker: CharSequence = Unicode.ELLIPSIS.endSpaced): CharSequence = truncateStart(15.codePoints, marker)
+
+/**
+ * Returns this string truncated from the start to up to 15 code points
+ * including the [marker] (default: "… ").
+ */
+public fun String.truncateStart(marker: CharSequence = Unicode.ELLIPSIS.endSpaced): String = truncateStart(15.codePoints, marker)
+
+/**
+ * Returns this character sequence truncated from the start to the specified [length] (default: 15)
+ * including the [marker] (default: "… ").
+ */
+public inline fun <reified T : CharSequence> CharSequence.truncateStart(
+    length: TextLength<T> = 15.toTextLength(),
+    marker: CharSequence = Unicode.ELLIPSIS.endSpaced,
+): CharSequence = transformText<T> { it.truncateStart(length.value, marker.toText()) }
+
+/**
+ * Returns this string truncated from the start to the specified [length] (default: 15)
+ * including the [marker] (default: "… ").
+ */
+public inline fun <reified T : CharSequence> String.truncateStart(
+    length: TextLength<T> = 15.toTextLength(),
+    marker: CharSequence = Unicode.ELLIPSIS.endSpaced,
+): String = transformText<T> { it.truncateStart(length.value, marker.toText()) }
+
+/**
+ * Returns this character sequence truncated from the end to up to 15 code points
+ * including the [marker] (default: " …").
+ */
+public fun CharSequence.truncateEnd(marker: CharSequence = Unicode.ELLIPSIS.startSpaced): CharSequence = truncateEnd(15.codePoints, marker)
+
+/**
+ * Returns this string truncated from the end to up to 15 code points
+ * including the [marker] (default: " …").
+ */
+public fun String.truncateEnd(marker: CharSequence = Unicode.ELLIPSIS.startSpaced): CharSequence = truncateEnd(15.codePoints, marker)
+
+/**
+ * Returns this character sequence truncated from the end to the specified [length] (default: 15)
+ * including the [marker] (default: " …").
+ */
+public inline fun <reified T : CharSequence> CharSequence.truncateEnd(
+    length: TextLength<T> = 15.toTextLength(),
+    marker: CharSequence = Unicode.ELLIPSIS.startSpaced,
+): CharSequence = transformText<T> { it.truncateEnd(length.value, marker.toText()) }
+
+/**
+ * Returns this string truncated from the end to the specified [length] (default: 15)
+ * including the [marker] (default: " …").
+ */
+public inline fun <reified T : CharSequence> String.truncateEnd(
+    length: TextLength<T> = 15.toTextLength(),
+    marker: CharSequence = Unicode.ELLIPSIS.startSpaced,
+): String = transformText<T> { it.truncateEnd(length.value, marker.toText()) }
 
 
 // withPrefix / withSuffix ---------------------------------------------------------------------------------------------
@@ -402,7 +432,7 @@ public fun CharSequence.indexOfOrNull(string: String, startIndex: Int = 0, ignor
 // lastIndexOfOrNull ---------------------------------------------------------------------------------------------------
 
 /**
- * Returns the index within this char sequence of the last occurrence of the specified character,
+ * Returns the index within this character sequence of the last occurrence of the specified character,
  * starting from the specified [startIndex].
  *
  * @param startIndex The index of character to start searching at. The search proceeds backward toward the beginning of the string.
@@ -413,7 +443,7 @@ public fun CharSequence.lastIndexOfOrNull(char: Char, startIndex: Int = lastInde
     lastIndexOf(char, startIndex, ignoreCase).takeIf { it >= 0 }
 
 /**
- * Returns the index within this char sequence of the last occurrence of the specified [string],
+ * Returns the index within this character sequence of the last occurrence of the specified [string],
  * starting from the specified [startIndex].
  *
  * @param startIndex The index of character to start searching at. The search proceeds backward toward the beginning of the string.

@@ -8,15 +8,13 @@ import com.bkahlert.kommons.debug.ClassWithCustomToString
 import com.bkahlert.kommons.debug.ClassWithDefaultToString
 import com.bkahlert.kommons.debug.OrdinaryClass
 import com.bkahlert.kommons.debug.ThrowingClass
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.assertions.withClue
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.sequences.shouldContainExactly
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldHaveLength
 import io.kotest.matchers.string.shouldMatch
 import io.kotest.matchers.string.shouldStartWith
@@ -26,14 +24,38 @@ import kotlin.test.Test
 
 class StringsKtTest {
 
-    @Test fun contains_any() = test {
+    @Test fun empty() = testAll {
+        String.EMPTY shouldBe ""
+    }
+
+    @Test fun contains_any() = testAll {
         "foo bar".containsAny("baz", "o b", "abc") shouldBe true
         "foo bar".containsAny("baz", "O B", "abc", ignoreCase = true) shouldBe true
         "foo bar".containsAny("baz", "O B", "abc") shouldBe false
         "foo bar".containsAny("baz", "---", "abc") shouldBe false
     }
 
-    @Test fun require_not_empty() = test {
+    @Test fun check_bounds_index() = testAll {
+        checkBoundsIndex(0..1, 0) shouldBe 0
+        checkBoundsIndex(0..1, 1) shouldBe 1
+        shouldThrow<IndexOutOfBoundsException> { checkBoundsIndex(0..1, -1) }.message shouldBe "index out of range: -1"
+        shouldThrow<IndexOutOfBoundsException> { checkBoundsIndex(0..1, 2) }.message shouldBe "index out of range: 2"
+    }
+
+    @Suppress("EmptyRange")
+    @Test fun check_bounds_indexes() = testAll {
+        checkBoundsIndexes(2, 0, 0) shouldBe (0 until 0)
+        checkBoundsIndexes(2, 0, 1) shouldBe (0 until 1)
+        checkBoundsIndexes(2, 0, 2) shouldBe (0 until 2)
+        checkBoundsIndexes(2, 1, 1) shouldBe (1 until 1)
+        checkBoundsIndexes(2, 1, 2) shouldBe (1 until 2)
+        checkBoundsIndexes(2, 2, 2) shouldBe (2 until 2)
+        shouldThrow<IndexOutOfBoundsException> { checkBoundsIndexes(2, 2, 1) }.message shouldBe "begin 2, end 1, length 2"
+        shouldThrow<IndexOutOfBoundsException> { checkBoundsIndexes(2, -1, 1) }.message shouldBe "begin -1, end 1, length 2"
+        shouldThrow<IndexOutOfBoundsException> { checkBoundsIndexes(2, 1, 3) }.message shouldBe "begin 1, end 3, length 2"
+    }
+
+    @Test fun require_not_empty() = testAll {
         requireNotEmpty(charSequence) shouldBe charSequence
         requireNotEmpty(charSequence) { "error" } shouldBe charSequence
         requireNotEmpty(string) shouldBe string
@@ -48,7 +70,7 @@ class StringsKtTest {
         requireNotEmpty(blankString) { "error" } shouldBe blankString
     }
 
-    @Test fun require_not_blank() = test {
+    @Test fun require_not_blank() = testAll {
         requireNotBlank(charSequence) shouldBe charSequence
         requireNotBlank(charSequence) { "error" } shouldBe charSequence
         requireNotBlank(string) shouldBe string
@@ -63,7 +85,7 @@ class StringsKtTest {
         shouldThrow<IllegalArgumentException> { requireNotBlank(blankString) { "error" } } shouldHaveMessage "error"
     }
 
-    @Test fun check_not_empty() = test {
+    @Test fun check_not_empty() = testAll {
         checkNotEmpty(charSequence) shouldBe charSequence
         checkNotEmpty(charSequence) { "error" } shouldBe charSequence
         checkNotEmpty(string) shouldBe string
@@ -78,7 +100,7 @@ class StringsKtTest {
         checkNotEmpty(blankString) { "error" } shouldBe blankString
     }
 
-    @Test fun check_not_blank() = test {
+    @Test fun check_not_blank() = testAll {
         checkNotBlank(charSequence) shouldBe charSequence
         checkNotBlank(charSequence) { "error" } shouldBe charSequence
         checkNotBlank(string) shouldBe string
@@ -93,7 +115,7 @@ class StringsKtTest {
         shouldThrow<IllegalStateException> { checkNotBlank(blankString) { "error" } } shouldHaveMessage "error"
     }
 
-    @Test fun take_if_not_empty() = test {
+    @Test fun take_if_not_empty() = testAll {
         charSequence.takeIfNotEmpty() shouldBe charSequence
         string.takeIfNotEmpty() shouldBe string
         emptyCharSequence.takeIfNotEmpty() shouldBe null
@@ -102,7 +124,7 @@ class StringsKtTest {
         blankString.takeIfNotEmpty() shouldBe blankString
     }
 
-    @Test fun take_if_not_blank() = test {
+    @Test fun take_if_not_blank() = testAll {
         charSequence.takeIfNotBlank() shouldBe charSequence
         string.takeIfNotBlank() shouldBe string
         emptyCharSequence.takeIfNotBlank() shouldBe null
@@ -111,7 +133,7 @@ class StringsKtTest {
         blankString.takeIfNotBlank() shouldBe null
     }
 
-    @Test fun take_unless_empty() = test {
+    @Test fun take_unless_empty() = testAll {
         charSequence.takeUnlessEmpty() shouldBe charSequence
         string.takeUnlessEmpty() shouldBe string
         emptyCharSequence.takeUnlessEmpty() shouldBe null
@@ -120,7 +142,7 @@ class StringsKtTest {
         blankString.takeUnlessEmpty() shouldBe blankString
     }
 
-    @Test fun take_unless_blank() = test {
+    @Test fun take_unless_blank() = testAll {
         charSequence.takeUnlessBlank() shouldBe charSequence
         string.takeUnlessBlank() shouldBe string
         emptyCharSequence.takeUnlessBlank() shouldBe null
@@ -130,7 +152,7 @@ class StringsKtTest {
     }
 
 
-    @Test fun ansi_contained() = test {
+    @Test fun ansi_contained() = testAll {
         charSequence.ansiContained shouldBe false
         string.ansiContained shouldBe false
         emptyCharSequence.ansiContained shouldBe false
@@ -143,7 +165,7 @@ class StringsKtTest {
         ansiOscString.ansiContained shouldBe true
     }
 
-    @Test fun ansi_removed() = test {
+    @Test fun ansi_removed() = testAll {
         charSequence.ansiRemoved shouldBe charSequence
         string.ansiRemoved shouldBe string
         emptyCharSequence.ansiRemoved shouldBe emptyCharSequence
@@ -156,32 +178,48 @@ class StringsKtTest {
         ansiOscString.ansiRemoved shouldBe "↗ link"
     }
 
-    @Test fun spaced() = test {
+    @Test fun spaced() = testAll {
         char.spaced shouldBe " $char "
         blankChar.spaced shouldBe " "
+        nullChar.spaced shouldBeSameInstanceAs String.EMPTY
         char.startSpaced shouldBe " $char"
         blankChar.startSpaced shouldBe " "
+        nullChar.startSpaced shouldBeSameInstanceAs String.EMPTY
         char.endSpaced shouldBe "$char "
         blankChar.endSpaced shouldBe " "
+        nullChar.endSpaced shouldBeSameInstanceAs String.EMPTY
 
         charSequence.spaced shouldBe " $charSequence "
-        charSequence.spaced.spaced shouldBe " $charSequence "
+        emptyCharSequence.spaced shouldBeSameInstanceAs emptyCharSequence
+        blankCharSequence.spaced shouldBeSameInstanceAs blankCharSequence
+        nullCharSequence.spaced shouldBeSameInstanceAs String.EMPTY
         charSequence.startSpaced shouldBe " $charSequence"
-        charSequence.startSpaced.startSpaced shouldBe " $charSequence"
+        emptyCharSequence.startSpaced shouldBeSameInstanceAs emptyCharSequence
+        blankCharSequence.startSpaced shouldBeSameInstanceAs blankCharSequence
+        nullCharSequence.startSpaced shouldBeSameInstanceAs String.EMPTY
         charSequence.endSpaced shouldBe "$charSequence "
-        charSequence.endSpaced.endSpaced shouldBe "$charSequence "
+        emptyCharSequence.endSpaced shouldBeSameInstanceAs emptyCharSequence
+        blankCharSequence.endSpaced shouldBeSameInstanceAs blankCharSequence
+        nullCharSequence.endSpaced shouldBeSameInstanceAs String.EMPTY
 
         string.spaced shouldBe " $string "
-        string.spaced.spaced shouldBe " $string "
+        emptyString.spaced shouldBeSameInstanceAs emptyString
+        blankString.spaced shouldBeSameInstanceAs blankString
+        nullString.spaced shouldBeSameInstanceAs String.EMPTY
         string.startSpaced shouldBe " $string"
-        string.startSpaced.startSpaced shouldBe " $string"
+        emptyString.startSpaced shouldBeSameInstanceAs emptyString
+        blankString.startSpaced shouldBeSameInstanceAs blankString
+        nullString.startSpaced shouldBeSameInstanceAs String.EMPTY
         string.endSpaced shouldBe "$string "
-        string.endSpaced.endSpaced shouldBe "$string "
+        emptyString.endSpaced shouldBeSameInstanceAs emptyString
+        blankString.endSpaced shouldBeSameInstanceAs blankString
+        nullString.endSpaced shouldBeSameInstanceAs String.EMPTY
     }
 
 
-    @Test fun truncate() = test {
+    @Test fun truncate() = testAll {
         longString.truncate() shouldBe longString.truncate(length = 15.codePoints, marker = Unicode.ELLIPSIS.spaced)
+        longString.truncate<Grapheme>() shouldBe longString.truncate(length = 15.graphemes, marker = Unicode.ELLIPSIS.spaced)
 
         longString.truncate(length = 7.chars) shouldBe "a\uD835 … 👦"
         longString.truncate(length = 7.codePoints) shouldBe "a𝕓 … ‍👦"
@@ -196,19 +234,22 @@ class StringsKtTest {
         longString.truncate(length = 7.graphemes, marker = "⋯") shouldBe "a𝕓🫠⋯🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦"
 
         shouldThrow<IllegalArgumentException> { longString.truncate(length = 7.chars, marker = "1234567890") }
-            .message shouldBe "The specified length (7 chars) must be greater or equal than the length of the marker \"1234567890\" (10 chars)."
+            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
         shouldThrow<IllegalArgumentException> { longString.truncate(length = 7.codePoints, marker = "1234567890") }
-            .message shouldBe "The specified length (7 codepoints) must be greater or equal than the length of the marker \"1234567890\" (10 codepoints)."
+            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
         shouldThrow<IllegalArgumentException> { longString.truncate(length = 7.graphemes, marker = "1234567890") }
-            .message shouldBe "The specified length (7 graphemes) must be greater or equal than the length of the marker \"1234567890\" (10 graphemes)."
+            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
+//        shouldThrow<IllegalArgumentException> { longString.truncate<WordUnit>() }
+//            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
     }
 
-    @Test fun truncate_start() = test {
-        longString.truncateStart() shouldBe longString.truncateStart(length = 15.codePoints, marker = Unicode.ELLIPSIS.spaced)
+    @Test fun truncate_start() = testAll {
+        longString.truncateStart() shouldBe longString.truncateStart(length = 15.codePoints, marker = Unicode.ELLIPSIS.endSpaced)
+        longString.truncateStart<Grapheme>() shouldBe longString.truncateStart(length = 15.graphemes, marker = Unicode.ELLIPSIS.endSpaced)
 
-        longString.truncateStart(length = 7.chars) shouldBe " … \uDC66\u200D👦"
-        longString.truncateStart(length = 7.codePoints) shouldBe " … ‍👦‍👦"
-        longString.truncateStart(length = 7.graphemes) shouldBe " … 🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦"
+        longString.truncateStart(length = 7.chars) shouldBe "… 👦‍👦"
+        longString.truncateStart(length = 7.codePoints) shouldBe "… 👩‍👦‍👦"
+        longString.truncateStart(length = 7.graphemes) shouldBe "… 𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦"
 
         longString.truncateStart(length = 100_000.chars) shouldBeSameInstanceAs longString
         longString.truncateStart(length = 100_000.codePoints) shouldBeSameInstanceAs longString
@@ -219,19 +260,20 @@ class StringsKtTest {
         longString.truncateStart(length = 7.graphemes, marker = "⋯") shouldBe "⋯a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦"
 
         shouldThrow<IllegalArgumentException> { longString.truncateStart(length = 7.chars, marker = "1234567890") }
-            .message shouldBe "The specified length (7 chars) must be greater or equal than the length of the marker \"1234567890\" (10 chars)."
+            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
         shouldThrow<IllegalArgumentException> { longString.truncateStart(length = 7.codePoints, marker = "1234567890") }
-            .message shouldBe "The specified length (7 codepoints) must be greater or equal than the length of the marker \"1234567890\" (10 codepoints)."
+            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
         shouldThrow<IllegalArgumentException> { longString.truncateStart(length = 7.graphemes, marker = "1234567890") }
-            .message shouldBe "The specified length (7 graphemes) must be greater or equal than the length of the marker \"1234567890\" (10 graphemes)."
+            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
     }
 
-    @Test fun truncate_end() = test {
-        longString.truncateEnd() shouldBe longString.truncateEnd(length = 15.codePoints, marker = Unicode.ELLIPSIS.spaced)
+    @Test fun truncate_end() = testAll {
+        longString.truncateEnd() shouldBe longString.truncateEnd(length = 15.codePoints, marker = Unicode.ELLIPSIS.startSpaced)
+        longString.truncateEnd<Grapheme>() shouldBe longString.truncateEnd(length = 15.graphemes, marker = Unicode.ELLIPSIS.startSpaced)
 
-        longString.truncateEnd(length = 7.chars) shouldBe "a𝕓\uD83E … "
-        longString.truncateEnd(length = 7.codePoints) shouldBe "a𝕓🫠🇩 … "
-        longString.truncateEnd(length = 7.graphemes) shouldBe "a𝕓🫠🇩🇪 … "
+        longString.truncateEnd(length = 7.chars) shouldBe "a𝕓🫠 …"
+        longString.truncateEnd(length = 7.codePoints) shouldBe "a𝕓🫠🇩🇪 …"
+        longString.truncateEnd(length = 7.graphemes) shouldBe "a𝕓🫠🇩🇪👨🏾‍🦱 …"
 
         longString.truncateEnd(length = 100_000.chars) shouldBeSameInstanceAs longString
         longString.truncateEnd(length = 100_000.codePoints) shouldBeSameInstanceAs longString
@@ -242,127 +284,48 @@ class StringsKtTest {
         longString.truncateEnd(length = 7.graphemes, marker = "⋯") shouldBe "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦⋯"
 
         shouldThrow<IllegalArgumentException> { longString.truncateEnd(length = 7.chars, marker = "1234567890") }
-            .message shouldBe "The specified length (7 chars) must be greater or equal than the length of the marker \"1234567890\" (10 chars)."
+            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
         shouldThrow<IllegalArgumentException> { longString.truncateEnd(length = 7.codePoints, marker = "1234567890") }
-            .message shouldBe "The specified length (7 codepoints) must be greater or equal than the length of the marker \"1234567890\" (10 codepoints)."
+            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
         shouldThrow<IllegalArgumentException> { longString.truncateEnd(length = 7.graphemes, marker = "1234567890") }
-            .message shouldBe "The specified length (7 graphemes) must be greater or equal than the length of the marker \"1234567890\" (10 graphemes)."
+            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
+    }
+
+    @Test fun xxx() = testAll {
+//        longString.truncateEnd(length = 7.chars) shouldBe "a𝕓🫠 …"
+//        longString.truncateEnd(length = 7.codePoints) shouldBe "a𝕓🫠🇩🇪 …"
+//        longString.truncateEnd(length = 7.graphemes) shouldBe "a𝕓🫠🇩🇪👨🏾‍🦱 …"
+//
+        shouldThrow<IllegalArgumentException> { longString.truncateEnd(length = 7.graphemes, marker = "1234567890") }
+            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
     }
 
 
-    @Test fun consolidate_whitespaces_by() = test {
-        withClue("should remove whitespaces from the right") {
-            "a   b   c".consolidateWhitespacesBy(3.codePoints) shouldBe "a  b c"
-        }
-
-        withClue("should use whitespaces on the right") {
-            "a   b   c    ".consolidateWhitespacesBy(3.codePoints) shouldBe "a   b   c "
-        }
-
-        withClue("should use single whitespace on the right") {
-            "a   b   c ".consolidateWhitespacesBy(1.codePoints) shouldBe "a   b   c"
-        }
-
-        withClue("should not merge words") {
-            "a   b   c".consolidateWhitespacesBy(10.codePoints) shouldBe "a b c"
-        }
-
-        withClue("should consider different whitespaces") {
-            val differentWhitespaces = "\u0020\u00A0\u2000\u2003"
-            "a ${differentWhitespaces}b".consolidateWhitespacesBy(differentWhitespaces.length.codePoints) shouldBe "a b"
-        }
-
-        withClue("should leave area before startIndex unchanged") {
-            "a   b   c".consolidateWhitespacesBy(10.codePoints, startIndex = 5) shouldBe "a   b c"
-        }
-
-        withClue("should leave whitespace sequence below minimal length unchanged") {
-            "a      b   c".consolidateWhitespacesBy(3.codePoints, minWhitespaceLength = 3) shouldBe "a   b   c"
-        }
-
-        withClue("regression") {
-            val x = "│   nested 1                                                                                            ▮▮"
-            val y = "│   nested 1                                                                                      ▮▮"
-            val z = "│   nested 1                                                                                         ▮▮"
-            x.consolidateWhitespacesBy(3.codePoints, minWhitespaceLength = 3) should {
-                it shouldBe z
-                it shouldNotBe y
-            }
-        }
-
-        "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespacesBy(3.chars) shouldBe "a  𝕓  🫠  🇩🇪 👨🏾‍🦱 👩‍👩‍👦‍👦"
-        "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespacesBy(3.codePoints) shouldBe "a  𝕓  🫠  🇩🇪 👨🏾‍🦱 👩‍👩‍👦‍👦"
-        "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespacesBy(3.graphemes) shouldBe "a  𝕓  🫠  🇩🇪 👨🏾‍🦱 👩‍👩‍👦‍👦"
-    }
-
-    @Test fun consolidate_whitespaces() = test {
-        withClue("should remove whitespaces from the right") {
-            "a   b   c".consolidateWhitespaces(6.codePoints) shouldBe "a  b c"
-        }
-
-        withClue("should use whitespaces on the right") {
-            "a   b   c    ".consolidateWhitespaces(10.codePoints) shouldBe "a   b   c "
-        }
-
-        withClue("should use single whitespace on the right") {
-            "a   b   c ".consolidateWhitespaces(9.codePoints) shouldBe "a   b   c"
-        }
-
-        withClue("should not merge words") {
-            "a   b   c".consolidateWhitespaces(0.codePoints) shouldBe "a b c"
-        }
-
-        withClue("should consider different whitespaces") {
-            val differentWhitespaces = "\u0020\u00A0\u2000\u2003"
-            "a ${differentWhitespaces}b".consolidateWhitespaces(0.codePoints) shouldBe "a b"
-        }
-
-        withClue("should leave area before startIndex unchanged") {
-            "a   b   c".consolidateWhitespaces(0.codePoints, startIndex = 5) shouldBe "a   b c"
-        }
-
-        withClue("should leave whitespace sequence below minimal length unchanged") {
-            "a      b   c".consolidateWhitespaces(9.codePoints, minWhitespaceLength = 3) shouldBe "a   b   c"
-        }
-
-        "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespaces(35.chars) shouldBe "a  𝕓  🫠  🇩🇪 👨🏾‍🦱 👩‍👩‍👦‍👦"
-        "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespaces(24.codePoints) shouldBe "a  𝕓  🫠  🇩🇪 👨🏾‍🦱 👩‍👩‍👦‍👦"
-        "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespaces(14.graphemes) shouldBe "a  𝕓  🫠  🇩🇪 👨🏾‍🦱 👩‍👩‍👦‍👦"
-
-        "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespaces() should {
-            it shouldBe "a 𝕓 🫠 🇩🇪 👨🏾‍🦱 👩‍👩‍👦‍👦"
-            it shouldBe "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespaces(0.chars)
-            it shouldBe "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespaces(0.codePoints)
-            it shouldBe "a  𝕓  🫠  🇩🇪  👨🏾‍🦱   👩‍👩‍👦‍👦".consolidateWhitespaces(0.graphemes)
-        }
-    }
-
-
-    @Test fun with_prefix() = test {
+    @Test fun with_prefix() = testAll {
         char.withPrefix("c") shouldBe "c"
         char.withPrefix("b") shouldBe "bc"
         char.withPrefix("bc") shouldBe "bcc"
-        charSequence.withPrefix(charSequence) shouldBe charSequence
-        charSequence.withPrefix("char") shouldBe charSequence
+        charSequence.withPrefix(charSequence) shouldBeSameInstanceAs charSequence
+        charSequence.withPrefix("char") shouldBeSameInstanceAs charSequence
         charSequence.withPrefix("char-") shouldBe "char-$charSequence"
-        string.withPrefix(string) shouldBe string
-        string.withPrefix("str") shouldBe string
+        string.withPrefix(string) shouldBeSameInstanceAs string
+        string.withPrefix("str") shouldBeSameInstanceAs string
         string.withPrefix("str-") shouldBe "str-$string"
     }
 
-    @Test fun with_suffix() = test {
+    @Test fun with_suffix() = testAll {
         char.withSuffix("c") shouldBe "c"
         char.withSuffix("d") shouldBe "cd"
         char.withSuffix("cd") shouldBe "ccd"
-        charSequence.withSuffix(charSequence) shouldBe charSequence
-        charSequence.withSuffix("sequence") shouldBe charSequence
+        charSequence.withSuffix(charSequence) shouldBeSameInstanceAs charSequence
+        charSequence.withSuffix("sequence") shouldBeSameInstanceAs charSequence
         charSequence.withSuffix("-sequence") shouldBe "$charSequence-sequence"
-        string.withSuffix(string) shouldBe string
-        string.withSuffix("ing") shouldBe string
+        string.withSuffix(string) shouldBeSameInstanceAs string
+        string.withSuffix("ing") shouldBeSameInstanceAs string
         string.withSuffix("-ing") shouldBe "$string-ing"
     }
 
-    @Test fun with_random_suffix() = test {
+    @Test fun with_random_suffix() = testAll {
         char.withRandomSuffix() should {
             it shouldMatch Regex("$char--[\\da-zA-Z]{4}")
             it shouldStartWith "$char"
@@ -380,7 +343,7 @@ class StringsKtTest {
         }
     }
 
-    @Test fun random_string() = test {
+    @Test fun random_string() = testAll {
         randomString() shouldHaveLength 16
         randomString(7) shouldHaveLength 7
 
@@ -390,7 +353,7 @@ class StringsKtTest {
         randomString(100, 'A', 'B').forAll { listOf('A', 'B') shouldContain it }
     }
 
-    @Test fun repeat() = test {
+    @Test fun repeat() = testAll {
         shouldThrow<IllegalArgumentException> { char.repeat(-1) }
         char.repeat(0) shouldBe ""
         char.repeat(1) shouldBe "c"
@@ -398,7 +361,7 @@ class StringsKtTest {
         char.repeat(3) shouldBe "ccc"
     }
 
-    @Test fun index_of_or_null() = test {
+    @Test fun index_of_or_null() = testAll {
         charSequence.indexOfOrNull('e') shouldBe 6
         charSequence.indexOfOrNull('E') shouldBe null
         charSequence.indexOfOrNull('e', ignoreCase = true) shouldBe 6
@@ -414,7 +377,7 @@ class StringsKtTest {
         charSequence.indexOfOrNull("e", startIndex = 7, ignoreCase = true) shouldBe 9
     }
 
-    @Test fun last_index_of_or_null() = test {
+    @Test fun last_index_of_or_null() = testAll {
         charSequence.lastIndexOfOrNull('e') shouldBe 12
         charSequence.lastIndexOfOrNull('E') shouldBe null
         charSequence.lastIndexOfOrNull('e', ignoreCase = true) shouldBe 12
@@ -430,22 +393,23 @@ class StringsKtTest {
         charSequence.lastIndexOfOrNull("e", startIndex = 7, ignoreCase = true) shouldBe 6
     }
 
-    @Test fun as_string() = test {
+    @Test fun as_string() = testAll {
         OrdinaryClass().asString() shouldBe when (Platform.Current) {
             is JS -> """
                 OrdinaryClass {
                     baseProperty: "base-property",
-                    openBaseProperty: 0x2a,
+                    openBaseProperty: 42／0x2a,
                     protectedOpenBaseProperty: "protected-open-base-property",
                     privateBaseProperty: "private-base-property",
                     ordinaryProperty: "ordinary-property",
                     privateOrdinaryProperty: "private-ordinary-property"
                 }
             """.trimIndent()
+
             else -> """
                 OrdinaryClass {
                     protectedOpenBaseProperty: "protected-open-base-property",
-                    openBaseProperty: 0x2a,
+                    openBaseProperty: 42／0x2a,
                     baseProperty: "base-property",
                     privateOrdinaryProperty: "private-ordinary-property",
                     ordinaryProperty: "ordinary-property"
@@ -469,16 +433,17 @@ class StringsKtTest {
             is JS -> """
                 OrdinaryClass {
                     baseProperty: "base-property",
-                    openBaseProperty: 0x2a,
+                    openBaseProperty: 42／0x2a,
                     protectedOpenBaseProperty: "protected-open-base-property",
                     privateBaseProperty: "private-base-property",
                     privateOrdinaryProperty: "private-ordinary-property"
                 }
             """.trimIndent()
+
             else -> """
                 OrdinaryClass {
                     protectedOpenBaseProperty: "protected-open-base-property",
-                    openBaseProperty: 0x2a,
+                    openBaseProperty: 42／0x2a,
                     baseProperty: "base-property",
                     privateOrdinaryProperty: "private-ordinary-property"
                 }
@@ -497,7 +462,7 @@ class StringsKtTest {
         } shouldBe """ClassWithDefaultToString { bar: "baz", baz: custom toString }"""
     }
 
-    @Test fun split_map() = test {
+    @Test fun split_map() = testAll {
         "foo,bar".cs.splitMap(",") { ">$it<" } shouldBe ">foo<,>bar<"
         "foo-bar".cs.splitMap(",") { ">$it<" } shouldBe ">foo-bar<"
         "foo X bar".cs.splitMap(" X ") { ">$it<" } shouldBe ">foo< X >bar<"
@@ -513,7 +478,7 @@ class StringsKtTest {
         "foo,bar,baz".splitMap(",", limit = 2) { ">$it<" } shouldBe ">foo<,>bar,baz<"
     }
 
-    @Test fun split_to_sequence() = test {
+    @Test fun split_to_sequence() = testAll {
         "foo X bar x baz".cs.splitToSequence(" X ").shouldContainExactly("foo", "bar x baz")
         "foo X bar x baz".cs.splitToSequence(" X ", " x ").shouldContainExactly("foo", "bar", "baz")
         "foo X bar x baz".cs.splitToSequence(" X ", " x ", keepDelimiters = true).shouldContainExactly("foo X ", "bar x ", "baz")
@@ -534,16 +499,76 @@ internal val String.cs: CharSequence get() = StringBuilder(this)
 
 internal const val char: Char = 'c'
 internal const val blankChar: Char = ' '
+internal val nullChar: Char? = null
 
 internal val charSequence: CharSequence = StringBuilder("char sequence")
 internal val emptyCharSequence: CharSequence = StringBuilder()
 internal val blankCharSequence: CharSequence = StringBuilder("   ")
+internal val nullCharSequence: CharSequence? = null
 
 internal const val string: String = "string"
 internal const val emptyString: String = ""
 internal const val blankString: String = "   "
+internal val nullString: String? = null
 
-internal val longString = "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦".repeat(1000)
+internal val emojiString: String = "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦"
+internal val emojiChars: Array<Text.Char> = arrayOf(
+    Text.Char('a'),
+    Text.Char('\uD835'),
+    Text.Char('\uDD53'),
+    Text.Char('\uD83E'),
+    Text.Char('\uDEE0'),
+    Text.Char('\uD83C'),
+    Text.Char('\uDDE9'),
+    Text.Char('\uD83C'),
+    Text.Char('\uDDEA'),
+    Text.Char('\uD83D'),
+    Text.Char('\uDC68'),
+    Text.Char('\uD83C'),
+    Text.Char('\uDFFE'),
+    Text.Char('\u200D'),
+    Text.Char('\uD83E'),
+    Text.Char('\uDDB1'),
+    Text.Char('\uD83D'),
+    Text.Char('\uDC69'),
+    Text.Char('\u200D'),
+    Text.Char('\uD83D'),
+    Text.Char('\uDC69'),
+    Text.Char('\u200D'),
+    Text.Char('\uD83D'),
+    Text.Char('\uDC66'),
+    Text.Char('\u200D'),
+    Text.Char('\uD83D'),
+    Text.Char('\uDC66'),
+)
+internal val emojiCodePoints: Array<CodePoint> = arrayOf(
+    CodePoint(0x0061),
+    CodePoint(0x1D553),
+    CodePoint(0x1FAE0),
+    CodePoint(0x1F1E9),
+    CodePoint(0x1F1EA),
+    CodePoint(0x1F468),
+    CodePoint(0x1F3FE),
+    CodePoint(0x200D),
+    CodePoint(0x1F9B1),
+    CodePoint(0x1F469),
+    CodePoint(0x200D),
+    CodePoint(0x1F469),
+    CodePoint(0x200D),
+    CodePoint(0x1F466),
+    CodePoint(0x200D),
+    CodePoint(0x1F466),
+)
+internal val emojiGraphemes: Array<Grapheme> = arrayOf(
+    Grapheme("a"),
+    Grapheme("𝕓"),
+    Grapheme("🫠"),
+    Grapheme("🇩🇪"),
+    Grapheme("👨🏾‍🦱"),
+    Grapheme("👩‍👩‍👦‍👦"),
+)
+
+internal val longString = emojiString.repeat(1000)
 
 /** [String] containing CSI (`control sequence intro`) escape sequences */
 internal const val ansiCsiString: String = "[1mbold [34mand blue[0m"
