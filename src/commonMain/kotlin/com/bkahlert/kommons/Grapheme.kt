@@ -1,5 +1,6 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.Text.ChunkedText
 import kotlin.jvm.JvmInline
 
 /**
@@ -13,21 +14,26 @@ public value class Grapheme private constructor(
     /** The string this grapheme consists of. */
     public val value: CharSequence,
 ) : CharSequence by value {
-    public constructor(delegate: CharSequence, range: IntRange? = null) : this(DelegatingCharSequence(delegate, range))
+    public constructor(text: CharSequence, startIndex: Int = 0, endIndex: Int = -1) : this(CharSequenceDelegate(text, startIndex, endIndex))
+    public constructor(text: CharSequence, range: IntRange) : this(CharSequenceDelegate(text, range))
 
     /** The [CodePoint] instances this grapheme consists of. */
     public val codePoints: List<CodePoint> get() = value.toCodePointList()
     override fun toString(): String = value.toString()
+
+    /** Text unit for texts consisting of [Grapheme] chunks. */
+    public companion object : TextUnit<Grapheme> {
+        override val name: String = "grapheme"
+        override fun textOf(text: CharSequence): Text<Grapheme> =
+            if (text.isEmpty()) Text.emptyText() else ChunkedText(text, GraphemeBreakIterator(text), ::Grapheme)
+    }
 }
 
-/** An [Iterator] that iterates [Grapheme] positions. */
-public expect class GraphemePositionIterator(
-    text: CharSequence,
-) : PositionIterator
+/** An [Iterator] that iterates [Grapheme] boundaries. */
+public expect class GraphemeBreakIterator(text: CharSequence) : BreakIterator
 
 /** An [Iterator] that iterates [Grapheme] instances. */
-public class GraphemeIterator(private val text: CharSequence) :
-    ChunkIterator<Grapheme> by ChunkingIterator(GraphemePositionIterator(text), { Grapheme(text, it) })
+public class GraphemeIterator(private val text: CharSequence) : Iterator<Grapheme> by (GraphemeBreakIterator(text).mapToRanges().map { Grapheme(text, it) })
 
 /** Returns the [Grapheme] with the same value, or throws an [IllegalArgumentException] otherwise. */
 public fun CharSequence.asGrapheme(): Grapheme = asGraphemeOrNull() ?: throw IllegalArgumentException("invalid grapheme: $this")
@@ -41,7 +47,10 @@ public fun CharSequence.asGraphemeSequence(
     endIndex: Int = length,
 ): Sequence<Grapheme> {
     checkBoundsIndexes(length, startIndex, endIndex)
-    return GraphemeIterator(subSequence(startIndex, endIndex)).asSequence()
+    return when {
+        isEmpty() -> emptySequence()
+        else -> GraphemeIterator(subSequence(startIndex, endIndex)).asSequence()
+    }
 }
 
 /** Returns the [Grapheme] instances contained in the specified text range of this string. */

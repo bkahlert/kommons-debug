@@ -1,8 +1,8 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.Text.Companion.toText
+import com.bkahlert.kommons.Text.Companion.asText
+import com.bkahlert.kommons.Text.Companion.mapText
 import com.bkahlert.kommons.TextLength.Companion.codePoints
-import com.bkahlert.kommons.TextLength.Companion.toTextLength
 import com.bkahlert.kommons.debug.Compression.Always
 import com.bkahlert.kommons.debug.Typing.Untyped
 import com.bkahlert.kommons.debug.getOrNull
@@ -18,6 +18,21 @@ private const val EMPTY_STRING: String = ""
 
 /** An empty string. */
 public val String.Companion.EMPTY: String get() = EMPTY_STRING
+
+
+// get -----------------------------------------------------------------------------------------------------------------
+
+/**
+ * Returns the character at the specified [range] in this character sequence.
+ *
+ * @throws [IllegalArgumentException] if the [IntRange.first] isn't equal to [IntRange.last].
+ * @throws [IndexOutOfBoundsException] if the [range] is out of bounds of this character sequence.
+ */
+public operator fun CharSequence.get(range: IntRange): kotlin.Char {
+    require(range.first == range.last) { "The requested range $range is not suitable to get a single character." }
+    checkBoundsIndexes(length, range.first, range.last + 1)
+    return this[range.first]
+}
 
 
 // containsAny ---------------------------------------------------------------------------------------------------------
@@ -54,7 +69,11 @@ public inline fun checkBoundsIndex(range: IntRange, index: Int): Int {
 // checkBoundsIndexes --------------------------------------------------------------------------------------------------
 
 /**
- * Returns if the specified [endIndex] is greater or equal to the specified [startIndex] and if both are in the range `0`..[length].
+ * Returns a new range from [startIndex] until [endIndex] if:
+ * 1) [startIndex] is less than [endIndex],
+ * 2) [startIndex] is greater than or equal to `0`, and
+ * 3) [endIndex] is less than the specified [length].
+ *
  * Otherwise, throws an [IndexOutOfBoundsException].
  */
 @Suppress("NOTHING_TO_INLINE")
@@ -62,6 +81,18 @@ public inline fun checkBoundsIndexes(length: Int, startIndex: Int, endIndex: Int
     if (startIndex in 0..endIndex && endIndex <= length) return startIndex until endIndex
     throw IndexOutOfBoundsException("begin $startIndex, end $endIndex, length $length")
 }
+
+/**
+ * Returns the specified [range] if:
+ * 1) it's not empty,
+ * 2) [IntRange.first] is greater than or equal to `0`, and
+ * 3) [IntRange.last] is less than the specified [length].
+ *
+ * Otherwise, throws an [IndexOutOfBoundsException].
+ */
+@Suppress("NOTHING_TO_INLINE")
+public inline fun checkBoundsIndexes(length: Int, range: IntRange): IntRange =
+    checkBoundsIndexes(length, range.first, range.last + 1)
 
 
 // requireNotEmpty -----------------------------------------------------------------------------------------------------
@@ -205,13 +236,13 @@ public val String.ansiRemoved: String
 // spaced / startSpaced / endSpaced ------------------------------------------------------------------------------------
 
 /** Returns this char with a space added to each side if not already present, or an empty string otherwise. */
-public inline val Char?.spaced: String get() = startSpaced.endSpaced
+public inline val kotlin.Char?.spaced: String get() = startSpaced.endSpaced
 
 /** Returns this char with a space added to the beginning if not already present, or an empty string otherwise. */
-public inline val Char?.startSpaced: String get() = this?.run { withPrefix(" ") } ?: String.EMPTY
+public inline val kotlin.Char?.startSpaced: String get() = this?.run { withPrefix(" ") } ?: String.EMPTY
 
 /** Returns this char with a space added to the end if not already present, or an empty string otherwise. */
-public inline val Char?.endSpaced: String get() = this?.run { withSuffix(" ") } ?: String.EMPTY
+public inline val kotlin.Char?.endSpaced: String get() = this?.run { withSuffix(" ") } ?: String.EMPTY
 
 /** Returns this character sequence with a space added to each side if not already present, or an empty string otherwise. */
 public inline val CharSequence?.spaced: CharSequence get() = startSpaced.endSpaced
@@ -234,23 +265,6 @@ public inline val String?.endSpaced: String get() = if (this == null) String.EMP
 
 // truncate ------------------------------------------------------------------------------------------------------------
 
-public fun <T : CharSequence, S : CharSequence> S.transformText(
-    unit: TextUnit<T>,
-    transform: (Text<T>) -> Text<CharSequence>,
-    join: (Text<CharSequence>) -> S,
-): S {
-    val text: Text<T> = unit.transform(this)
-    return transform(text).takeUnless { it == text }?.let(join) ?: this
-}
-
-public inline fun <reified T : CharSequence> CharSequence.transformText(
-    noinline transform: (Text<T>) -> Text<*>,
-): CharSequence = transformText(TextUnit.of(), transform) { it.subSequence() }
-
-public inline fun <reified T : CharSequence> String.transformText(
-    noinline transform: (Text<T>) -> Text<CharSequence>,
-): String = transformText(TextUnit.of(), transform) { it.toString() }
-
 /**
  * Returns this character sequence truncated from the center to up to 15 code points
  * including the [marker] (default: " … ").
@@ -268,89 +282,95 @@ public fun String.truncate(marker: CharSequence = Unicode.ELLIPSIS.spaced): Stri
  * Returns this character sequence truncated from the center to the specified [length] (default: 15)
  * including the [marker] (default: " … ").
  */
-public inline fun <reified T : CharSequence> CharSequence.truncate(
-    length: TextLength<T> = 15.toTextLength(),
+public fun CharSequence.truncate(
+    length: TextLength<*>,
     marker: CharSequence = Unicode.ELLIPSIS.spaced,
-): CharSequence = transformText<T> { it.truncate(length.value, marker.toText()) }
+): CharSequence = mapText(length.unit) {
+    it.truncate(length.value, marker.asText(length.unit))
+}
 
 /**
  * Returns this string truncated from the center to the specified [length] (default: 15)
  * including the [marker] (default: " … ").
  */
-public inline fun <reified T : CharSequence> String.truncate(
-    length: TextLength<T> = 15.toTextLength(),
+public fun String.truncate(
+    length: TextLength<*>,
     marker: CharSequence = Unicode.ELLIPSIS.spaced,
-): String = transformText<T> { it.truncate(length.value, marker.toText()) }
+): String = mapText(length.unit) { it.truncate(length.value, marker.asText(length.unit)) }
 
 /**
  * Returns this character sequence truncated from the start to up to 15 code points
  * including the [marker] (default: "… ").
  */
-public fun CharSequence.truncateStart(marker: CharSequence = Unicode.ELLIPSIS.endSpaced): CharSequence = truncateStart(15.codePoints, marker)
+public fun CharSequence.truncateStart(marker: CharSequence = Unicode.ELLIPSIS.endSpaced): CharSequence =
+    truncateStart(15.codePoints, marker)
 
 /**
  * Returns this string truncated from the start to up to 15 code points
  * including the [marker] (default: "… ").
  */
-public fun String.truncateStart(marker: CharSequence = Unicode.ELLIPSIS.endSpaced): String = truncateStart(15.codePoints, marker)
+public fun String.truncateStart(marker: CharSequence = Unicode.ELLIPSIS.endSpaced): String =
+    truncateStart(15.codePoints, marker)
 
 /**
  * Returns this character sequence truncated from the start to the specified [length] (default: 15)
  * including the [marker] (default: "… ").
  */
-public inline fun <reified T : CharSequence> CharSequence.truncateStart(
-    length: TextLength<T> = 15.toTextLength(),
+public fun CharSequence.truncateStart(
+    length: TextLength<*>,
     marker: CharSequence = Unicode.ELLIPSIS.endSpaced,
-): CharSequence = transformText<T> { it.truncateStart(length.value, marker.toText()) }
+): CharSequence = mapText(length.unit) { it.truncateStart(length.value, marker.asText(length.unit)) }
 
 /**
  * Returns this string truncated from the start to the specified [length] (default: 15)
  * including the [marker] (default: "… ").
  */
-public inline fun <reified T : CharSequence> String.truncateStart(
-    length: TextLength<T> = 15.toTextLength(),
+public fun String.truncateStart(
+    length: TextLength<*>,
     marker: CharSequence = Unicode.ELLIPSIS.endSpaced,
-): String = transformText<T> { it.truncateStart(length.value, marker.toText()) }
+): String = mapText(length.unit) { it.truncateStart(length.value, marker.asText(length.unit)) }
 
 /**
  * Returns this character sequence truncated from the end to up to 15 code points
  * including the [marker] (default: " …").
  */
-public fun CharSequence.truncateEnd(marker: CharSequence = Unicode.ELLIPSIS.startSpaced): CharSequence = truncateEnd(15.codePoints, marker)
+public fun CharSequence.truncateEnd(marker: CharSequence = Unicode.ELLIPSIS.startSpaced): CharSequence =
+    truncateEnd(15.codePoints, marker)
 
 /**
  * Returns this string truncated from the end to up to 15 code points
  * including the [marker] (default: " …").
  */
-public fun String.truncateEnd(marker: CharSequence = Unicode.ELLIPSIS.startSpaced): CharSequence = truncateEnd(15.codePoints, marker)
+public fun String.truncateEnd(marker: CharSequence = Unicode.ELLIPSIS.startSpaced): CharSequence =
+    truncateEnd(15.codePoints, marker)
 
 /**
  * Returns this character sequence truncated from the end to the specified [length] (default: 15)
  * including the [marker] (default: " …").
  */
-public inline fun <reified T : CharSequence> CharSequence.truncateEnd(
-    length: TextLength<T> = 15.toTextLength(),
+public fun CharSequence.truncateEnd(
+    length: TextLength<*>,
     marker: CharSequence = Unicode.ELLIPSIS.startSpaced,
-): CharSequence = transformText<T> { it.truncateEnd(length.value, marker.toText()) }
+): CharSequence = mapText(length.unit) { it.truncateEnd(length.value, marker.asText(length.unit)) }
 
 /**
  * Returns this string truncated from the end to the specified [length] (default: 15)
  * including the [marker] (default: " …").
  */
-public inline fun <reified T : CharSequence> String.truncateEnd(
-    length: TextLength<T> = 15.toTextLength(),
+public fun String.truncateEnd(
+    length: TextLength<*>,
     marker: CharSequence = Unicode.ELLIPSIS.startSpaced,
-): String = transformText<T> { it.truncateEnd(length.value, marker.toText()) }
+): String = mapText(length.unit) { it.truncateEnd(length.value, marker.asText(length.unit)) }
 
 
 // withPrefix / withSuffix ---------------------------------------------------------------------------------------------
 
 /** Returns this char with the [prefix] prepended if it's not already present. */
-public fun Char.withPrefix(prefix: CharSequence): String =
+public fun kotlin.Char.withPrefix(prefix: CharSequence): String =
     toString().withPrefix(prefix)
 
 /** Returns this char with the [suffix] appended if it's not already present. */
-public fun Char.withSuffix(suffix: CharSequence): String =
+public fun kotlin.Char.withSuffix(suffix: CharSequence): String =
     toString().withSuffix(suffix)
 
 /** Returns this character sequence with the [prefix] prepended if it's not already present. */
@@ -379,7 +399,7 @@ private const val randomSuffixSeparator = "--"
 private val randomSuffixMatcher: Regex = Regex(".*$randomSuffixSeparator[\\da-zA-Z]{$randomSuffixLength}\$")
 
 /** Returns this char with a random suffix of two dashes and four alphanumeric characters. */
-public fun Char.withRandomSuffix(): String =
+public fun kotlin.Char.withRandomSuffix(): String =
     toString().withRandomSuffix()
 
 /** Returns this character sequence with a random suffix of two dashes and four alphanumeric characters. */
@@ -396,14 +416,14 @@ public fun String.withRandomSuffix(): String =
 // randomString --------------------------------------------------------------------------------------------------------
 
 /** Creates a random string of the specified [length] made up of the specified [allowedCharacters]. */
-public fun randomString(length: Int = 16, vararg allowedCharacters: Char = (('0'..'9') + ('a'..'z') + ('A'..'Z')).toCharArray()): String =
+public fun randomString(length: Int = 16, vararg allowedCharacters: kotlin.Char = (('0'..'9') + ('a'..'z') + ('A'..'Z')).toCharArray()): String =
     buildString(length) { repeat(length) { append(allowedCharacters[Random.nextInt(0, allowedCharacters.size)]) } }
 
 
 // repeat --------------------------------------------------------------------------------------------------------------
 
 /** Returns a string containing this char repeated [n] times. */
-public fun Char.repeat(n: Int): String = toString().repeat(n)
+public fun kotlin.Char.repeat(n: Int): String = toString().repeat(n)
 
 
 // indexOfOrNull -------------------------------------------------------------------------------------------------------
@@ -415,7 +435,7 @@ public fun Char.repeat(n: Int): String = toString().repeat(n)
  * @param ignoreCase `true` to ignore the character case when matching a character. By default `false`.
  * @return An index of the first occurrence of [char] or `null` if none is found.
  */
-public fun CharSequence.indexOfOrNull(char: Char, startIndex: Int = 0, ignoreCase: Boolean = false): Int? =
+public fun CharSequence.indexOfOrNull(char: kotlin.Char, startIndex: Int = 0, ignoreCase: Boolean = false): Int? =
     indexOf(char, startIndex, ignoreCase).takeIf { it >= 0 }
 
 /**
@@ -439,7 +459,7 @@ public fun CharSequence.indexOfOrNull(string: String, startIndex: Int = 0, ignor
  * @param ignoreCase `true` to ignore the character case when matching a character. By default `false`.
  * @return An index of the last occurrence of [char] or `null` if none is found.
  */
-public fun CharSequence.lastIndexOfOrNull(char: Char, startIndex: Int = lastIndex, ignoreCase: Boolean = false): Int? =
+public fun CharSequence.lastIndexOfOrNull(char: kotlin.Char, startIndex: Int = lastIndex, ignoreCase: Boolean = false): Int? =
     lastIndexOf(char, startIndex, ignoreCase).takeIf { it >= 0 }
 
 /**

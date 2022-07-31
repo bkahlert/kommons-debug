@@ -1,12 +1,12 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class JvmCodePointKtTest {
 
-    @Test fun name() = test {
+    @Test fun name() = testAll {
         "a".asCodePoint().name shouldBe "LATIN SMALL LETTER A"
         "¶".asCodePoint().name shouldBe "PILCROW SIGN"
         "☰".asCodePoint().name shouldBe "TRIGRAM FOR HEAVEN"

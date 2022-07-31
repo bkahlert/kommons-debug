@@ -1,5 +1,9 @@
 package com.bkahlert.kommons
 
+/** Shortcut for `subList(range.first, range.last+1)` */
+@Suppress("NOTHING_TO_INLINE")
+public inline fun <T> List<T>.subList(range: IntRange): List<T> = subList(range.first, range.end)
+
 /**
  * Returns a new list wrapping this list with the following differences:
  * 1) Negative indices are supported and start from the end of this list.

@@ -191,6 +191,20 @@ public inline fun Double.scale(
 ): Double = scale(amount, sourceRangeStart..sourceRangeEndInclusive)
 
 
+// end -----------------------------------------------------------------------------------------------------------------
+
+/**
+ * The exclusive end of this range.
+ *
+ * @throws IllegalStateException if [ClosedRange.endInclusive] is equal to [Int.MAX_VALUE]
+ */
+public inline val ClosedRange<Int>.end: Int
+    get() {
+        check(endInclusive != Int.MAX_VALUE) { "The exclusive end of $this is greater than Int.MAX_VALUE." }
+        return endInclusive + 1
+    }
+
+
 // random --------------------------------------------------------------------------------------------------------------
 
 /**

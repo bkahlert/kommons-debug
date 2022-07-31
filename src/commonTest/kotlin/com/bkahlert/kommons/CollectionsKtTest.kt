@@ -3,6 +3,7 @@ package com.bkahlert.kommons
 import com.bkahlert.kommons.test.testAll
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.throwable.shouldHaveMessage
 import kotlin.test.Test
@@ -59,6 +60,26 @@ class CollectionsKtTest {
         listOf("head", "tail").tail shouldBe listOf("tail")
         collection.tail shouldBe emptyList()
         emptyCollection.tail shouldBe emptyList()
+    }
+
+    @Test fun locate() = testAll {
+        listOf("foo", "bar") should {
+            shouldThrow<IndexOutOfBoundsException> { it.locate(-1, CharSequence::length) }.message shouldBe "index out of range: -1"
+            it.locate(0, CharSequence::length) shouldBe (0 to 0)
+            it.locate(1, CharSequence::length) shouldBe (0 to 1)
+            it.locate(2, CharSequence::length) shouldBe (0 to 2)
+            it.locate(3, CharSequence::length) shouldBe (1 to 0)
+            it.locate(4, CharSequence::length) shouldBe (1 to 1)
+            it.locate(5, CharSequence::length) shouldBe (1 to 2)
+            shouldThrow<IndexOutOfBoundsException> { it.locate(6, CharSequence::length) }.message shouldBe "index out of range: 6"
+
+            shouldThrow<IndexOutOfBoundsException> { it.locate(-1, 2, CharSequence::length) }.message shouldBe "index out of range: -1"
+            it.locate(1, 2, CharSequence::length) shouldBe (0..0 to 1 too 2)
+            it.locate(1, 6, CharSequence::length) shouldBe (0..1 to 1 too 3)
+            it.locate(4, 6, CharSequence::length) shouldBe (1..1 to 1 too 3)
+            shouldThrow<IndexOutOfBoundsException> { it.locate(4, 7, CharSequence::length) }.message shouldBe "index out of range: 6"
+            shouldThrow<IndexOutOfBoundsException> { it.locate(2, 1, CharSequence::length) }.message shouldBe "begin 2, end 1"
+        }
     }
 }
 

@@ -28,6 +28,13 @@ class StringsKtTest {
         String.EMPTY shouldBe ""
     }
 
+    @Test fun get() = testAll {
+        shouldThrow<IndexOutOfBoundsException> { String.EMPTY[0..0] }.message shouldBe "begin 0, end 1, length 0"
+        for (i in charSequence.indices) charSequence[i..i] shouldBe charSequence[i]
+        shouldThrow<IllegalArgumentException> { charSequence[0..1] }.message shouldBe "The requested range 0..1 is not suitable to get a single character."
+        shouldThrow<IndexOutOfBoundsException> { charSequence[charSequence.length..charSequence.length] }.message shouldBe "begin 13, end 14, length 13"
+    }
+
     @Test fun contains_any() = testAll {
         "foo bar".containsAny("baz", "o b", "abc") shouldBe true
         "foo bar".containsAny("baz", "O B", "abc", ignoreCase = true) shouldBe true
@@ -50,6 +57,16 @@ class StringsKtTest {
         checkBoundsIndexes(2, 1, 1) shouldBe (1 until 1)
         checkBoundsIndexes(2, 1, 2) shouldBe (1 until 2)
         checkBoundsIndexes(2, 2, 2) shouldBe (2 until 2)
+        shouldThrow<IndexOutOfBoundsException> { checkBoundsIndexes(2, 2, 1) }.message shouldBe "begin 2, end 1, length 2"
+        shouldThrow<IndexOutOfBoundsException> { checkBoundsIndexes(2, -1, 1) }.message shouldBe "begin -1, end 1, length 2"
+        shouldThrow<IndexOutOfBoundsException> { checkBoundsIndexes(2, 1, 3) }.message shouldBe "begin 1, end 3, length 2"
+
+        checkBoundsIndexes(2, 0 until 0) shouldBe (0 until 0)
+        checkBoundsIndexes(2, 0 until 1) shouldBe (0 until 1)
+        checkBoundsIndexes(2, 0 until 2) shouldBe (0 until 2)
+        checkBoundsIndexes(2, 1 until 1) shouldBe (1 until 1)
+        checkBoundsIndexes(2, 1 until 2) shouldBe (1 until 2)
+        checkBoundsIndexes(2, 2 until 2) shouldBe (2 until 2)
         shouldThrow<IndexOutOfBoundsException> { checkBoundsIndexes(2, 2, 1) }.message shouldBe "begin 2, end 1, length 2"
         shouldThrow<IndexOutOfBoundsException> { checkBoundsIndexes(2, -1, 1) }.message shouldBe "begin -1, end 1, length 2"
         shouldThrow<IndexOutOfBoundsException> { checkBoundsIndexes(2, 1, 3) }.message shouldBe "begin 1, end 3, length 2"
@@ -217,86 +234,33 @@ class StringsKtTest {
     }
 
 
-    @Test fun truncate() = testAll {
-        longString.truncate() shouldBe longString.truncate(length = 15.codePoints, marker = Unicode.ELLIPSIS.spaced)
-        longString.truncate<Grapheme>() shouldBe longString.truncate(length = 15.graphemes, marker = Unicode.ELLIPSIS.spaced)
-
-        longString.truncate(length = 7.chars) shouldBe "a\uD835 … 👦"
-        longString.truncate(length = 7.codePoints) shouldBe "a𝕓 … ‍👦"
-        longString.truncate(length = 7.graphemes) shouldBe "a𝕓 … 👨🏾‍🦱👩‍👩‍👦‍👦"
-
-        longString.truncate(length = 100_000.chars) shouldBeSameInstanceAs longString
-        longString.truncate(length = 100_000.codePoints) shouldBeSameInstanceAs longString
-        longString.truncate(length = 100_000.graphemes) shouldBeSameInstanceAs longString
-
-        longString.truncate(length = 7.chars, marker = "⋯") shouldBe "a𝕓⋯‍👦"
-        longString.truncate(length = 7.codePoints, marker = "⋯") shouldBe "a𝕓🫠⋯👦‍👦"
-        longString.truncate(length = 7.graphemes, marker = "⋯") shouldBe "a𝕓🫠⋯🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦"
-
-        shouldThrow<IllegalArgumentException> { longString.truncate(length = 7.chars, marker = "1234567890") }
-            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
-        shouldThrow<IllegalArgumentException> { longString.truncate(length = 7.codePoints, marker = "1234567890") }
-            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
-        shouldThrow<IllegalArgumentException> { longString.truncate(length = 7.graphemes, marker = "1234567890") }
-            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
-//        shouldThrow<IllegalArgumentException> { longString.truncate<WordUnit>() }
-//            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
-    }
-
-    @Test fun truncate_start() = testAll {
-        longString.truncateStart() shouldBe longString.truncateStart(length = 15.codePoints, marker = Unicode.ELLIPSIS.endSpaced)
-        longString.truncateStart<Grapheme>() shouldBe longString.truncateStart(length = 15.graphemes, marker = Unicode.ELLIPSIS.endSpaced)
-
-        longString.truncateStart(length = 7.chars) shouldBe "… 👦‍👦"
-        longString.truncateStart(length = 7.codePoints) shouldBe "… 👩‍👦‍👦"
-        longString.truncateStart(length = 7.graphemes) shouldBe "… 𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦"
-
-        longString.truncateStart(length = 100_000.chars) shouldBeSameInstanceAs longString
-        longString.truncateStart(length = 100_000.codePoints) shouldBeSameInstanceAs longString
-        longString.truncateStart(length = 100_000.graphemes) shouldBeSameInstanceAs longString
-
-        longString.truncateStart(length = 7.chars, marker = "⋯") shouldBe "⋯‍👦‍👦"
-        longString.truncateStart(length = 7.codePoints, marker = "⋯") shouldBe "⋯‍👩‍👦‍👦"
-        longString.truncateStart(length = 7.graphemes, marker = "⋯") shouldBe "⋯a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦"
-
-        shouldThrow<IllegalArgumentException> { longString.truncateStart(length = 7.chars, marker = "1234567890") }
-            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
-        shouldThrow<IllegalArgumentException> { longString.truncateStart(length = 7.codePoints, marker = "1234567890") }
-            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
-        shouldThrow<IllegalArgumentException> { longString.truncateStart(length = 7.graphemes, marker = "1234567890") }
+    @Test fun truncate() = testAll(longString.cs, longString) {
+        it.truncate() should { truncated ->
+            truncated shouldBe it.truncate(length = 15.codePoints, marker = Unicode.ELLIPSIS.spaced)
+            truncated.toString() shouldBe "a𝕓🫠🇩🇪👨 … ‍👩‍👦‍👦"
+        }
+        it.truncate(length = 100_000.graphemes) shouldBeSameInstanceAs it
+        shouldThrow<IllegalArgumentException> { it.truncate(length = 7.chars, marker = "1234567890") }
             .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
     }
 
-    @Test fun truncate_end() = testAll {
-        longString.truncateEnd() shouldBe longString.truncateEnd(length = 15.codePoints, marker = Unicode.ELLIPSIS.startSpaced)
-        longString.truncateEnd<Grapheme>() shouldBe longString.truncateEnd(length = 15.graphemes, marker = Unicode.ELLIPSIS.startSpaced)
-
-        longString.truncateEnd(length = 7.chars) shouldBe "a𝕓🫠 …"
-        longString.truncateEnd(length = 7.codePoints) shouldBe "a𝕓🫠🇩🇪 …"
-        longString.truncateEnd(length = 7.graphemes) shouldBe "a𝕓🫠🇩🇪👨🏾‍🦱 …"
-
-        longString.truncateEnd(length = 100_000.chars) shouldBeSameInstanceAs longString
-        longString.truncateEnd(length = 100_000.codePoints) shouldBeSameInstanceAs longString
-        longString.truncateEnd(length = 100_000.graphemes) shouldBeSameInstanceAs longString
-
-        longString.truncateEnd(length = 7.chars, marker = "⋯") shouldBe "a𝕓🫠\uD83C⋯"
-        longString.truncateEnd(length = 7.codePoints, marker = "⋯") shouldBe "a𝕓🫠🇩🇪👨⋯"
-        longString.truncateEnd(length = 7.graphemes, marker = "⋯") shouldBe "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦⋯"
-
-        shouldThrow<IllegalArgumentException> { longString.truncateEnd(length = 7.chars, marker = "1234567890") }
-            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
-        shouldThrow<IllegalArgumentException> { longString.truncateEnd(length = 7.codePoints, marker = "1234567890") }
-            .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
-        shouldThrow<IllegalArgumentException> { longString.truncateEnd(length = 7.graphemes, marker = "1234567890") }
+    @Test fun truncate_start() = testAll(longString.cs, longString) {
+        it.truncateStart() should { truncated ->
+            truncated shouldBe it.truncateStart(length = 15.codePoints, marker = Unicode.ELLIPSIS.endSpaced)
+            truncated.toString() shouldBe "… 🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦"
+        }
+        it.truncateStart(length = 100_000.graphemes) shouldBeSameInstanceAs it
+        shouldThrow<IllegalArgumentException> { it.truncateStart(length = 7.chars, marker = "1234567890") }
             .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
     }
 
-    @Test fun xxx() = testAll {
-//        longString.truncateEnd(length = 7.chars) shouldBe "a𝕓🫠 …"
-//        longString.truncateEnd(length = 7.codePoints) shouldBe "a𝕓🫠🇩🇪 …"
-//        longString.truncateEnd(length = 7.graphemes) shouldBe "a𝕓🫠🇩🇪👨🏾‍🦱 …"
-//
-        shouldThrow<IllegalArgumentException> { longString.truncateEnd(length = 7.graphemes, marker = "1234567890") }
+    @Test fun truncate_end() = testAll(longString.cs, longString) {
+        it.truncateEnd() should { truncated ->
+            truncated shouldBe it.truncateEnd(length = 15.codePoints, marker = Unicode.ELLIPSIS.startSpaced)
+            truncated.toString() shouldBe "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍ …"
+        }
+        it.truncateEnd(length = 100_000.graphemes) shouldBeSameInstanceAs it
+        shouldThrow<IllegalArgumentException> { it.truncateEnd(length = 7.chars, marker = "1234567890") }
             .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
     }
 
@@ -497,9 +461,9 @@ class StringsKtTest {
 
 internal val String.cs: CharSequence get() = StringBuilder(this)
 
-internal const val char: Char = 'c'
-internal const val blankChar: Char = ' '
-internal val nullChar: Char? = null
+internal const val char: kotlin.Char = 'c'
+internal const val blankChar: kotlin.Char = ' '
+internal val nullChar: kotlin.Char? = null
 
 internal val charSequence: CharSequence = StringBuilder("char sequence")
 internal val emptyCharSequence: CharSequence = StringBuilder()
@@ -512,34 +476,34 @@ internal const val blankString: String = "   "
 internal val nullString: String? = null
 
 internal val emojiString: String = "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦"
-internal val emojiChars: Array<Text.Char> = arrayOf(
-    Text.Char('a'),
-    Text.Char('\uD835'),
-    Text.Char('\uDD53'),
-    Text.Char('\uD83E'),
-    Text.Char('\uDEE0'),
-    Text.Char('\uD83C'),
-    Text.Char('\uDDE9'),
-    Text.Char('\uD83C'),
-    Text.Char('\uDDEA'),
-    Text.Char('\uD83D'),
-    Text.Char('\uDC68'),
-    Text.Char('\uD83C'),
-    Text.Char('\uDFFE'),
-    Text.Char('\u200D'),
-    Text.Char('\uD83E'),
-    Text.Char('\uDDB1'),
-    Text.Char('\uD83D'),
-    Text.Char('\uDC69'),
-    Text.Char('\u200D'),
-    Text.Char('\uD83D'),
-    Text.Char('\uDC69'),
-    Text.Char('\u200D'),
-    Text.Char('\uD83D'),
-    Text.Char('\uDC66'),
-    Text.Char('\u200D'),
-    Text.Char('\uD83D'),
-    Text.Char('\uDC66'),
+internal val emojiChars: Array<kotlin.Char> = arrayOf(
+    'a',
+    '\uD835',
+    '\uDD53',
+    '\uD83E',
+    '\uDEE0',
+    '\uD83C',
+    '\uDDE9',
+    '\uD83C',
+    '\uDDEA',
+    '\uD83D',
+    '\uDC68',
+    '\uD83C',
+    '\uDFFE',
+    '\u200D',
+    '\uD83E',
+    '\uDDB1',
+    '\uD83D',
+    '\uDC69',
+    '\u200D',
+    '\uD83D',
+    '\uDC69',
+    '\u200D',
+    '\uD83D',
+    '\uDC66',
+    '\u200D',
+    '\uD83D',
+    '\uDC66',
 )
 internal val emojiCodePoints: Array<CodePoint> = arrayOf(
     CodePoint(0x0061),

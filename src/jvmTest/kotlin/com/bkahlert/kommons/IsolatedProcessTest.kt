@@ -1,6 +1,6 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
@@ -16,7 +16,7 @@ import kotlin.system.exitProcess
 class IsolatedProcessTest {
 
     @Test
-    fun `should execute main`(@TempDir tempDir: Path) = test {
+    fun `should execute main`(@TempDir tempDir: Path) = testAll {
         val file = tempDir / "file"
         val result = IsolatedProcess.exec(TestClass::class, file.pathString)
         result shouldBe 0
@@ -24,14 +24,14 @@ class IsolatedProcessTest {
     }
 
     @Test
-    fun `should return non-zero exit code on error`(@TempDir tempDir: Path) = test {
+    fun `should return non-zero exit code on error`(@TempDir tempDir: Path) = testAll {
         val file = tempDir / "not-existing-dir" / "file"
         val result = IsolatedProcess.exec(TestClass::class, file.pathString)
         result shouldBe 1
     }
 
     @Test
-    fun `should throw on missing main`() = test {
+    fun `should throw on missing main`() = testAll {
         shouldThrow<IllegalArgumentException> { IsolatedProcess.exec(IsolatedProcessTest::class) }
     }
 }

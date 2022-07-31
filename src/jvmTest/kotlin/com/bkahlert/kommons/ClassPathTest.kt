@@ -1,6 +1,6 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.withClue
 import io.kotest.matchers.ints.shouldBeGreaterThan
@@ -23,9 +23,9 @@ import kotlin.io.path.readText
 
 class ClassPathTest {
 
-    @Test fun class_path() = test {
+    @Test fun class_path() = testAll {
         ClassPath(classPathTextFile) should {
-            it.fileSystem.shouldBeInstanceOf<DelegatingFileSystem>()
+            it.fileSystem.shouldBeInstanceOf<FileSystemDelegate>()
             it.isAbsolute shouldBe true
             it.root.pathString shouldBe "/"
             it.fileName.pathString shouldBe "61C285F09D95930D0AE298B00AF09F918B0A.txt"
@@ -51,7 +51,7 @@ class ClassPathTest {
             it.readBytes() shouldBe classPathTextFileBytes
         }
         ClassPath(standardLibraryClassPathClass) should {
-            it.fileSystem.shouldBeInstanceOf<DelegatingFileSystem>()
+            it.fileSystem.shouldBeInstanceOf<FileSystemDelegate>()
             it.isAbsolute shouldBe true
             it.root.pathString shouldBe "/"
             it.fileName.pathString shouldBe "Regex.class"
@@ -81,7 +81,7 @@ class ClassPathTest {
         shouldThrow<IOException> { ClassPath(URI("jar:file:/invalid.jar!/invalid.class")) }
     }
 
-    @Test fun manually_copy_class_path(@TempDir tempDir: Path) = test {
+    @Test fun manually_copy_class_path(@TempDir tempDir: Path) = testAll {
         ClassPath(classPathTextFile).useBufferedInputStream {
             tempDir.resolve("classPathTextFile-streamed-copy").useOutputStream { out -> it.copyTo(out) }
         }.readBytes() shouldBe classPathTextFileBytes
@@ -91,7 +91,7 @@ class ClassPathTest {
         }.readBytes() shouldBe standardLibraryClassPathClassBytes
     }
 
-    @Test fun kotlin_copy_class_path(@TempDir tempDir: Path) = test {
+    @Test fun kotlin_copy_class_path(@TempDir tempDir: Path) = testAll {
         ClassPath(classPathTextFile).copyTo(tempDir.resolve("classPathTextFile-kotlin-copy")) should {
             it.pathString shouldBe tempDir.resolve("classPathTextFile-kotlin-copy").pathString
             it.readBytes() shouldBe classPathTextFileBytes
@@ -103,7 +103,7 @@ class ClassPathTest {
         }
     }
 
-    @Test fun kotlin_copy_class_path_to_directory(@TempDir tempDir: Path) = test {
+    @Test fun kotlin_copy_class_path_to_directory(@TempDir tempDir: Path) = testAll {
         ClassPath(classPathTextFile).copyToDirectory(tempDir) should {
             it.pathString shouldBe tempDir.resolve(classPathTextFile).pathString
             it.readBytes() shouldBe classPathTextFileBytes
@@ -115,7 +115,7 @@ class ClassPathTest {
         }
     }
 
-    @Test fun kotlin_copy_class_path_to_directory__multiple(@TempDir tempDir: Path) = test {
+    @Test fun kotlin_copy_class_path_to_directory__multiple(@TempDir tempDir: Path) = testAll {
         for (i in 0..0) {
             ClassPath(classPathTextFile).copyTo(tempDir.resolve(classPathTextFile + i)) should {
                 it.pathString shouldBe tempDir.resolve(classPathTextFile + i).pathString

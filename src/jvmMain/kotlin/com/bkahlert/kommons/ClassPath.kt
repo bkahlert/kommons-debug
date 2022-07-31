@@ -41,7 +41,7 @@ public fun ClassPath(resource: String): Path {
 /** Returns a [Path] that points to the specified [resource]. */
 @Suppress("FunctionName")
 public fun ClassPath(resource: URL): Path =
-    DelegatingPath(resource.also { require(it.openStream().use { inputStream -> inputStream.available() > 0 }) { "$resource is unavailable" } })
+    PathDelegate(resource.also { require(it.openStream().use { inputStream -> inputStream.available() > 0 }) { "$resource is unavailable" } })
 
 /** Returns a [Path] that points to the specified [resource]. */
 @Suppress("FunctionName")
@@ -50,7 +50,7 @@ public fun ClassPath(resource: URI): Path =
 
 
 /** A [Path] that delegates all invocations to the specified [actualResource]. */
-internal class DelegatingPath(
+internal class PathDelegate(
     private val actualResource: URL,
     private val range: IntRange? = null,
 ) : Path {
@@ -71,30 +71,30 @@ internal class DelegatingPath(
     override fun toString(): String = useActual { actual -> actual.toString() }
     override fun compareTo(other: Path): Int = useActual { actual -> other.useActual { actual.compareTo(it) } }
 
-    override fun getFileSystem(): FileSystem = useActual { actual -> DelegatingFileSystem(actual.fileSystem) }
+    override fun getFileSystem(): FileSystem = useActual { actual -> FileSystemDelegate(actual.fileSystem) }
     override fun isAbsolute(): Boolean = useActual { actual -> actual.isAbsolute }
-    override fun getRoot(): Path? = useActual { actual -> actual.root?.let { DelegatingPath(it) } }
-    override fun getFileName(): Path? = if (nameCount > 0) DelegatingPath(actualResource, nameCount.let { it - 1 until it }) else null
-    override fun getParent(): Path? = useActual { actual -> actual.parent?.let { DelegatingPath(it) } }
+    override fun getRoot(): Path? = useActual { actual -> actual.root?.let { PathDelegate(it) } }
+    override fun getFileName(): Path? = if (nameCount > 0) PathDelegate(actualResource, nameCount.let { it - 1 until it }) else null
+    override fun getParent(): Path? = useActual { actual -> actual.parent?.let { PathDelegate(it) } }
     override fun getNameCount(): Int = useActual { actual -> actual.nameCount }
-    override fun getName(index: Int): Path = DelegatingPath(actualResource, index until index + 1)
-    override fun subpath(beginIndex: Int, endIndex: Int): Path = DelegatingPath(actualResource, beginIndex until endIndex)
+    override fun getName(index: Int): Path = PathDelegate(actualResource, index until index + 1)
+    override fun subpath(beginIndex: Int, endIndex: Int): Path = PathDelegate(actualResource, beginIndex until endIndex)
     override fun startsWith(other: Path): Boolean = useActual { actual -> other.useActual { actual.startsWith(it) } }
     override fun startsWith(other: String): Boolean = useActual { actual -> actual.startsWith(other) }
     override fun endsWith(other: Path): Boolean = useActual { actual -> other.useActual { actual.endsWith(it) } }
     override fun endsWith(other: String): Boolean = useActual { actual -> actual.endsWith(other) }
-    override fun normalize(): Path = useActual { actual -> DelegatingPath(actual.normalize()) }
-    override fun resolve(other: Path): Path = useActual { actual -> DelegatingPath(other.useActual { actual.resolve(it) }) }
-    override fun resolve(other: String): Path = useActual { actual -> DelegatingPath(actual.resolve(other)) }
-    override fun resolveSibling(other: Path): Path = useActual { actual -> DelegatingPath(other.useActual { actual.resolveSibling(it) }) }
-    override fun resolveSibling(other: String): Path = useActual { actual -> DelegatingPath(actual.resolveSibling(other)) }
+    override fun normalize(): Path = useActual { actual -> PathDelegate(actual.normalize()) }
+    override fun resolve(other: Path): Path = useActual { actual -> PathDelegate(other.useActual { actual.resolve(it) }) }
+    override fun resolve(other: String): Path = useActual { actual -> PathDelegate(actual.resolve(other)) }
+    override fun resolveSibling(other: Path): Path = useActual { actual -> PathDelegate(other.useActual { actual.resolveSibling(it) }) }
+    override fun resolveSibling(other: String): Path = useActual { actual -> PathDelegate(actual.resolveSibling(other)) }
     override fun relativize(other: Path): Path =
         useActual { actual -> other.useActual { actual.relativize(it) } } // TODO return delegated with computed range
 
     override fun toFile(): File = useActual { actual -> actual.toFile() }
     override fun toUri(): URI = useActual { actual -> actual.toUri() }
-    override fun toAbsolutePath(): Path = useActual { actual -> DelegatingPath(actual.toAbsolutePath()) }
-    override fun toRealPath(vararg options: LinkOption?): Path = useActual { actual -> DelegatingPath(actual.toRealPath(*options)) }
+    override fun toAbsolutePath(): Path = useActual { actual -> PathDelegate(actual.toAbsolutePath()) }
+    override fun toRealPath(vararg options: LinkOption?): Path = useActual { actual -> PathDelegate(actual.toRealPath(*options)) }
 
     override fun iterator(): MutableIterator<Path> = useActual { actual -> actual.iterator() }
 
@@ -106,21 +106,21 @@ internal class DelegatingPath(
 }
 
 private fun <R> Path.useActual(block: (Path) -> R): R = when (this) {
-    is DelegatingPath -> useActual { block(it) }
+    is PathDelegate -> useActual { block(it) }
     else -> block(this)
 }
 
 private fun <R> Path?.useNullableActual(block: (Path?) -> R): R = when (this) {
-    is DelegatingPath -> useActual { block(it) }
+    is PathDelegate -> useActual { block(it) }
     else -> block(this)
 }
 
 /** A [FileSystem] that delegates all invocations to the specified [actualFileSystem]. */
-internal class DelegatingFileSystem(
+internal class FileSystemDelegate(
     private val actualFileSystem: FileSystem,
 ) : FileSystem() {
     override fun close() = actualFileSystem.close()
-    override fun provider(): FileSystemProvider = DelegatingFileSystemProvider(actualFileSystem.provider())
+    override fun provider(): FileSystemProvider = FileSystemProviderDelegate(actualFileSystem.provider())
     override fun isOpen(): Boolean =
         actualFileSystem.isOpen
 
@@ -153,13 +153,13 @@ internal class DelegatingFileSystem(
 }
 
 /** A [FileSystemProvider] that delegates all invocations to the specified [actualProvider]. */
-internal class DelegatingFileSystemProvider(
+internal class FileSystemProviderDelegate(
     private val actualProvider: FileSystemProvider,
 ) : FileSystemProvider() {
     override fun getScheme(): String = actualProvider.scheme
 
     override fun newFileSystem(uri: URI?, env: MutableMap<String, *>?): FileSystem =
-        DelegatingFileSystem(actualProvider.newFileSystem(uri, env))
+        FileSystemDelegate(actualProvider.newFileSystem(uri, env))
 
     override fun getFileSystem(uri: URI?): FileSystem =
         actualProvider.getFileSystem(uri)

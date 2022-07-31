@@ -1,10 +1,10 @@
 package com.bkahlert.kommons
 
 /** Returns `true` if this character is uppercase. */
-public fun Char.isUpperCase(): Boolean = this == uppercaseChar() && this != lowercaseChar()
+public fun kotlin.Char.isUpperCase(): Boolean = this == uppercaseChar() && this != lowercaseChar()
 
 /** Returns `true` if this character is lowercase. */
-public fun Char.isLowerCase(): Boolean = this == lowercaseChar() && this != uppercaseChar()
+public fun kotlin.Char.isLowerCase(): Boolean = this == lowercaseChar() && this != uppercaseChar()
 
 
 /** Returns this character sequence with its first letter in uppercase. */

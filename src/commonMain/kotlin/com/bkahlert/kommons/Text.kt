@@ -1,59 +1,32 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.Text.Char
 import com.bkahlert.kommons.Text.ChunkedText
+import com.bkahlert.kommons.Text.TextComposite
 import com.bkahlert.kommons.TextUnit.Chars
 import com.bkahlert.kommons.TextUnit.CodePoints
 import com.bkahlert.kommons.TextUnit.Graphemes
-import kotlin.jvm.JvmInline
+import kotlin.contracts.InvocationKind.EXACTLY_ONCE
+import kotlin.contracts.contract
 import kotlin.math.roundToInt
-import kotlin.reflect.KClass
 
-/** An [Iterator] that iterates text positions between boundaries. */
-public typealias PositionIterator = Iterator<IntRange>
+/** An [Iterator] that iterates text boundaries. */
+public typealias BreakIterator = Iterator<Int>
 
-/** An [Iterator] that iterates text chunks between boundaries. */
-public interface ChunkIterator<T : CharSequence> : Iterator<T>
+/** A text consisting of chunks of type [T]. */
+public interface Text<out T> : Iterable<Text<T>> {
 
-/** An [Iterator] that iterates text chunks returned by the specified [iterator] and materialized using the specified [materialize]. */
-public class ChunkingIterator<T : CharSequence>(
-    private val iterator: PositionIterator,
-    private val materialize: (IntRange) -> T,
-) : ChunkIterator<T> {
-    override fun hasNext(): Boolean = iterator.hasNext()
-    override fun next(): T = materialize(iterator.next())
-}
-
-/** An [Iterator] that iterates [Char] positions. */
-public class CharPositionIterator(private val text: CharSequence) : PositionIterator {
-    private var index = 0
-    override fun hasNext(): Boolean = index < text.length
-    override fun next(): IntRange = index++..index
-}
-
-/** An [Iterator] that iterates [Char] instances. */
-public class CharIterator(private val text: CharSequence) : ChunkIterator<Char> by ChunkingIterator(CharPositionIterator(text), { Char(text, it) })
-
-
-public interface Text<out T : CharSequence> {
-
-    /**
-     * Returns the length of this character sequence.
-     */
+    /** The of this text. */
     public val length: Int
 
     /**
-     * Returns the character at the specified [index] in this character sequence.
+     * Returns the chunk at the specified [index] in this text.
      *
      * @throws [IndexOutOfBoundsException] if the [index] is out of bounds of this character sequence.
-     *
-     * Note that the [String] implementation of this interface in Kotlin/JS has unspecified behavior
-     * if the [index] is out of its bounds.
      */
     public operator fun get(index: Int): T
 
     /**
-     * Returns a new character sequence that is a subsequence of this character sequence,
+     * Returns a character sequence representing the text that is a subsequence of this text,
      * starting at the specified [startIndex] and ending right before the specified [endIndex].
      *
      * @param startIndex the start index (inclusive).
@@ -61,66 +34,46 @@ public interface Text<out T : CharSequence> {
      */
     public fun subSequence(startIndex: Int = 0, endIndex: Int = length): CharSequence
 
+    /**
+     * Returns a new text that is a subsequence of this text,
+     * starting at the specified [startIndex] and ending right before the specified [endIndex].
+     */
     public fun subText(startIndex: Int = 0, endIndex: Int = length): Text<T>
 
-    // TODO test
+    /** Returns an iterator that iterates over the sub texts of this text. */
+    override fun iterator(): Iterator<Text<T>>
+
+    /** Returns a list containing the chunks this text consists of. */
     public fun asList(): List<T>
 
     public companion object {
 
-        public fun from(text: CharSequence): Text<Char> = from(text) { it.map(::Char) }
-
-        public fun <T : CharSequence> from(
-            text: CharSequence,
-            transform: (CharSequence) -> List<T>
-        ): Text<T> = ChunkedText(transform(text))
-
         /** Returns an empty text. */
-        public fun <T : CharSequence> emptyText(): Text<T> = EmptyText
-        public fun <T : CharSequence> restrictedText(text: CharSequence): Text<T> = RestrictedText(text)
-        public fun <T : CharSequence> CharSequence.toText(unit: TextUnit<T>): Text<T> = unit.transform(this)
-        public inline fun <reified T : CharSequence> CharSequence.toText(): Text<T> = toText(TextUnit.of())
-    }
+        public fun <T> emptyText(): Text<T> = EmptyText
 
-    @JvmInline
-    public value class Char(private val char: kotlin.Char) : CharSequence {
-        public constructor(text: CharSequence, index: Int) : this(text[index])
-        public constructor(text: CharSequence, range: IntRange) : this(text, range.single())
+        /** Returns a text consisting of text chunks of type [T] using the specified [unit]. */
+        public fun <T> CharSequence.asText(unit: TextUnit<T>): Text<T> = unit.textOf(this)
 
-        override val length: Int get() = 1
-        override fun get(index: Int): kotlin.Char = char.also { checkBoundsIndex(indices, index) }
-        override fun subSequence(startIndex: Int, endIndex: Int): CharSequence {
-            checkBoundsIndexes(length, startIndex, endIndex)
-            if (startIndex == endIndex) return String.EMPTY
-            return this
+        /** Maps the [unit]-based [Text] of this character sequence using the specified [transform]. */
+        public fun <T> CharSequence.mapText(
+            unit: TextUnit<T>,
+            transform: (Text<T>) -> Text<*>,
+        ): CharSequence = mapText(unit, transform) { it.subSequence() }
+
+        /** Maps the [unit]-based [Text] of this string using the specified [transform]. */
+        public fun <T> String.mapText(
+            unit: TextUnit<T>,
+            transform: (Text<T>) -> Text<*>,
+        ): String = mapText(unit, transform) { it.subSequence().toString() }
+
+        private fun <T, R : CharSequence> R.mapText(
+            unit: TextUnit<T>,
+            transform: (Text<T>) -> Text<*>,
+            join: (Text<*>) -> R,
+        ): R {
+            val text: Text<T> = asText(unit)
+            return transform(text).takeUnless { it == text }?.let(join) ?: this
         }
-
-        override fun toString(): String = "$char"
-    }
-
-    @JvmInline
-    public value class ChunkedText<T : CharSequence>(private val chunks: List<T>) : Text<T> {
-        override val length: Int get() = chunks.size
-        override fun get(index: Int): T {
-            checkBoundsIndex(chunks.indices, index)
-            return chunks[index]
-        }
-
-        override fun subSequence(startIndex: Int, endIndex: Int): CharSequence {
-            checkBoundsIndexes(chunks.size, startIndex, endIndex)
-            if (startIndex == endIndex) return String.EMPTY
-            return ComposingCharSequence(chunks.subList(startIndex, endIndex))
-        }
-
-        override fun subText(startIndex: Int, endIndex: Int): Text<T> {
-            checkBoundsIndexes(chunks.size, startIndex, endIndex)
-            if (startIndex == endIndex) return EmptyText
-            return ChunkedText(chunks.subList(startIndex, endIndex))
-        }
-
-        override fun asList(): List<T> = chunks
-
-        override fun toString(): String = ComposingCharSequence(chunks).toString()
     }
 
     private object EmptyText : Text<Nothing> {
@@ -128,100 +81,247 @@ public interface Text<out T : CharSequence> {
         override fun get(index: Int): Nothing = throw IndexOutOfBoundsException("index out of range: $index")
         override fun subSequence(startIndex: Int, endIndex: Int): CharSequence = String.EMPTY.also { checkBoundsIndexes(0, startIndex, endIndex) }
         override fun subText(startIndex: Int, endIndex: Int): Text<Nothing> = EmptyText.also { checkBoundsIndexes(0, startIndex, endIndex) }
+        override fun iterator(): Iterator<Text<Nothing>> = emptyList<Text<Nothing>>().iterator()
         override fun asList(): List<Nothing> = emptyList()
         override fun toString(): String = String.EMPTY
     }
 
-    @JvmInline
-    private value class RestrictedText private constructor(private val text: String) : Text<Nothing> {
-        constructor(text: CharSequence) : this(text.takeIf {
-            it.none(kotlin.Char::isSurrogate)
-        }?.toString() ?: throw IllegalArgumentException("text must not contain surrogates"))
+    /**
+     * A text that is backed by the specified [text],
+     * its chunks based the on the specified [indices],
+     * and materialized using the specified [transform].
+     */
+    public class ChunkedText<T>(
+        private val text: CharSequence,
+        private val indices: List<IntRange>,
+        private val transform: (CharSequence, IntRange) -> T,
+    ) : Text<T> {
+        public constructor(
+            text: CharSequence,
+            vararg indices: IntRange,
+            transform: (CharSequence, IntRange) -> T,
+        ) : this(text, indices.asList(), transform)
 
-        override val length: Int get() = text.length
-        override fun get(index: Int): Nothing = throw UnsupportedOperationException()
+        public constructor(
+            text: CharSequence,
+            iterator: BreakIterator,
+            transform: (CharSequence, IntRange) -> T,
+        ) : this(text, iterator.mapToRanges().toList(), transform)
+
+        override val length: Int get() = indices.size
+
+        override fun get(index: Int): T {
+            checkBoundsIndex(indices.indices, index)
+            return transform(text, indices[index])
+        }
+
+        private val fullyIndexed get() = indices.fold(0) { last, range -> if (range.first == last) range.last + 1 else -1 } == text.length
+
         override fun subSequence(startIndex: Int, endIndex: Int): CharSequence {
-            require(startIndex == 0) { "startIndex must be 0" }
-            require(endIndex == text.length) { "endIndex must be ${text.length}" }
-            return text
+            checkBoundsIndexes(length, startIndex, endIndex)
+            if (startIndex == endIndex) return String.EMPTY
+            if (fullyIndexed && startIndex == 0 && endIndex == length) return text
+            return buildString { this@ChunkedText.indices.subList(startIndex, endIndex).forEach { append(text, it.first, it.last + 1) } }
         }
 
-        override fun subText(startIndex: Int, endIndex: Int): Text<Nothing> {
-            require(startIndex == 0) { "startIndex must be 0" }
-            require(endIndex == text.length) { "endIndex must be ${text.length}" }
-            return this
+        override fun subText(startIndex: Int, endIndex: Int): Text<T> {
+            checkBoundsIndexes(length, startIndex, endIndex)
+            if (startIndex == endIndex) return EmptyText
+            if (fullyIndexed && startIndex == 0 && endIndex == length) return this
+            return ChunkedText(text, indices.subList(startIndex, endIndex), transform)
         }
 
-        override fun asList(): List<Nothing> = throw UnsupportedOperationException()
-        override fun toString(): String = text
+        override fun iterator(): Iterator<Text<T>> = indices.indices.iterator().map { subText(it, it + 1) }
+
+        override fun asList(): List<T> = indices.map { transform(text, it) }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other == null || this::class != other::class) return false
+
+            other as ChunkedText<*>
+
+            if (text != other.text) return false
+            if (indices != other.indices) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = text.hashCode()
+            result = 31 * result + indices.hashCode()
+            return result
+        }
+
+        override fun toString(): String = subSequence().toString()
+    }
+
+    /** A [Text] that acts as if the specified [texts] were concatenated. */
+    public class TextComposite<out T>(
+        private val texts: List<Text<T>>,
+    ) : Text<T> {
+        public constructor(vararg texts: Text<T>) : this(texts.asList())
+
+        override val length: Int get() = texts.sumOf { it.length }
+
+        override fun get(index: Int): T {
+            checkBoundsIndex(0..length, index)
+            val (delegateIndex, localIndex) = texts.locate(index, Text<T>::length)
+            return texts[delegateIndex][localIndex]
+        }
+
+        override fun subSequence(startIndex: Int, endIndex: Int): CharSequence {
+            checkBoundsIndexes(length, startIndex, endIndex)
+            if (startIndex == endIndex) return String.EMPTY
+            if (startIndex == 0 && endIndex == length) CharSequenceComposite(texts.map { it.subSequence() })
+            val (elementRange, virtualStartIndex, virtualEndIndex) = texts.locate(startIndex, endIndex, Text<T>::length)
+            return elementRange.singleOrNull()
+                ?.let { texts[it].subSequence(virtualStartIndex, virtualEndIndex) }
+                ?: CharSequenceComposite(elementRange.map {
+                    texts[it].let { text ->
+                        text.subSequence(
+                            if (elementRange.first == it) virtualStartIndex else 0,
+                            if (elementRange.last == it) virtualEndIndex else text.length,
+                        )
+                    }
+                })
+        }
+
+        override fun subText(startIndex: Int, endIndex: Int): Text<T> {
+            checkBoundsIndexes(length, startIndex, endIndex)
+            if (startIndex == endIndex) return EmptyText
+            if (startIndex == 0 && endIndex == length) return this
+            val (elementRange, virtualStartIndex, virtualEndIndex) = texts.locate(startIndex, endIndex, Text<T>::length)
+            return elementRange.singleOrNull()
+                ?.let { texts[it].subText(virtualStartIndex, virtualEndIndex) }
+                ?: TextComposite(elementRange.map {
+                    texts[it].let { text ->
+                        text.subText(
+                            if (elementRange.first == it) virtualStartIndex else 0,
+                            if (elementRange.last == it) virtualEndIndex else text.length,
+                        )
+                    }
+                })
+        }
+
+        override fun iterator(): Iterator<Text<T>> = iterator {
+            texts.forEach { text -> text.iterator().forEach { yield(it) } }
+        }
+
+        override fun asList(): List<T> = texts.flatMap { it.asList() }
+
+        /** Returns the [texts] concatenated string. */
+        override fun toString(): String = texts.joinToString(String.EMPTY)
+
+        /** Returns `true` if the specified [other] is a [TextComposite] and the return values of [toString] are equal. */
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other == null || this::class != other::class) return false
+
+            other as TextComposite<*>
+
+            return toString() == other.toString()
+        }
+
+        /** Returns the hash code of [toString]. */
+        override fun hashCode(): Int = toString().hashCode()
     }
 }
 
-public operator fun <T : CharSequence> Text<T>.plus(other: Text<T>): Text<T> = ChunkedText(this.asList() + other.asList())
+/** Returns `true` if the collection is empty, `false` otherwise. */
+public fun Text<*>.isEmpty(): Boolean = length == 0.also { emptyList<Nothing>().isEmpty() }
 
-public interface TextUnit<T : CharSequence> {
-    public val type: KClass<T>
-    public fun transform(text: CharSequence): Text<T>
+/** Returns a new text consisting of the text chunks of this and the specified [other] text. */
+public operator fun <T> Text<T>.plus(other: Text<T>): Text<T> = when {
+    this.isEmpty() -> other
+    other.isEmpty() -> this
+    else -> TextComposite(this, other)
+}
 
-    public object Chars : TextUnit<Char> by (build { Text.from(it) })
-    public object CodePoints : TextUnit<CodePoint> by (build { Text.from(it, CharSequence::toCodePointList) })
-    public object Graphemes : TextUnit<Grapheme> by (build { Text.from(it, CharSequence::toGraphemeList) })
-    public object Nothings : TextUnit<Nothing> by (build(Nothing::class) { Text.restrictedText(it) })
+/** The type of text chunks. */
+public interface TextUnit<T> {
 
-    public companion object {
+    /** The unit name. */
+    public val name: String
 
-        public fun <T : CharSequence> build(
-            type: KClass<T>,
-            transform: (CharSequence) -> Text<T>
-        ): TextUnit<T> = object : TextUnit<T> {
-            override val type: KClass<T> = type
-            override fun transform(text: CharSequence): Text<T> = transform(text)
+    /** Returns a new [Text] backed by the specified [text]. */
+    public fun textOf(text: CharSequence): Text<T>
+
+    /** Text unit for texts consisting of [kotlin.Char] chunks. */
+    public object Chars : TextUnit<kotlin.Char> {
+        override val name: String = "char"
+        override fun textOf(text: CharSequence): Text<kotlin.Char> = ChunkedText(text, text.indices.map { it..it }) { txt, range ->
+            check(range.first == range.last) { "range start and end must be equal: $range" }
+            txt[range.first]
         }
 
-        public inline fun <reified T : CharSequence> build(
-            noinline transform: (CharSequence) -> Text<T>
-        ): TextUnit<T> = build(T::class, transform)
+        override fun toString(): String = name
+    }
 
-        @Suppress("UNCHECKED_CAST")
-        public fun <T : CharSequence> of(unitClass: KClass<T>): TextUnit<T> = when (unitClass) {
-            Char::class -> Chars
-            CodePoint::class -> CodePoints
-            Grapheme::class -> Graphemes
-            else -> Nothings
-        } as TextUnit<T>
+    /** Text unit for texts consisting of [CodePoint] chunks. */
+    public object CodePoints : TextUnit<CodePoint> {
+        override val name: String = "code point"
+        override fun textOf(text: CharSequence): Text<CodePoint> = ChunkedText(text, CodePointBreakIterator(text).mapToRanges().toList()) { txt, range ->
+            CodePoint(txt, range)
+        }
 
-        public inline fun <reified T : CharSequence> of(): TextUnit<T> = of(T::class)
+        override fun toString(): String = name
+    }
+
+    /** Text unit for texts consisting of [Grapheme] chunks. */
+    public object Graphemes : TextUnit<Grapheme> {
+        override val name: String = "grapheme"
+        override fun textOf(text: CharSequence): Text<Grapheme> = ChunkedText(text, GraphemeBreakIterator(text).mapToRanges().toList()) { txt, range ->
+            Grapheme(txt, range)
+        }
+
+        override fun toString(): String = name
     }
 }
 
 /** Represents the length of text in a given [TextUnit]. */
-public class TextLength<T : CharSequence>(
+public class TextLength<T>(
     /** The length of text measured in [unit]. */
     public val value: Int,
-    public val unit: KClass<T>,
+    /** The unit of this text length. */
+    public val unit: TextUnit<T>,
 ) : Comparable<TextLength<T>> {
-
-    private val name = checkNotNull(unit.simpleName?.lowercase()) { "missing name" }
 
     public companion object {
 
         /** Returns a [Chars] equal to this [Int] number of chars. */
-        public inline val Int.chars: TextLength<Char> get() = TextLength(this, Char::class)
+        public inline val Int.chars: TextLength<kotlin.Char> get() = TextLength(this, Chars)
 
         /** Returns a [CodePoints] equal to this [Int] number of code points. */
-        public inline val Int.codePoints: TextLength<CodePoint> get() = TextLength(this, CodePoint::class)
+        public inline val Int.codePoints: TextLength<CodePoint> get() = TextLength(this, CodePoints)
 
         /** Returns a [Graphemes] equal to this [Int] number of graphemes. */
-        public inline val Int.graphemes: TextLength<Grapheme> get() = TextLength(this, Grapheme::class)
-
-        /** Returns a [TextLength] equal to this [Int] number of the reified [TextUnit]. */
-        public inline fun <reified T : CharSequence> Int.toTextLength(): TextLength<T> = TextLength(this, T::class)
+        public inline val Int.graphemes: TextLength<Grapheme> get() = TextLength(this, Graphemes)
     }
 
     public override fun compareTo(other: TextLength<T>): Int = value.compareTo(other.value)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as TextLength<*>
+
+        if (value != other.value) return false
+        if (unit != other.unit) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = value
+        result = 31 * result + unit.hashCode()
+        return result
+    }
+
     override fun toString(): String = when (value) {
-        1 -> "$value $name"
-        else -> "$value ${name}s"
+        1 -> "$value ${unit.name}"
+        else -> "$value ${unit.name}s"
     }
 
 
@@ -296,28 +396,9 @@ public class TextLength<T : CharSequence>(
     /** Returns true, if the text length value is greater than zero. */
     public fun isPositive(): Boolean = value > 0
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || this::class != other::class) return false
-
-        other as TextLength<*>
-
-        if (value != other.value) return false
-        if (unit != other.unit) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = value
-        result = 31 * result + unit.hashCode()
-        return result
-    }
-
     /** Returns the absolute value of this value. The returned value is always non-negative. */
     public val absoluteValue: TextLength<T> get() = if (isNegative()) -this else this
 }
-
 
 /** Throws an [IllegalArgumentException] with the result of calling [lazyMessage] if the specified [n] is negative. */
 public fun requireNotNegative(
@@ -327,12 +408,26 @@ public fun requireNotNegative(
 
 
 /**
+ * Builds a new [Text] by populating a [MutableList]
+ * using the given [builderAction] and
+ * returning a [Text] encompassing the same elements.
+ *
+ * The list passed as a receiver to the [builderAction]
+ * is valid only inside that function.
+ */
+public inline fun <T> buildText(builderAction: MutableList<Text<T>>.() -> Unit): Text<T> {
+    contract { callsInPlace(builderAction, EXACTLY_ONCE) }
+    return TextComposite(mutableListOf<Text<T>>().apply(builderAction))
+}
+
+
+/**
  * Returns a subsequence of this character sequence containing the first [n] units of the reified [TextUnit] from this character sequence,
  * or the entire character sequence if this character sequence is shorter.
  *
  * @throws IllegalArgumentException if [n] is negative.
  */
-public fun <T : CharSequence> Text<T>.take(n: Int): Text<T> {
+public fun <T> Text<T>.take(n: Int): Text<T> {
     requireNotNegative(n)
     return subText(endIndex = n.coerceAtMost(length))
 }
@@ -343,7 +438,7 @@ public fun <T : CharSequence> Text<T>.take(n: Int): Text<T> {
  *
  * @throws IllegalArgumentException if [n] is negative.
  */
-public fun <T : CharSequence> Text<T>.takeLast(n: Int): Text<T> {
+public fun <T> Text<T>.takeLast(n: Int): Text<T> {
     requireNotNegative(n)
     val length = length
     return subText(startIndex = length - n.coerceAtMost(length))
@@ -359,13 +454,10 @@ private fun targetLengthFor(length: Int, markerText: Text<*>): Int {
 }
 
 /**
- * Returns this string truncated from the center to the specified [length] (default: 15)
- * including the [marker] (default: " … ").
+ * Returns this text truncated from the center to the specified [length]
+ * including the [marker].
  */
-public fun <T : CharSequence> Text<T>.truncate(
-    length: Int,
-    marker: Text<T> = Text.restrictedText(Unicode.ELLIPSIS.spaced)
-): Text<T> {
+public fun <T> Text<T>.truncate(length: Int, marker: Text<T>): Text<T> {
     requireNotNegative(length)
     if (this.length <= length) return this
     val targetLength = targetLengthFor(length, marker)
@@ -375,29 +467,21 @@ public fun <T : CharSequence> Text<T>.truncate(
 }
 
 /**
- * Returns this string truncated from the start to the specified [length] (default: 15)
- * including the [marker] (default: "… ").
+ * Returns this text truncated from the start to the specified [length]
+ * including the [marker].
  */
-public fun <T : CharSequence> Text<T>.truncateStart(
-    length: Int = 15,
-    marker: Text<T> = Text.restrictedText(Unicode.ELLIPSIS.endSpaced),
-): Text<T> {
+public fun <T> Text<T>.truncateStart(length: Int, marker: Text<T>): Text<T> {
     requireNotNegative(length)
     if (this.length <= length) return this
-    val targetLength = targetLengthFor(length, marker)
-    return marker + takeLast(targetLength)
+    return marker + takeLast(targetLengthFor(length, marker))
 }
 
 /**
- * Returns this string truncated from the end to the specified [length] (default: 15)
- * including the [marker] (default: " …").
+ * Returns this text truncated from the end to the specified [length]
+ * including the [marker].
  */
-public fun <T : CharSequence> Text<T>.truncateEnd(
-    length: Int = 15,
-    marker: Text<T> = Text.restrictedText(Unicode.ELLIPSIS.startSpaced),
-): Text<T> {
+public fun <T> Text<T>.truncateEnd(length: Int, marker: Text<T>): Text<T> {
     requireNotNegative(length)
     if (this.length <= length) return this
-    val targetLength = targetLengthFor(length, marker)
-    return take(targetLength) + marker
+    return take(targetLengthFor(length, marker)) + marker
 }

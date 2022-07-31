@@ -232,7 +232,7 @@ internal object PrimitiveTypes : TypeMap() {
     const val string: String = "string"
 
     const val boolean: Boolean = true
-    const val char: Char = '*'
+    const val char: kotlin.Char = '*'
     const val float: Float = 42.1f
     const val double: Double = 42.12
 

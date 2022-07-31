@@ -1,30 +1,33 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.Text.ChunkedText
 import com.bkahlert.kommons.test.testAll
+import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.assertions.throwables.shouldThrowWithMessage
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.sequences.shouldBeEmpty
 import io.kotest.matchers.sequences.shouldContainExactly
+import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test
 
-
 class GraphemeTest {
 
     @Test fun grapheme_position_iterator() = testAll {
-        GraphemePositionIterator("").asSequence().shouldBeEmpty()
-        GraphemePositionIterator("a").asSequence().shouldContainExactly(0..0)
-        GraphemePositionIterator("¶").asSequence().shouldContainExactly(0..0)
-        GraphemePositionIterator("☰").asSequence().shouldContainExactly(0..0)
-        GraphemePositionIterator("𝕓").asSequence().shouldContainExactly(0..1)
-        GraphemePositionIterator("a̳o").asSequence().shouldContainExactly(0..1, 2..2) // combining mark
-        GraphemePositionIterator("🫠").asSequence().shouldContainExactly(0..1) // emoji
-        GraphemePositionIterator("🇩🇪").asSequence().shouldContainExactly(0..3) // regional indicators
-        GraphemePositionIterator("👨🏾‍🦱").asSequence().shouldContainExactly(0..6) // emoji + skin tone modifier + ZWJ + curly hair
-        GraphemePositionIterator("👩‍👩‍👦‍👦").asSequence().shouldContainExactly(0..10) // long ZWJ sequence
+        GraphemeBreakIterator("").asSequence().shouldBeEmpty()
+        GraphemeBreakIterator("a").asSequence().shouldContainExactly(1)
+        GraphemeBreakIterator("¶").asSequence().shouldContainExactly(1)
+        GraphemeBreakIterator("☰").asSequence().shouldContainExactly(1)
+        GraphemeBreakIterator("𝕓").asSequence().shouldContainExactly(2)
+        GraphemeBreakIterator("a̳o").asSequence().shouldContainExactly(2, 3) // combining mark
+        GraphemeBreakIterator("🫠").asSequence().shouldContainExactly(2) // emoji
+        GraphemeBreakIterator("🇩🇪").asSequence().shouldContainExactly(4) // regional indicators
+        GraphemeBreakIterator("👨🏾‍🦱").asSequence().shouldContainExactly(7) // emoji + skin tone modifier + ZWJ + curly hair
+        GraphemeBreakIterator("👩‍👩‍👦‍👦").asSequence().shouldContainExactly(11) // long ZWJ sequence
     }
 
     @Test fun grapheme_iterator() = testAll {
@@ -109,19 +112,28 @@ class GraphemeTest {
         "👩‍👩‍👦‍👦".graphemeCount() shouldBe 1 // long ZWJ sequence
     }
 
+    @Test fun instantiate() = testAll {
+        shouldNotThrowAny { Grapheme("👩‍👩‍👦‍👦") }
+        Grapheme("👩‍👩‍👦‍👦") should {
+            it shouldBe Grapheme("👩‍👩‍👦‍👦", startIndex = 0, endIndex = 11)
+            it shouldBe Grapheme("👩‍👩‍👦‍👦", 0..10)
+        }
+        shouldThrowAny { Grapheme("👩‍👩‍👦‍👦", 0..100).toString() }.message shouldBe "begin 0, end 101, length 11"
+    }
+
     @Test fun equality() = testAll {
         Grapheme("a") shouldNotBe Grapheme("¶")
         Grapheme("¶") shouldBe Grapheme("¶")
-        Grapheme("¶") shouldBe Grapheme("¶", null)
+        Grapheme("¶") shouldBe Grapheme("¶", startIndex = 0, endIndex = 1)
         Grapheme("¶") shouldBe Grapheme("¶", 0..0)
     }
 
     @Test fun value() = testAll {
-        Grapheme("a").value shouldBe DelegatingCharSequence("a")
-        Grapheme("¶").value shouldBe DelegatingCharSequence("¶")
-        Grapheme("☰").value shouldBe DelegatingCharSequence("☰")
-        Grapheme("𝕓").value shouldBe DelegatingCharSequence("𝕓")
-        Grapheme("a̳").value shouldBe DelegatingCharSequence("a̳")
+        Grapheme("a").value shouldBe CharSequenceDelegate("a")
+        Grapheme("¶").value shouldBe CharSequenceDelegate("¶")
+        Grapheme("☰").value shouldBe CharSequenceDelegate("☰")
+        Grapheme("𝕓").value shouldBe CharSequenceDelegate("𝕓")
+        Grapheme("a̳").value shouldBe CharSequenceDelegate("a̳")
     }
 
     @Test fun to_string() = testAll {
@@ -148,5 +160,23 @@ class GraphemeTest {
         "".asGraphemeOrNull() shouldBe null
         "👨🏾‍🦱".asGraphemeOrNull() shouldBe Grapheme("👨🏾‍🦱")
         "👨🏾‍🦱👩‍👩‍👦‍👦".asGraphemeOrNull() shouldBe null
+    }
+
+    @Test fun text() = testAll {
+        Grapheme.name shouldBe "grapheme"
+        Grapheme.textOf(String.EMPTY) shouldBe Text.emptyText()
+        Grapheme.textOf(emojiString) should beText(
+            ChunkedText(
+                emojiString,
+                0..0,
+                1..2,
+                3..4,
+                5..8,
+                9..15,
+                16..26,
+                transform = ::Grapheme
+            ),
+            *emojiGraphemes
+        )
     }
 }

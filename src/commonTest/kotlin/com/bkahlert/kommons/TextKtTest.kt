@@ -1,14 +1,13 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.Text.Char
-import com.bkahlert.kommons.Text.Companion
+import com.bkahlert.kommons.Text.ChunkedText
+import com.bkahlert.kommons.Text.Companion.asText
 import com.bkahlert.kommons.Text.Companion.emptyText
-import com.bkahlert.kommons.Text.Companion.restrictedText
-import com.bkahlert.kommons.Text.Companion.toText
+import com.bkahlert.kommons.Text.Companion.mapText
+import com.bkahlert.kommons.Text.TextComposite
 import com.bkahlert.kommons.TextLength.Companion.chars
 import com.bkahlert.kommons.TextLength.Companion.codePoints
 import com.bkahlert.kommons.TextLength.Companion.graphemes
-import com.bkahlert.kommons.TextLength.Companion.toTextLength
 import com.bkahlert.kommons.TextUnit.Chars
 import com.bkahlert.kommons.TextUnit.CodePoints
 import com.bkahlert.kommons.TextUnit.Graphemes
@@ -20,31 +19,20 @@ import io.kotest.matchers.Matcher
 import io.kotest.matchers.MatcherResult
 import io.kotest.matchers.and
 import io.kotest.matchers.be
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.comparables.shouldBeGreaterThan
 import io.kotest.matchers.comparables.shouldBeLessThan
+import io.kotest.matchers.iterator.shouldBeEmpty
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.reflect.KClass
 import kotlin.test.Test
 
 class TextKtTest {
 
-    @Test fun char_text() = testAll {
-        charText should beText(emojiString, *emojiChars)
-    }
-
-    @Test fun codepoint_text() = testAll {
-        codePointText should beText(emojiString, *emojiCodePoints)
-    }
-
-    @Test fun grapheme_text() = testAll {
-        graphemeText should beText(emojiString, *emojiGraphemes)
-    }
-
-    // TODO toText(Chars)
-    // TODO toText<Char>()
-    // TODO toText<Unit>()
     @Test fun empty_text() = testAll(
         emptyText<Char>(),
         emptyText<CodePoint>(),
@@ -55,42 +43,144 @@ class TextKtTest {
         shouldThrow<IndexOutOfBoundsException> { it[0] }.message shouldBe "index out of range: 0"
         it.subSequence(0, 0) shouldBe ""
         shouldThrow<IndexOutOfBoundsException> { it.subSequence(1, 0) }.message shouldBe "begin 1, end 0, length 0"
+        it.subText(0, 0) shouldBeSameInstanceAs emptyText<Char>()
+        shouldThrow<IndexOutOfBoundsException> { it.subText(1, 0) }.message shouldBe "begin 1, end 0, length 0"
+        it.iterator().shouldBeEmpty()
         it.toString() shouldBe ""
     }
 
-    @Test fun restricted_text() = testAll {
-        listOf(
-            restrictedText<Char>("foo"),
-            restrictedText<CodePoint>("foo"),
-            restrictedText<Grapheme>("foo"),
-        ).forAll {
-            it shouldBe "foo".toText()
-            it.length shouldBe 3
-            (-1..4).forEach { index ->
-                shouldThrow<UnsupportedOperationException> { it[index] }
-            }
-            shouldThrow<IllegalArgumentException> { it.subSequence(1, 3) }.message shouldBe "startIndex must be 0"
-            shouldThrow<IllegalArgumentException> { it.subSequence(0, 2) }.message shouldBe "endIndex must be 3"
-            it.subSequence(0, 3) shouldBe "foo"
-            it.toString() shouldBe "foo"
-        }
+    @Test fun chunked_text() = testAll {
+        val transform: (CharSequence, IntRange) -> List<kotlin.Char> = { text, range -> text.subSequence(range).toList() }
+        ChunkedText(string, listOf(0..1, 2..3, 4..5), transform) should {
+            it shouldBe ChunkedText(string, listOf(2, 4, 6).iterator(), transform)
+            it shouldBe ChunkedText(string, 0..1, 2..3, 4..5, transform = transform)
+            it should beText(
+                ChunkedText(string, listOf(2, 4, 6).iterator(), transform),
+                listOf('s', 't'),
+                listOf('r', 'i'),
+                listOf('n', 'g'),
+            )
+            it.iterator().toList().shouldContainExactly(
+                ChunkedText(string, 0..1, transform = transform),
+                ChunkedText(string, 2..3, transform = transform),
+                ChunkedText(string, 4..5, transform = transform),
+            )
 
-        listOf<(CharSequence) -> Text<CharSequence>>(
-            { restrictedText<Char>(it) },
-            { restrictedText<CodePoint>(it) },
-            { restrictedText<Grapheme>(it) },
-        ).forAll {
-            shouldThrow<IllegalArgumentException> { it("🫠") }.message shouldBe "text must not contain surrogates"
+            it.subSequence(0, 3) shouldBeSameInstanceAs string
+            it.subText(0, 3) shouldBeSameInstanceAs it
         }
     }
 
+    @Test fun text_composite() = testAll {
+        val text1 = CodePoint.textOf(string)
+        val text2 = CodePoint.textOf(emojiString)
+        TextComposite(text1, text2) should {
+            it should beText(
+                TextComposite(CodePoint.textOf(string), CodePoint.textOf(emojiString)),
+                CodePoint('s'),
+                CodePoint('t'),
+                CodePoint('r'),
+                CodePoint('i'),
+                CodePoint('n'),
+                CodePoint('g'),
+                *emojiCodePoints,
+            )
+            it.subText(5, 11).toString() shouldBe "ga𝕓🫠🇩🇪"
+            it.iterator().toList().shouldContainExactly(
+                text1.subText(0, 1),
+                text1.subText(1, 2),
+                text1.subText(2, 3),
+                text1.subText(3, 4),
+                text1.subText(4, 5),
+                text1.subText(5, 6),
+                text2.subText(0, 1),
+                text2.subText(1, 2),
+                text2.subText(2, 3),
+                text2.subText(3, 4),
+                text2.subText(4, 5),
+                text2.subText(5, 6),
+                text2.subText(6, 7),
+                text2.subText(7, 8),
+                text2.subText(8, 9),
+                text2.subText(9, 10),
+                text2.subText(10, 11),
+                text2.subText(11, 12),
+                text2.subText(12, 13),
+                text2.subText(13, 14),
+                text2.subText(14, 15),
+                text2.subText(15, 16),
+            )
+
+            it.subSequence(0, 22) shouldBe CharSequenceComposite(string, emojiString)
+            it.subText(0, 22) shouldBeSameInstanceAs it
+        }
+
+        TextComposite(text1, Grapheme.textOf(emojiString)).subText(5, 10).toString() shouldBe "ga𝕓🫠🇩🇪"
+    }
+
+    @Test fun as_text() = testAll {
+        listOf(
+            Chars to emojiChars,
+            CodePoints to emojiCodePoints,
+            Graphemes to emojiGraphemes,
+        ).forAll { (unit, chunks) ->
+            emojiString.asText(unit) should beText(unit.textOf(emojiString), *chunks)
+        }
+
+        charSequence.asText(Word) should beText(
+            Word.textOf(charSequence),
+            Word.Letters(charSequence, 0..3),
+            Word.Space(charSequence, 4..4),
+            Word.Letters(charSequence, 5..12),
+        )
+    }
+
+    @Test fun map_text() = testAll {
+        emojiString.mapText(Graphemes) { text ->
+            buildText { text.reversed().forEach { add(it) } }
+        } shouldBe "👩‍👩‍👦‍👦👨🏾‍🦱🇩🇪🫠𝕓a"
+    }
+
+    @Test fun is_empty() = testAll {
+        emptyText<Nothing>().isEmpty() shouldBe true
+        Char.textOf("").isEmpty() shouldBe true
+        Char.textOf(emojiString).isEmpty() shouldBe false
+    }
+
+    @Test fun plus() = testAll(Chars, CodePoints, Graphemes, Word) { unit ->
+        unit.textOf(charSequence) should { text ->
+            String.EMPTY.asText(unit) + text shouldBeSameInstanceAs text
+            text + String.EMPTY.asText(unit) shouldBeSameInstanceAs text
+
+            text + string.asText(unit) shouldBe TextComposite(text, string.asText(unit))
+            string.asText(unit) + text shouldBe TextComposite(string.asText(unit), text)
+
+            val uniqueText = ChunkedText(string, 0..2, 1..3) { s, r -> s.subSequence(r) }
+            text + uniqueText shouldBe TextComposite(text, uniqueText)
+        }
+    }
+
+    @Test fun text_unit() = testAll {
+        Chars.name shouldBe "char"
+        Chars.textOf(emojiString).asList().shouldContainExactly(*emojiChars)
+
+        CodePoints.name shouldBe "code point"
+        CodePoints.textOf(emojiString).asList().shouldContainExactly(*emojiCodePoints)
+
+        Graphemes.name shouldBe "grapheme"
+        Graphemes.textOf(emojiString).asList().shouldContainExactly(*emojiGraphemes)
+
+        Word.textOf(charSequence).asList().shouldContainExactly(
+            Word.Letters(charSequence, 0..3),
+            Word.Space(charSequence, 4..4),
+            Word.Letters(charSequence, 5..12),
+        )
+    }
+
     @Test fun text_length() = testAll {
-        42.chars shouldBe TextLength(42, Char::class)
-        42.codePoints shouldBe TextLength(42, CodePoint::class)
-        42.graphemes shouldBe TextLength(42, Grapheme::class)
-        42.chars shouldBe 42.toTextLength()
-        42.codePoints shouldBe 42.toTextLength()
-        42.graphemes shouldBe 42.toTextLength()
+        42.chars shouldBe TextLength(42, Chars)
+        42.codePoints shouldBe TextLength(42, CodePoints)
+        42.graphemes shouldBe TextLength(42, Graphemes)
 
         42.chars shouldNotBe 41.chars
         42.chars shouldNotBe 42.codePoints
@@ -122,20 +212,112 @@ class TextKtTest {
         (-42).chars.absoluteValue shouldBe 42.chars
     }
 
+
     @Test fun require_not_negative() = testAll {
         requireNotNegative(1) shouldBe 1
         requireNotNegative(0) shouldBe 0
         shouldThrow<IllegalArgumentException> { requireNotNegative(-1) }
     }
 
-    // TODO test take
-}
+    @Test fun build_text() = testAll {
+        buildText {
+            add(emojiString.asText(CodePoint))
+            add(emojiString.asText(Grapheme))
+        } should {
+            it should beText(
+                TextComposite(emojiString.asText(CodePoint), emojiString.asText(Grapheme)),
+                *emojiCodePoints,
+                *emojiGraphemes,
+            )
 
-internal val codePoint: CodePoint = CodePoint(0x1FAE0) // 🫠
-internal val grapheme: Grapheme = Grapheme("👨🏾‍🦱")
-internal val charText: Text<Char> = emojiString.toText(Chars)
-internal val codePointText: Text<CodePoint> = emojiString.toText(CodePoints)
-internal val graphemeText: Text<Grapheme> = emojiString.toText(Graphemes)
+            it.subSequence(0, 16).toString() shouldBe emojiString
+            it.subSequence(0, 22).toString() shouldBe emojiString + emojiString
+        }
+    }
+
+    @Test fun take() = testAll {
+        charSequence.asText(Word) should {
+            shouldThrow<IllegalArgumentException> { it.take(-1) }.message shouldBe "Requested text unit count -1 is less than zero."
+            it.take(0).asList().shouldBeEmpty()
+            it.take(1) shouldBe it.subText(0, 1)
+            it.take(2) shouldBe it.subText(0, 2)
+            it.take(3) shouldBeSameInstanceAs it
+            it.take(4) shouldBeSameInstanceAs it
+        }
+    }
+
+    @Test fun take_last() = testAll {
+        charSequence.asText(Word) should {
+            shouldThrow<IllegalArgumentException> { it.takeLast(-1) }.message shouldBe "Requested text unit count -1 is less than zero."
+            it.takeLast(0).asList().shouldBeEmpty()
+            it.takeLast(1) shouldBe it.subText(2, 3)
+            it.takeLast(2) shouldBe it.subText(1, 3)
+            it.takeLast(3) shouldBeSameInstanceAs it
+            it.takeLast(4) shouldBeSameInstanceAs it
+        }
+    }
+
+
+    @Test fun truncate() = testAll {
+        listOf(
+            Chars to "a\uD835 … 👦",
+            CodePoints to "a𝕓 … ‍👦",
+            Graphemes to "a𝕓 … 👨🏾‍🦱👩‍👩‍👦‍👦",
+        ).forAll { (unit, expected) ->
+            val text = longString.asText(unit)
+            text.truncate(7, " … ".asText(unit)) should {
+                it shouldBe TextComposite(text.subText(0, 2), " … ".asText(unit), text.subText(text.length - 2, text.length))
+                it.toString() shouldBe expected
+            }
+            text.truncate(10_000_000, " … ".asText(unit)) should {
+                it shouldBeSameInstanceAs text
+                it.toString() shouldBeSameInstanceAs longString
+            }
+            shouldThrow<IllegalArgumentException> { text.truncateEnd(1, " … ".asText(unit)) }
+                .message shouldBe "The specified length (1) must be greater or equal than the length of the marker \" … \" (3)."
+        }
+    }
+
+    @Test fun truncate_start() = testAll {
+        listOf(
+            Chars to "… 👦‍👦",
+            CodePoints to "… 👩‍👦‍👦",
+            Graphemes to "… 𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦",
+        ).forAll { (unit, expected) ->
+            val text = longString.asText(unit)
+            text.truncateStart(7, "… ".asText(unit)) should {
+                it shouldBe TextComposite("… ".asText(unit), text.subText(text.length - 5, text.length))
+                it.toString() shouldBe expected
+            }
+            text.truncateStart(10_000_000, "… ".asText(unit)) should {
+                it shouldBeSameInstanceAs text
+                it.toString() shouldBeSameInstanceAs longString
+            }
+            shouldThrow<IllegalArgumentException> { text.truncateStart(1, "… ".asText(unit)) }
+                .message shouldBe "The specified length (1) must be greater or equal than the length of the marker \"… \" (2)."
+        }
+    }
+
+    @Test fun truncate_end() = testAll {
+        listOf(
+            Chars to "a𝕓🫠 …",
+            CodePoints to "a𝕓🫠🇩🇪 …",
+            Graphemes to "a𝕓🫠🇩🇪👨🏾‍🦱 …",
+        ).forAll { (unit, expected) ->
+            val text = longString.asText(unit)
+            text.truncateEnd(7, " …".asText(unit)) should {
+                it shouldBe TextComposite(text.subText(0, 5), " …".asText(unit))
+                it.toString() shouldBe expected
+            }
+            text.truncateEnd(10_000_000, " …".asText(unit)) should {
+                it shouldBeSameInstanceAs text
+                it.toString() shouldBeSameInstanceAs longString
+            }
+            shouldThrow<IllegalArgumentException> { text.truncateEnd(1, " …".asText(unit)) }
+                .message shouldBe "The specified length (1) must be greater or equal than the length of the marker \" …\" (2)."
+        }
+    }
+}
 
 
 fun <T, U> withProp(matcher: Matcher<U>, resolve: (T) -> U): Matcher<T> = Matcher {
@@ -193,49 +375,108 @@ fun <T> havePropFailure(
     )
 }
 
-internal class NonSingletonUnit() : TextUnit<String> by TextUnit.build(Companion::restrictedText)
-internal object WordUnit : TextUnit<String> by TextUnit.build({ Text.from(it, { text -> text.split(" ") }) })
+internal class WordBreakIterator(
+    text: CharSequence,
+) : Iterator<Int> by (text.splitToSequence(Regex("\\b"))
+    .runningFold(0) { acc, chunk -> acc + chunk.length }
+    .distinct()
+    .drop(1)
+    .iterator())
+
+internal sealed class Word(
+    text: CharSequence,
+    range: IntRange,
+) : CharSequence by CharSequenceDelegate(text, range) {
+    internal data class Letters(
+        val text: CharSequence,
+        val range: IntRange,
+    ) : Word(text, range)
+
+    internal data class Space(
+        val text: CharSequence,
+        val range: IntRange,
+    ) : Word(text, range)
+
+    internal data class Mixed(
+        val text: CharSequence,
+        val range: IntRange,
+    ) : Word(text, range)
+
+    companion object : TextUnit<Word> {
+        override val name: String = "word"
+        override fun textOf(text: CharSequence): Text<Word> = ChunkedText(
+            text,
+            WordBreakIterator(text).mapToRanges().toList(),
+        ) { txt, range ->
+            val (whitespaces, nonWhitespaces) = txt.subSequence(range).partition { it.isWhitespace() }
+            when {
+                whitespaces.isEmpty() -> Letters(txt, range)
+                nonWhitespaces.isEmpty() -> Space(txt, range)
+                else -> Mixed(txt, range)
+            }
+        }
+
+        override fun toString(): String = name
+    }
+}
 
 
 fun <T> haveStringRepresentation(string: String) =
     haveProp<T>("string representation", string) { it.toString() }
 
-fun <T : CharSequence> haveLength(length: Int) =
+fun <T> haveLength(length: Int) =
     haveProp<Text<T>>("length", length) { it.length }
 
-fun <T : CharSequence> haveChunk(index: Int, chunk: T) =
+fun <T> haveChunk(index: Int, chunk: T) =
     haveProp<Text<T>>("chunk", "at $index", chunk) { it[index] }
 
-fun <T : CharSequence> haveSubSequence(startIndex: Int, endIndex: Int, expected: CharSequence) =
+fun <T> haveSubSequence(startIndex: Int, endIndex: Int, expected: CharSequence) =
     haveProp<Text<T>>("sub sequence", "from $startIndex to $endIndex", expected) { it.subSequence(startIndex, endIndex) }
 
-fun <T : CharSequence> haveChunkFailure(index: Int) =
+fun <T> haveSubText(startIndex: Int, endIndex: Int, expected: Text<T>) =
+    haveProp<Text<T>>("sub text", "from $startIndex to $endIndex", expected) { it.subText(startIndex, endIndex) }
+
+fun <T> haveChunkFailure(index: Int) =
     havePropFailure<Text<T>, IndexOutOfBoundsException>("chunk", "at $index", "index out of range: $index") { it[index] }
 
-fun <T : CharSequence> haveSubSequenceFailure(startIndex: Int, endIndex: Int) =
+fun <T> haveSubSequenceFailure(startIndex: Int, endIndex: Int) =
     havePropFailure<Text<T>, IndexOutOfBoundsException>(
         "sub sequence",
         "from $startIndex to $endIndex",
         "begin $startIndex, end $endIndex, length *"
     ) { it.subSequence(startIndex, endIndex) }
 
+fun <T> haveSubTextFailure(startIndex: Int, endIndex: Int) =
+    havePropFailure<Text<T>, IndexOutOfBoundsException>(
+        "sub text",
+        "from $startIndex to $endIndex",
+        "begin $startIndex, end $endIndex, length *"
+    ) { it.subText(startIndex, endIndex) }
 
-inline fun <reified T : CharSequence> beText(
-    expected: CharSequence,
+fun <T> beText(
+    text: Text<T>,
     vararg chunks: T,
 ): Matcher<Text<T>> {
-    val text = expected.toText<T>()
     return be(text)
         .and(haveLength(chunks.size))
         .and(haveChunk(0, chunks[0]))
         .and(haveChunk(chunks.size - 1, chunks.last()))
         .and(haveChunkFailure(-1))
         .and(haveChunkFailure(chunks.size))
-        .and(haveSubSequence(0, 1, ComposingCharSequence(chunks[0])))
-        .and(haveSubSequence(1, 2, ComposingCharSequence(chunks[1])))
-        .and(haveSubSequence(0, chunks.size - 1, ComposingCharSequence(chunks.slice(0 until chunks.size - 1))))
-        .and(haveSubSequence(0, chunks.size, ComposingCharSequence(chunks.slice(chunks.indices))))
+        .and(haveSubSequence(0, 1, text.subSequence(0, 1)))
+        .and(haveSubSequence(1, 2, text.subSequence(1, 2)))
+        .and(haveSubSequence(0, chunks.size - 1, text.subSequence(endIndex = chunks.size - 1)))
+        .and(haveSubSequence(0, chunks.size, text.subSequence()))
         .and(haveSubSequence(0, 0, ""))
         .and(haveSubSequenceFailure(1, 0))
-        .and(haveStringRepresentation(expected.toString()))
+        .and(haveSubSequence(0, 0, ""))
+        .and(haveSubSequenceFailure(1, 0))
+        .and(haveSubText(0, 1, text.subText(0, 1)))
+        .and(haveSubText(1, 2, text.subText(1, 2)))
+        .and(haveSubText(0, chunks.size - 1, text.subText(endIndex = chunks.size - 1)))
+        .and(haveSubText(0, chunks.size, text.subText()))
+        .and(haveSubText(0, 0, emptyText()))
+        .and(haveSubTextFailure(1, 0))
+        .and(withProp(be(chunks.toList())) { it.asList() })
+        .and(haveStringRepresentation(text.toString()))
 }

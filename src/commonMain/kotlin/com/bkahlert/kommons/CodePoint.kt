@@ -1,5 +1,6 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.Text.ChunkedText
 import kotlin.jvm.JvmInline
 
 /**
@@ -14,8 +15,16 @@ public value class CodePoint(
      */
     public val value: Int,
 ) : Comparable<CodePoint>, CharSequence {
-    public constructor(char: Char) : this(char.code)
-    public constructor(high: Char, low: Char) : this(makeCharFromSurrogatePair(high, low))
+    public constructor(char: kotlin.Char) : this(char.code)
+    public constructor(high: kotlin.Char, low: kotlin.Char) : this(makeCharFromSurrogatePair(high, low))
+    public constructor(text: CharSequence, range: IntRange) : this(
+        when (text.subSequence(range).length) {
+            1 -> text[range.first].code
+            2 -> makeCharFromSurrogatePair(text[range.first], text[range.first + 1])
+            else -> @Suppress("RedundantCompanionReference")
+            throw IllegalArgumentException("The requested range $range is not suitable to get a single ${Companion.name}.")
+        }
+    )
 
     init {
         if (value !in INDEX_RANGE) throw IndexOutOfBoundsException("index out of range $INDEX_RANGE: $value")
@@ -39,12 +48,12 @@ public value class CodePoint(
     override fun compareTo(other: CodePoint): Int = value.compareTo(other.value)
 
     override val length: Int get() = string.length
-    override fun get(index: Int): Char = string[index]
+    override fun get(index: Int): kotlin.Char = string[index]
     override fun subSequence(startIndex: Int, endIndex: Int): CharSequence = string.subSequence(startIndex, endIndex)
     override fun toString(): String = string
 
-    /** The [Char] representing this code point **if** it can be represented by a single [Char]. */
-    public val char: Char? get() = value.takeIf { it in Char.MIN_VALUE.code..Char.MAX_VALUE.code }?.toChar()
+    /** The [kotlin.Char] representing this code point **if** it can be represented by a single [kotlin.Char]. */
+    public val char: kotlin.Char? get() = value.takeIf { it in kotlin.Char.MIN_VALUE.code..kotlin.Char.MAX_VALUE.code }?.toChar()
 
     /** The 16-bit Unicode characters needed to encode. */
     public val chars: CharArray get() = string.toCharArray()
@@ -83,7 +92,8 @@ public value class CodePoint(
      */
     public val isAlphanumeric: Boolean get() = Regex("[\\p{L} \\p{Nd}]").matches(string)
 
-    public companion object {
+    /** Text unit for texts consisting of [CodePoint] chunks. */
+    public companion object : TextUnit<CodePoint> {
         /** The minimum index a code point can have. */
         public const val MIN_INDEX: Int = 0x0
 
@@ -92,68 +102,54 @@ public value class CodePoint(
 
         /** The range of indices a code point can have. */
         public val INDEX_RANGE: IntRange = MIN_INDEX..MAX_INDEX
+
+        override val name: String = "code point"
+
+        override fun textOf(text: CharSequence): Text<CodePoint> =
+            if (text.isEmpty()) Text.emptyText() else ChunkedText(text, CodePointBreakIterator(text), ::CodePoint)
     }
 }
 
-/** An [Iterator] that iterates [CodePoint] positions. */
-public class CodePointPositionIterator(
+/** An [Iterator] that iterates [CodePoint] boundaries of the specified [text]. */
+public class CodePointBreakIterator(
     private val text: CharSequence,
     private val throwOnInvalidSequence: Boolean = false,
-) : PositionIterator {
-    private var index = 0
-    override fun hasNext(): Boolean = index < text.length
-
-    override fun next(): IntRange {
-        val ch = text[index]
-        return when {
+) : BreakIterator by (iterator {
+    var index = 0
+    while (index < text.length) {
+        val ch = text[index++]
+        when {
             ch.isHighSurrogate() -> {
-                val low = if (index + 1 < text.length) text[index + 1] else null
+                val low = if (index < text.length) text[index] else null
                 if (low?.isLowSurrogate() == true) {
-                    index += 2
-                    (index - 2) until index
+                    yield(++index)
                 } else {
-                    if (throwOnInvalidSequence) throw CharacterCodingException(index)
-                    else {
-                        index++
-                        index - 1 until index
-                    }
+                    if (throwOnInvalidSequence) throw CharacterCodingException(index - 1)
+                    else yield(index)
                 }
             }
 
             ch.isLowSurrogate() -> {
-                if (throwOnInvalidSequence) throw CharacterCodingException(index)
-                else {
-                    index++
-                    index - 1 until index
-                }
+                if (throwOnInvalidSequence) throw CharacterCodingException(index - 1)
+                else yield(index)
             }
 
-            else -> {
-                index++
-                index - 1 until index
-            }
+            else -> yield(index)
         }
     }
-}
+})
 
 /** An [Iterator] that iterates [CodePoint] instances. */
 public class CodePointIterator(
     private val text: CharSequence,
     private val throwOnInvalidSequence: Boolean = false,
-) : ChunkIterator<CodePoint> by ChunkingIterator(CodePointPositionIterator(text, throwOnInvalidSequence), {
-    val sub = text.subSequence(it)
-    when (sub.length) {
-        1 -> CodePoint(sub[0])
-        2 -> CodePoint(sub[0], sub[1])
-        else -> error("cannot convert $sub to code point")
-    }
-})
+) : Iterator<CodePoint> by (CodePointBreakIterator(text, throwOnInvalidSequence).mapToRanges().map { range -> CodePoint(text, range) })
 
 /** The character pointed to and represented by a [String]. */
 internal expect val CodePoint.string: String
 
 /** Returns the Unicode code point with the same value. */
-public inline val Char.codePoint: CodePoint get() = CodePoint(code)
+public inline val kotlin.Char.codePoint: CodePoint get() = CodePoint(code)
 
 /** Returns the Unicode code point with the same value. */
 public fun Byte.asCodePoint(): CodePoint = CodePoint(toInt() and 0xFF)
@@ -175,51 +171,11 @@ public expect val CodePoint.isWhitespace: Boolean
 
 internal expect fun CharacterCodingException(inputLength: Int): CharacterCodingException
 
-private fun makeCharFromSurrogatePair(high: Char, low: Char): Int {
-    check(high in Char.MIN_HIGH_SURROGATE..Char.MAX_HIGH_SURROGATE) { "high character is outside valid range: 0x${high.code.toString(16)}" }
-    check(low in Char.MIN_LOW_SURROGATE..Char.MAX_LOW_SURROGATE) { "high character is outside valid range: 0x${low.code.toString(16)}" }
-    val off = 0x10000 - (Char.MIN_HIGH_SURROGATE.code shl 10) - Char.MIN_LOW_SURROGATE.code
+private fun makeCharFromSurrogatePair(high: kotlin.Char, low: kotlin.Char): Int {
+    check(high in kotlin.Char.MIN_HIGH_SURROGATE..kotlin.Char.MAX_HIGH_SURROGATE) { "high character is outside valid range: 0x${high.code.toString(16)}" }
+    check(low in kotlin.Char.MIN_LOW_SURROGATE..kotlin.Char.MAX_LOW_SURROGATE) { "high character is outside valid range: 0x${low.code.toString(16)}" }
+    val off = 0x10000 - (kotlin.Char.MIN_HIGH_SURROGATE.code shl 10) - kotlin.Char.MIN_LOW_SURROGATE.code
     return (high.code shl 10) + low.code + off
-}
-
-/** Returns a sequence yielding the indices describing the [CodePoint] instances contained in the specified text range of this string. */
-public fun CharSequence.asCodePointIndicesSequence(
-    startIndex: Int = 0,
-    endIndex: Int = length,
-    throwOnInvalidSequence: Boolean = false,
-): Sequence<IntRange> {
-    checkBoundsIndexes(length, startIndex, endIndex)
-    if (isEmpty()) return emptySequence()
-    var index = startIndex
-    return sequence {
-        while (index < endIndex) {
-            val ch = this@asCodePointIndicesSequence[index]
-            when {
-                ch.isHighSurrogate() -> {
-                    val low = if (index + 1 < endIndex) this@asCodePointIndicesSequence[index + 1] else null
-                    if (low?.isLowSurrogate() == true) {
-                        yield(index..index + 1)
-                        index += 2
-                    } else {
-                        if (throwOnInvalidSequence) throw CharacterCodingException(index)
-                        else yield(index..index)
-                        index++
-                    }
-                }
-
-                ch.isLowSurrogate() -> {
-                    if (throwOnInvalidSequence) throw CharacterCodingException(index)
-                    else yield(index..index)
-                    index++
-                }
-
-                else -> {
-                    yield(index..index)
-                    index++
-                }
-            }
-        }
-    }
 }
 
 /** Returns a sequence yielding the [CodePoint] instances contained in the specified text range of this string. */
@@ -227,14 +183,13 @@ public fun CharSequence.asCodePointSequence(
     startIndex: Int = 0,
     endIndex: Int = length,
     throwOnInvalidSequence: Boolean = false,
-): Sequence<CodePoint> =
-    asCodePointIndicesSequence(startIndex, endIndex, throwOnInvalidSequence).map { indices ->
-        if (indices.last > indices.first) {
-            CodePoint(makeCharFromSurrogatePair(get(indices.first), get(indices.last)))
-        } else {
-            get(indices.first).codePoint
-        }
+): Sequence<CodePoint> {
+    checkBoundsIndexes(length, startIndex, endIndex)
+    return when {
+        isEmpty() -> emptySequence()
+        else -> CodePointIterator(subSequence(startIndex, endIndex), throwOnInvalidSequence).asSequence()
     }
+}
 
 /** Returns the [CodePoint] instances contained in the specified text range of this string. */
 public fun CharSequence.toCodePointList(
@@ -248,7 +203,7 @@ public fun CharSequence.codePointCount(
     startIndex: Int = 0,
     endIndex: Int = length,
     throwOnInvalidSequence: Boolean = false,
-): Int = asCodePointIndicesSequence(startIndex, endIndex, throwOnInvalidSequence).count()
+): Int = asCodePointSequence(startIndex, endIndex, throwOnInvalidSequence).count()
 
 /** A closed range of code points. */
 public class CodePointRange(

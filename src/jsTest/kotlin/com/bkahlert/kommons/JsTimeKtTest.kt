@@ -1,6 +1,6 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
 import io.kotest.matchers.comparables.shouldBeLessThan
 import io.kotest.matchers.comparables.shouldBeLessThanOrEqualTo
@@ -17,7 +17,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class JsInstantTest {
 
-    @Test fun local_date() = test {
+    @Test fun local_date() = testAll {
         LocalDate(2007, 11, 3) should {
             it.fullYear shouldBe 2007
             it.month shouldBe 11
@@ -37,7 +37,7 @@ class JsInstantTest {
     private val duration = 2.days + 3.hours + 4.minutes + 5.seconds + 6.nanoseconds
 
     @Test
-    fun now() = test {
+    fun now() = testAll {
         Now should {
             it.compareTo(Now) shouldBeLessThanOrEqualTo 0
             it.compareTo(Now - 1.seconds) shouldBeGreaterThanOrEqualTo 0
@@ -45,7 +45,7 @@ class JsInstantTest {
     }
 
     @Test
-    fun today() = test {
+    fun today() = testAll {
         Today should {
             it.fullYear shouldBe Now.fullYear
             it.month shouldBe Now.month
@@ -54,7 +54,7 @@ class JsInstantTest {
     }
 
     @Test
-    fun yesterday() = test {
+    fun yesterday() = testAll {
         Yesterday should {
             it.fullYear shouldBe Now.fullYear
             it.month shouldBe Now.month
@@ -63,7 +63,7 @@ class JsInstantTest {
     }
 
     @Test
-    fun tomorrow() = test {
+    fun tomorrow() = testAll {
         Tomorrow should {
             it.fullYear shouldBe Now.fullYear
             it.month shouldBe Now.month
@@ -72,7 +72,7 @@ class JsInstantTest {
     }
 
     @Test
-    fun timestamp() = test {
+    fun timestamp() = testAll {
         Timestamp should {
             it shouldBeLessThanOrEqualTo Date().getTime().toLong()
             it shouldBeGreaterThanOrEqualTo Date().getTime().toLong() - 1
@@ -80,7 +80,7 @@ class JsInstantTest {
     }
 
     @Test
-    fun components() = test {
+    fun components() = testAll {
         Date("August 19, 1975 23:15:30 GMT-11:00") should {
             it.time shouldBe it.getTime()
             it.timezoneOffset shouldBe it.getTimezoneOffset().minutes
@@ -106,19 +106,19 @@ class JsInstantTest {
     }
 
     @Test
-    fun add() = test {
+    fun add() = testAll {
         (Date("August 19, 1975 23:15:30 GMT-11:00") + duration).time shouldBe Date("Fri Aug 22 1975 02:19:35 GMT-11:00").time
         LocalDate(1975, 7, 19) + duration shouldBe LocalDate(1975, 7, 21)
     }
 
     @Test
-    fun subtract() = test {
+    fun subtract() = testAll {
         (Date("August 19, 1975 23:15:30 GMT-11:00") - duration).time shouldBe Date("Mon Aug 18 1975 08:11:25 GMT+0100").time
         LocalDate(1975, 7, 19) - duration shouldBe LocalDate(1975, 7, 17)
     }
 
     @Test
-    fun subtract_self() = test {
+    fun subtract_self() = testAll {
         (Now - Now) should {
             it shouldBeLessThanOrEqualTo ZERO
             it shouldBeGreaterThanOrEqualTo ZERO - 1.seconds

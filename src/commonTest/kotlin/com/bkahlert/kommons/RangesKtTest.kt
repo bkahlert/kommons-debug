@@ -67,6 +67,10 @@ class RangesKtTest {
         shouldThrow<IllegalArgumentException> { 10.0.scale(0.0, -1.0..5.0) }
     }
 
+    @Test fun end() = testAll {
+        (0..10).end shouldBe 11
+        shouldThrow<IllegalStateException> { (0..Int.MAX_VALUE).end }.message shouldBe "The exclusive end of 0..2147483647 is greater than Int.MAX_VALUE."
+    }
 
     @Test fun random() = testAll {
         (-4.2..42.0) should { range ->

@@ -4,7 +4,7 @@ import com.bkahlert.kommons.test.testAll
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-class DelegatingCharSequenceExtensionsTest {
+class CharSequenceDelegateExtensionsTest {
 
     @Test fun assume_fixed_with_string() = testAll {
         val foo = "foo"
@@ -30,22 +30,21 @@ class DelegatingCharSequenceExtensionsTest {
         fo.toString() shouldBe "fo"
     }
 
-    @Test fun test_delegating() = testAll {
-        val foo = TestCharSequence("foo")
-        val fo: CharSequence = DelegatingCharSequence(foo).dropLast(1)
+    @Test fun test_delegate() = testAll {
+        val (update, foo) = TestCharSequence("foo")
+        val fo: CharSequence = CharSequenceDelegate(foo).dropLast(1)
 
         foo.toString() shouldBe "foo"
         fo.toString() shouldBe "fo"
 
-        foo.update(">foo")
+        update(">foo")
         foo.toString() shouldBe ">foo"
         fo.toString() shouldBe ">f"
     }
 }
 
-internal class TestCharSequence(delegate: CharSequence) : DelegatingCharSequence(delegate) {
-    fun update(delegate: CharSequence): TestCharSequence {
-        this.delegate = delegate
-        return this
-    }
+fun TestCharSequence(initial: CharSequence): Pair<(CharSequence) -> Unit, CharSequence> {
+    val sb = StringBuilder(initial)
+    val update: (CharSequence) -> Unit = { sb.clear().append(it) }
+    return update to CharSequenceDelegate(sb)
 }

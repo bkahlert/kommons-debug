@@ -5,7 +5,7 @@ import com.bkahlert.kommons.MessageDigestProviders.`SHA-1`
 import com.bkahlert.kommons.MessageDigestProviders.`SHA-256`
 import com.bkahlert.kommons.debug.FunctionTypes.provider
 import com.bkahlert.kommons.test.junit.testEach
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
@@ -30,21 +30,21 @@ class MessageDigestsKtTest {
         string.checksum(provider) shouldBe expectedChecksum
     }
 
-    @Test fun md5_checksum(@TempDir tempDir: Path) = test {
+    @Test fun md5_checksum(@TempDir tempDir: Path) = testAll {
         string.encodeToByteArray().inputStream().md5Checksum() shouldBe checksums[MD5]
         string.encodeToByteArray().md5Checksum() shouldBe checksums[MD5]
         (tempDir / provider.name).apply { writeText(string) }.md5Checksum() shouldBe checksums[MD5]
         string.md5Checksum() shouldBe checksums[MD5]
     }
 
-    @Test fun sha1_checksum(@TempDir tempDir: Path) = test {
+    @Test fun sha1_checksum(@TempDir tempDir: Path) = testAll {
         string.encodeToByteArray().inputStream().sha1Checksum() shouldBe checksums[`SHA-1`]
         string.encodeToByteArray().sha1Checksum() shouldBe checksums[`SHA-1`]
         (tempDir / provider.name).apply { writeText(string) }.sha1Checksum() shouldBe checksums[`SHA-1`]
         string.sha1Checksum() shouldBe checksums[`SHA-1`]
     }
 
-    @Test fun sha256_checksum(@TempDir tempDir: Path) = test {
+    @Test fun sha256_checksum(@TempDir tempDir: Path) = testAll {
         string.encodeToByteArray().inputStream().sha256Checksum() shouldBe checksums[`SHA-256`]
         string.encodeToByteArray().sha256Checksum() shouldBe checksums[`SHA-256`]
         (tempDir / provider.name).apply { writeText(string) }.sha256Checksum() shouldBe checksums[`SHA-256`]

@@ -1,12 +1,12 @@
 package com.bkahlert.kommons.debug
 
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class ObjectTest {
 
-    @Test fun test_keys() = test {
+    @Test fun test_keys() = testAll {
         Object.keys(nativeObject()) shouldBe arrayOf(
             "property",
         )
@@ -85,7 +85,7 @@ class ObjectTest {
         )
     }
 
-    @Test fun test_entries() = test {
+    @Test fun test_entries() = testAll {
         Object.entries(nativeObject()) shouldBe arrayOf(
             arrayOf("property", "Function-property"),
         )
@@ -164,7 +164,7 @@ class ObjectTest {
         )
     }
 
-    @Test fun object_get_own_property_names() = test {
+    @Test fun object_get_own_property_names() = testAll {
         Object.getOwnPropertyNames(nativeObject()) shouldBe arrayOf(
             "property",
         )
@@ -245,7 +245,7 @@ class ObjectTest {
         )
     }
 
-    @Test fun test_keys_extension() = test {
+    @Test fun test_keys_extension() = testAll {
         nativeObject().keys shouldBe Object.keys(nativeObject())
         BaseClass().keys shouldBe Object.keys(BaseClass())
         Singleton.keys shouldBe Object.keys(Singleton)
@@ -263,7 +263,7 @@ class ObjectTest {
         ClassWithDefaultToString(customObject).keys shouldBe Object.keys(ClassWithDefaultToString(customObject))
     }
 
-    @Test fun test_entries_extension() = test {
+    @Test fun test_entries_extension() = testAll {
         nativeObject().entries shouldBe Object.entries(nativeObject())
         BaseClass().entries shouldBe Object.entries(BaseClass())
         Singleton.entries shouldBe Object.entries(Singleton)

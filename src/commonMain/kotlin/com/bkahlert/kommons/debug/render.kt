@@ -181,7 +181,7 @@ internal class RenderingContext(
             when (obj) {
                 is CharSequence -> renderStringTo(out, obj)
 
-                is Boolean, is Char, is Float, is Double,
+                is Boolean, is kotlin.Char, is Float, is Double,
                 is UByte, is UShort, is UInt, is ULong,
                 is Byte, is Short, is Int, is Long -> renderPrimitiveTo(out, obj)
 
@@ -258,7 +258,7 @@ private fun UByte.toDecimalAndHexadecimalString() = "${toInt()}／0x${toHexadeci
 internal fun renderPrimitiveTo(out: StringBuilder, primitive: Any) {
     when (primitive) {
         is Boolean -> out.append(primitive)
-        is Char -> out.append(primitive)
+        is kotlin.Char -> out.append(primitive)
         is Float -> if (primitive.toLong() in Byte.VALUE_RANGE && primitive.mod(1.0f) == 0.0f)
             out.append(primitive.toInt().toByte().toDecimalAndHexadecimalString()) else out.append(primitive)
 

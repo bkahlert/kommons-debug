@@ -1,7 +1,7 @@
 package com.bkahlert.kommons
 
 import com.bkahlert.kommons.ShutdownHookTestHelper.Companion.marker
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.assertions.asClue
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.paths.shouldExist
@@ -25,32 +25,32 @@ import kotlin.test.Test
 
 class JvmProgramTest {
 
-    @Test fun name() = test {
+    @Test fun name() = testAll {
         Program.name shouldBe "kommons-debug"
     }
 
-    @Test fun group() = test {
+    @Test fun group() = testAll {
         Program.group shouldBe "com.bkahlert.kommons"
     }
 
-    @Test fun version() = test {
+    @Test fun version() = testAll {
         Program.version shouldNotBe null
     }
 
-    @Test fun context_class_loader() = test {
+    @Test fun context_class_loader() = testAll {
         Program.contextClassLoader shouldNotBe null
     }
 
-    @Test fun load_class_or_null() = test {
+    @Test fun load_class_or_null() = testAll {
         Program.contextClassLoader.loadClassOrNull(randomString()) shouldBe null
         Program.contextClassLoader.loadClassOrNull("java.lang.String") shouldBe String::class.java
     }
 
-    @Test fun is_debugging() = test {
+    @Test fun is_debugging() = testAll {
         Program.isDebugging shouldBe false
     }
 
-    @Test fun on_exit(@TempDir tempDir: Path) = test {
+    @Test fun on_exit(@TempDir tempDir: Path) = testAll {
         tempDir.resolve("on-exit.txt").asClue { file ->
             IsolatedProcess.exec(OnExitTestHelper::class, file.pathString, "did complete") shouldBe 0
             file should {
@@ -78,7 +78,7 @@ class JvmProgramTest {
         }
     }
 
-    @Test fun shutdown_hook() = test {
+    @Test fun shutdown_hook() = testAll {
         marker.delete()
         IsolatedProcess.exec(ShutdownHookTestHelper::class, "create") shouldBe 0
         marker.shouldExist()

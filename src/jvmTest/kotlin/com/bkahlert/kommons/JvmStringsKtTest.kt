@@ -1,6 +1,6 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 class JvmStringsKtTest {
 
     @Suppress("SpellCheckingInspection")
-    @Test fun transform() = test {
+    @Test fun transform() = testAll {
         withClue("composed") { "© А-З ÄÖÜäöüẞß".transform("de_DE", "de_DE-ASCII") shouldBe "(C) A-Z AEOEUeaeoeueSSss" }
         withClue("composed") { "ÄÖÜäöüẞß".transform("Any-Latin; de_De-ASCII") shouldBe "AEOEUeaeoeueSSss" }
         withClue("decomposed") { "ÄÖÜäöü".transform("Any-Latin; de_De-ASCII") shouldBe "AEOEUeaeoeue" }

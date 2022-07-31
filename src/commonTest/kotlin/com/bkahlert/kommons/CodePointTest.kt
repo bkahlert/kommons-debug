@@ -1,5 +1,6 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.Text.ChunkedText
 import com.bkahlert.kommons.test.testAll
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
@@ -22,20 +23,22 @@ import kotlin.test.Test
 class CodePointTest {
 
     @Test fun codepoint_position_iterator() = testAll {
-        CodePointPositionIterator("").asSequence().shouldBeEmpty()
-        CodePointPositionIterator("a").asSequence().shouldContainExactly(0..0)
-        CodePointPositionIterator("¶").asSequence().shouldContainExactly(0..0)
-        CodePointPositionIterator("☰").asSequence().shouldContainExactly(0..0)
-        CodePointPositionIterator("𝕓").asSequence().shouldContainExactly(0..1)
-        CodePointPositionIterator("a̳o").asSequence().shouldContainExactly(0..0, 1..1, 2..2)
-        CodePointPositionIterator("$MIN_HIGH_SURROGATE", false).asSequence().shouldContainExactly(0..0)
-        CodePointPositionIterator("${MIN_HIGH_SURROGATE}a", false).asSequence().shouldContainExactly(0..0, 1..1)
-        CodePointPositionIterator("${MIN_LOW_SURROGATE}a", false).asSequence().shouldContainExactly(0..0, 1..1)
-        shouldThrow<CharacterCodingException> { CodePointPositionIterator("$MIN_HIGH_SURROGATE", true).asSequence().toList() }
+        CodePointBreakIterator("").asSequence().shouldBeEmpty()
+        CodePointBreakIterator("a").asSequence().shouldContainExactly(1)
+        CodePointBreakIterator("¶").asSequence().shouldContainExactly(1)
+        CodePointBreakIterator("☰").asSequence().shouldContainExactly(1)
+        CodePointBreakIterator("𝕓").asSequence().shouldContainExactly(2)
+        CodePointBreakIterator("a̳o").asSequence().shouldContainExactly(1, 2, 3)
+
+        CodePointBreakIterator("$MIN_HIGH_SURROGATE", throwOnInvalidSequence = false).asSequence().shouldContainExactly(1)
+        CodePointBreakIterator("${MIN_HIGH_SURROGATE}a", throwOnInvalidSequence = false).asSequence().shouldContainExactly(1, 2)
+        CodePointBreakIterator("${MIN_LOW_SURROGATE}a", throwOnInvalidSequence = false).asSequence().shouldContainExactly(1, 2)
+
+        shouldThrow<CharacterCodingException> { CodePointBreakIterator("$MIN_HIGH_SURROGATE", throwOnInvalidSequence = true).asSequence().toList() }
             .message shouldBe "Input length = 0"
-        shouldThrow<CharacterCodingException> { CodePointPositionIterator("${MIN_HIGH_SURROGATE}a", true).asSequence().toList() }
+        shouldThrow<CharacterCodingException> { CodePointBreakIterator("${MIN_HIGH_SURROGATE}a", throwOnInvalidSequence = true).asSequence().toList() }
             .message shouldBe "Input length = 0"
-        shouldThrow<CharacterCodingException> { CodePointPositionIterator("${MIN_LOW_SURROGATE}a", true).asSequence().toList() }
+        shouldThrow<CharacterCodingException> { CodePointBreakIterator("${MIN_LOW_SURROGATE}a", throwOnInvalidSequence = true).asSequence().toList() }
             .message shouldBe "Input length = 0"
     }
 
@@ -46,41 +49,19 @@ class CodePointTest {
         CodePointIterator("☰").asSequence().shouldContainExactly(CodePoint(0x2630))
         CodePointIterator("𝕓").asSequence().shouldContainExactly(CodePoint(0x1D553))
         CodePointIterator("a̳o").asSequence().shouldContainExactly(CodePoint('a'.code), CodePoint('̳'.code), CodePoint('o'.code))
-        CodePointIterator("$MIN_HIGH_SURROGATE", false).asSequence().shouldContainExactly(MIN_HIGH_SURROGATE.codePoint)
-        CodePointIterator("${MIN_HIGH_SURROGATE}a", false).asSequence().shouldContainExactly(MIN_HIGH_SURROGATE.codePoint, CodePoint(0x61))
-        CodePointIterator("${MIN_LOW_SURROGATE}a", false).asSequence().shouldContainExactly(MIN_LOW_SURROGATE.codePoint, CodePoint(0x61))
-        shouldThrow<CharacterCodingException> { CodePointIterator("$MIN_HIGH_SURROGATE", true).asSequence().toList() }
-            .message shouldBe "Input length = 0"
-        shouldThrow<CharacterCodingException> { CodePointIterator("${MIN_HIGH_SURROGATE}a", true).asSequence().toList() }
-            .message shouldBe "Input length = 0"
-        shouldThrow<CharacterCodingException> { CodePointIterator("${MIN_LOW_SURROGATE}a", true).asSequence().toList() }
-            .message shouldBe "Input length = 0"
-    }
 
-    @Test fun as_code_point_indices_sequences() = testAll {
-        "".asCodePointIndicesSequence().shouldBeEmpty()
-        "a".asCodePointIndicesSequence().shouldContainExactly(0..0)
-        "¶".asCodePointIndicesSequence().shouldContainExactly(0..0)
-        "☰".asCodePointIndicesSequence().shouldContainExactly(0..0)
-        "𝕓".asCodePointIndicesSequence().shouldContainExactly(0..1)
-        "a̳o".asCodePointIndicesSequence().shouldContainExactly(0..0, 1..1, 2..2)
-        "a̳o".asCodePointIndicesSequence(startIndex = 1).shouldContainExactly(1..1, 2..2)
-        "a̳o".asCodePointIndicesSequence(startIndex = 2).shouldContainExactly(2..2)
-        "a̳o".asCodePointIndicesSequence(startIndex = 3).shouldBeEmpty()
-        "a̳o".asCodePointIndicesSequence(endIndex = 1).shouldContainExactly(0..0)
-        "a̳o".asCodePointIndicesSequence(endIndex = 2).shouldContainExactly(0..0, 1..1)
-        "a̳o".asCodePointIndicesSequence(endIndex = 3).shouldContainExactly(0..0, 1..1, 2..2)
+        CodePointIterator("$MIN_HIGH_SURROGATE", throwOnInvalidSequence = false).asSequence()
+            .shouldContainExactly(MIN_HIGH_SURROGATE.codePoint)
+        CodePointIterator("${MIN_HIGH_SURROGATE}a", throwOnInvalidSequence = false).asSequence()
+            .shouldContainExactly(MIN_HIGH_SURROGATE.codePoint, CodePoint(0x61))
+        CodePointIterator("${MIN_LOW_SURROGATE}a", throwOnInvalidSequence = false).asSequence()
+            .shouldContainExactly(MIN_LOW_SURROGATE.codePoint, CodePoint(0x61))
 
-        shouldThrowWithMessage<IndexOutOfBoundsException>("begin -1, end 0, length 0") { "".asCodePointIndicesSequence(startIndex = -1).toList() }
-        shouldThrowWithMessage<IndexOutOfBoundsException>("begin 0, end -1, length 0") { "".asCodePointIndicesSequence(endIndex = -1).toList() }
-        "$MIN_HIGH_SURROGATE".asCodePointIndicesSequence(throwOnInvalidSequence = false).shouldContainExactly(0..0)
-        "${MIN_HIGH_SURROGATE}a".asCodePointIndicesSequence(throwOnInvalidSequence = false).shouldContainExactly(0..0, 1..1)
-        "${MIN_LOW_SURROGATE}a".asCodePointIndicesSequence(throwOnInvalidSequence = false).shouldContainExactly(0..0, 1..1)
-        shouldThrow<CharacterCodingException> { "$MIN_HIGH_SURROGATE".asCodePointIndicesSequence(throwOnInvalidSequence = true).toList() }
+        shouldThrow<CharacterCodingException> { CodePointIterator("$MIN_HIGH_SURROGATE", throwOnInvalidSequence = true).asSequence().toList() }
             .message shouldBe "Input length = 0"
-        shouldThrow<CharacterCodingException> { "${MIN_HIGH_SURROGATE}a".asCodePointIndicesSequence(throwOnInvalidSequence = true).toList() }
+        shouldThrow<CharacterCodingException> { CodePointIterator("${MIN_HIGH_SURROGATE}a", throwOnInvalidSequence = true).asSequence().toList() }
             .message shouldBe "Input length = 0"
-        shouldThrow<CharacterCodingException> { "${MIN_LOW_SURROGATE}a".asCodePointIndicesSequence(throwOnInvalidSequence = true).toList() }
+        shouldThrow<CharacterCodingException> { CodePointIterator("${MIN_LOW_SURROGATE}a", throwOnInvalidSequence = true).asSequence().toList() }
             .message shouldBe "Input length = 0"
     }
 
@@ -331,6 +312,34 @@ class CodePointTest {
     @Test fun is_whitespace() = testAll {
         listOf(' ', '\u2000').forAll { it.codePoint.isWhitespace shouldBe true }
         "Az09Αω𝌀𝍖षि🜃🜂🜁🜄".asCodePointSequence().forEach { it.isWhitespace shouldBe false }
+    }
+
+    @Test fun text() = testAll {
+        CodePoint.name shouldBe "code point"
+        CodePoint.textOf(String.EMPTY) shouldBe Text.emptyText()
+        CodePoint.textOf(emojiString) should beText(
+            ChunkedText(
+                emojiString,
+                0..0,
+                1..2,
+                3..4,
+                5..6,
+                7..8,
+                9..10,
+                11..12,
+                13..13,
+                14..15,
+                16..17,
+                18..18,
+                19..20,
+                21..21,
+                22..23,
+                24..24,
+                25..26,
+                transform = ::CodePoint
+            ),
+            *emojiCodePoints
+        )
     }
 
     @Test fun code_point_range() = testAll {

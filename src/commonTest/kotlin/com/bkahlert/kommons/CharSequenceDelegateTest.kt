@@ -10,11 +10,11 @@ import io.kotest.matchers.string.shouldHaveLength
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 import kotlin.test.Test
 
-class DelegatingCharSequenceTest {
+class CharSequenceDelegateTest {
 
     @Test fun of_empty() = testAll {
         val empty = ""
-        val foo = DelegatingCharSequence(empty)
+        val foo = CharSequenceDelegate(empty)
         foo.length shouldBe 0
         shouldThrow<IndexOutOfBoundsException> { foo[-1] }.message shouldBe "index out of range: -1"
         shouldThrow<IndexOutOfBoundsException> { foo[0] }.message shouldBe "index out of range: 0"
@@ -25,21 +25,21 @@ class DelegatingCharSequenceTest {
 
     @Test fun of_string() = testAll {
         val string = "foo"
-        val foo = DelegatingCharSequence(string)
+        val foo = CharSequenceDelegate(string)
         assertFoo(foo)
         foo.toString() shouldBeSameInstanceAs "foo"
     }
 
     @Test fun of_string_builder() = testAll {
         val stringBuilder = StringBuilder("foo")
-        val foo = DelegatingCharSequence(stringBuilder)
+        val foo = CharSequenceDelegate(stringBuilder)
         assertFoo(foo)
     }
 
     @Test fun of_delegate() = testAll {
         val stringBuilder = StringBuilder("foo")
-        val delegate = DelegatingCharSequence(stringBuilder)
-        val foo = DelegatingCharSequence(delegate)
+        val delegate = CharSequenceDelegate(stringBuilder)
+        val foo = CharSequenceDelegate(delegate)
         assertFoo(foo)
 
         stringBuilder.append("-bar")
@@ -52,7 +52,7 @@ class DelegatingCharSequenceTest {
 
     @Test fun of_delegate_subSequence() = testAll {
         val stringBuilder = StringBuilder("-foo-")
-        val delegate = DelegatingCharSequence(stringBuilder)
+        val delegate = CharSequenceDelegate(stringBuilder)
         val foo = delegate.subSequence(1, 4)
         assertFoo(foo)
 
@@ -65,32 +65,36 @@ class DelegatingCharSequenceTest {
     }
 
     @Test fun instantiation() = testAll {
-        shouldNotThrowAny { DelegatingCharSequence("foo") }
-        shouldNotThrowAny { DelegatingCharSequence("foo", null) }
-        shouldNotThrowAny { DelegatingCharSequence("foo", 0..2) }
-        shouldThrow<IndexOutOfBoundsException> { DelegatingCharSequence("foo", 0..3) }.message shouldBe "begin 0, end 4, length 3"
+        shouldNotThrowAny { CharSequenceDelegate("foo").toString() }
+        shouldNotThrowAny { CharSequenceDelegate("foo", 0..2).toString() }
+        shouldNotThrowAny { CharSequenceDelegate("foo", startIndex = 0).toString() }
+        shouldNotThrowAny { CharSequenceDelegate("foo", endIndex = 3).toString() }
+
+        shouldThrow<IndexOutOfBoundsException> { CharSequenceDelegate("foo", 0..3).toString() }.message shouldBe "begin 0, end 4, length 3"
+        shouldThrow<IndexOutOfBoundsException> { CharSequenceDelegate("foo", startIndex = -1).toString() }.message shouldBe "begin -1, end 3, length 3"
+        shouldThrow<IndexOutOfBoundsException> { CharSequenceDelegate("foo", endIndex = 4).toString() }.message shouldBe "begin 0, end 4, length 3"
     }
 
     @Test fun to_string() = testAll {
-        DelegatingCharSequence("foo").toString() shouldBe "foo"
-        DelegatingCharSequence("foo", 0..0).toString() shouldBe "f"
-        DelegatingCharSequence("foo", 0..1).toString() shouldBe "fo"
-        DelegatingCharSequence("foo", 0..2).toString() shouldBe "foo"
-        DelegatingCharSequence("foo", 1..2).toString() shouldBe "oo"
-        DelegatingCharSequence("foo", 2..2).toString() shouldBe "o"
+        CharSequenceDelegate("foo").toString() shouldBe "foo"
+        CharSequenceDelegate("foo", 0..0).toString() shouldBe "f"
+        CharSequenceDelegate("foo", 0..1).toString() shouldBe "fo"
+        CharSequenceDelegate("foo", 0..2).toString() shouldBe "foo"
+        CharSequenceDelegate("foo", 1..2).toString() shouldBe "oo"
+        CharSequenceDelegate("foo", 2..2).toString() shouldBe "o"
         @Suppress("EmptyRange")
-        DelegatingCharSequence("foo", 3..2).toString() shouldBe ""
+        CharSequenceDelegate("foo", 3..2).toString() shouldBe ""
     }
 
     @Test fun equality() = testAll {
-        DelegatingCharSequence("foo", 0..1) shouldBe DelegatingCharSequence("fo")
-        DelegatingCharSequence("foo", 0..1) shouldBe DelegatingCharSequence("foo", 0..1)
-        DelegatingCharSequence("foo", 0..1) shouldNotBe DelegatingCharSequence("bar", 0..1)
-        DelegatingCharSequence("foo", 0..1) shouldNotBe DelegatingCharSequence("foo", 1..2)
+        CharSequenceDelegate("foo", 0..1) shouldBe CharSequenceDelegate("fo")
+        CharSequenceDelegate("foo", 0..1) shouldBe CharSequenceDelegate("foo", 0..1)
+        CharSequenceDelegate("foo", 0..1) shouldNotBe CharSequenceDelegate("bar", 0..1)
+        CharSequenceDelegate("foo", 0..1) shouldNotBe CharSequenceDelegate("foo", 1..2)
     }
 
     @Test fun hash_code() = testAll {
-        DelegatingCharSequence("foo", 0..1).hashCode() shouldBe "fo".hashCode()
+        CharSequenceDelegate("foo", 0..1).hashCode() shouldBe "fo".hashCode()
     }
 }
 

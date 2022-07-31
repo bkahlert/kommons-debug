@@ -2,7 +2,7 @@ package com.bkahlert.kommons
 
 import com.bkahlert.kommons.test.createAnyFile
 import com.bkahlert.kommons.test.junit.testEach
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
@@ -57,26 +57,26 @@ class SystemLocationsTest {
     inner class AutoCleanup {
 
         @Test
-        fun `should delete if empty`(@TempDir tempDir: Path) = test {
+        fun `should delete if empty`(@TempDir tempDir: Path) = testAll {
             tempDir.cleanUp(Duration.ZERO, 0).shouldNotExist()
         }
 
         @Test
-        fun `should keep at most specified number of files`(@TempDir tempDir: Path) = test {
+        fun `should keep at most specified number of files`(@TempDir tempDir: Path) = testAll {
             (1..10).forEach { i -> tempDir.createAnyFile("file-$i") }
             tempDir.listDirectoryEntriesRecursively() shouldHaveSize 10
             tempDir.cleanUp(Duration.ZERO, 5).listDirectoryEntriesRecursively() shouldHaveSize 5
         }
 
         @Test
-        fun `should not delete if less files than maximum`(@TempDir tempDir: Path) = test {
+        fun `should not delete if less files than maximum`(@TempDir tempDir: Path) = testAll {
             (1..10).forEach { i -> tempDir.createAnyFile("file-$i") }
             tempDir.listDirectoryEntriesRecursively() shouldHaveSize 10
             tempDir.cleanUp(Duration.ZERO, 100).listDirectoryEntriesRecursively() shouldHaveSize 10
         }
 
         @Test
-        fun `should not delete files younger than specified age`(@TempDir tempDir: Path) = test {
+        fun `should not delete files younger than specified age`(@TempDir tempDir: Path) = testAll {
             val a = tempDir.createAnyFile("a").apply { age = 30.minutes }
             val b = tempDir.createAnyFile("b").apply { age = 1.5.hours }
             tempDir.createAnyFile("c").apply { age = 1.days }
@@ -87,7 +87,7 @@ class SystemLocationsTest {
         }
 
         @Test
-        fun `should delete empty directories`(@TempDir tempDir: Path) = test {
+        fun `should delete empty directories`(@TempDir tempDir: Path) = testAll {
             val emptyDir = tempDir.createTempDirectory("empty")
             val file = tempDir.createAnyFile()
             tempDir.cleanUp(2.hours, 0).listDirectoryEntriesRecursively().map { it.pathString } should {

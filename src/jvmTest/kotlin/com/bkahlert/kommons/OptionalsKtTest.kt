@@ -1,13 +1,13 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.matchers.shouldBe
 import java.util.Optional
 import kotlin.test.Test
 
 class OptionalsTest {
 
-    @Test fun or_null() = test {
+    @Test fun or_null() = testAll {
         optionalPresentString.orNull() shouldBe "string"
         optionalNonPresentString.orNull() shouldBe null
         nullableOptionalPresentString.orNull() shouldBe "string"

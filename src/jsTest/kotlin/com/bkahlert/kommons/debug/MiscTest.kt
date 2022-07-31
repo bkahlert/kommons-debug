@@ -1,6 +1,6 @@
 package com.bkahlert.kommons.debug
 
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import kotlin.js.json
@@ -8,7 +8,7 @@ import kotlin.test.Test
 
 class MiscTest {
 
-    @Test fun iterable_to_json() = test {
+    @Test fun iterable_to_json() = testAll {
         emptyList<Pair<String, Any?>>().toJson().entries shouldBe json().entries
         listOf("notNull" to 42, "null" to null, "map" to mapOf("foo" to "bar")).toJson().entries shouldBe json(
             "notNull" to 42,
@@ -17,7 +17,7 @@ class MiscTest {
         ).entries
     }
 
-    @Test fun map_to_json() = test {
+    @Test fun map_to_json() = testAll {
         emptyMap<String, Any?>().toJson().entries shouldBe json().entries
         mapOf("notNull" to 42, "null" to null, "map" to mapOf("foo" to "bar")).toJson().entries shouldBe json(
             "notNull" to 42,
@@ -26,7 +26,7 @@ class MiscTest {
         ).entries
     }
 
-    @Test fun iterable_to_json_array() = test {
+    @Test fun iterable_to_json_array() = testAll {
         emptyList<Any?>().toJsonArray().entries shouldBe json().entries
         listOf(42, null, mapOf("foo" to "bar")).toJsonArray() should {
             it.size shouldBe 3
@@ -36,7 +36,7 @@ class MiscTest {
         }
     }
 
-    @Test fun map_to_json_array() = test {
+    @Test fun map_to_json_array() = testAll {
         emptyArray<Any?>().toJsonArray().entries shouldBe json().entries
         arrayOf(42, null, mapOf("foo" to "bar")).toJsonArray() should {
             it.size shouldBe 3
@@ -46,7 +46,7 @@ class MiscTest {
         }
     }
 
-    @Test fun object_stringify_extension() = test {
+    @Test fun object_stringify_extension() = testAll {
         null.stringify() shouldBe "null"
         "string".stringify() shouldBe """
             "string"
@@ -164,7 +164,7 @@ class MiscTest {
             """.trimIndent()
     }
 
-    @Test fun string_parse_extension() = test {
+    @Test fun string_parse_extension() = testAll {
         null.stringify().parseJson().entries shouldBe json().entries
         "string".stringify().parseJson().entries shouldBe "string".entries
         arrayOf("string", 42).stringify().parseJson().entries shouldBe json(
@@ -246,7 +246,7 @@ class MiscTest {
         ).entries
     }
 
-    @Test fun any_to_json_extension() = test {
+    @Test fun any_to_json_extension() = testAll {
         null.toJson().entries shouldBe null.stringify().parseJson().entries
         "string".toJson().entries shouldBe "string".stringify().parseJson().entries
         arrayOf("string", 42).toJson().entries shouldBe arrayOf("string", 42).stringify().parseJson().entries

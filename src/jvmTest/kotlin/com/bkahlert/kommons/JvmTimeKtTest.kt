@@ -1,6 +1,6 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.test.test
+import com.bkahlert.kommons.test.testAll
 import io.kotest.matchers.comparables.shouldBeGreaterThanOrEqualTo
 import io.kotest.matchers.comparables.shouldBeLessThanOrEqualTo
 import io.kotest.matchers.should
@@ -30,7 +30,7 @@ class JvmInstantTest {
 
 
     @Test
-    fun now() = test {
+    fun now() = testAll {
         Now should {
             it shouldBeLessThanOrEqualTo Instant.now()
             it shouldBeGreaterThanOrEqualTo Instant.now() - 1.seconds
@@ -38,12 +38,12 @@ class JvmInstantTest {
     }
 
     @Test
-    fun today() = test {
+    fun today() = testAll {
         Today shouldBe LocalDate.now()
     }
 
     @Test
-    fun yesterday() = test {
+    fun yesterday() = testAll {
         Yesterday should {
             it shouldBe LocalDate.now() - 1.days
             it shouldBe LocalDate.now() - (1.days + 1.seconds)
@@ -54,7 +54,7 @@ class JvmInstantTest {
     }
 
     @Test
-    fun tomorrow() = test {
+    fun tomorrow() = testAll {
         Tomorrow should {
             it shouldBe LocalDate.now() + 1.days
             it shouldBe LocalDate.now() + (1.days + 1.seconds)
@@ -65,7 +65,7 @@ class JvmInstantTest {
     }
 
     @Test
-    fun timestamp() = test {
+    fun timestamp() = testAll {
         Timestamp should {
             it shouldBeLessThanOrEqualTo Instant.now().toEpochMilli()
             it shouldBeGreaterThanOrEqualTo Instant.now().toEpochMilli() - 100
@@ -73,7 +73,7 @@ class JvmInstantTest {
     }
 
     @Test
-    fun `should add`() = test {
+    fun `should add`() = testAll {
         (Instant.now() + duration) should {
             it shouldBeLessThanOrEqualTo Instant.now().plus(javaDuration)
             it shouldBeGreaterThanOrEqualTo Instant.now().plus(javaDuration) - 1.seconds
@@ -105,7 +105,7 @@ class JvmInstantTest {
     }
 
     @Test
-    fun `should subtract`() = test {
+    fun `should subtract`() = testAll {
         (Instant.now() - duration) should {
             it shouldBeLessThanOrEqualTo Instant.now().minus(javaDuration)
             it shouldBeGreaterThanOrEqualTo Instant.now().minus(javaDuration) - 1.seconds
@@ -141,7 +141,7 @@ class JvmInstantTest {
         now.toFileTime() shouldBe FileTime.from(now)
     }
 
-    @Test fun subtract_self() = test {
+    @Test fun subtract_self() = testAll {
         (Now - Now) should {
             it shouldBeLessThanOrEqualTo Duration.ZERO
             it shouldBeGreaterThanOrEqualTo Duration.ZERO - 1.seconds
@@ -152,7 +152,7 @@ class JvmInstantTest {
         }
     }
 
-    @Test fun components() = test {
+    @Test fun components() = testAll {
         Instant.parse("1975-08-20T10:15:30.0Z") should {
             it.utcHours shouldBe 10
             it.utcMinutes shouldBe 15

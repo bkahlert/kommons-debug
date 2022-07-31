@@ -9,14 +9,14 @@ public enum class CaseStyle {
     /** Strategy that separates words with a capitalized letter, and the first word starting with lowercase. */
     @Suppress("EnumEntryName")
     camelCase {
-        override fun matches(phrase: CharSequence, isUpperCase: (Char) -> Boolean): Boolean {
+        override fun matches(phrase: CharSequence, isUpperCase: (kotlin.Char) -> Boolean): Boolean {
             if (phrase.isEmpty()) return true
             if (isUpperCase(phrase.first())) return false
             if (phrase.containsAny("_", "-", " ")) return false
             return true
         }
 
-        override fun split(phrase: CharSequence, isUpperCase: (Char) -> Boolean): List<String> = PascalCase.split(phrase, isUpperCase)
+        override fun split(phrase: CharSequence, isUpperCase: (kotlin.Char) -> Boolean): List<String> = PascalCase.split(phrase, isUpperCase)
 
         override fun join(words: Iterable<CharSequence>): String =
             buildString {
@@ -27,14 +27,14 @@ public enum class CaseStyle {
 
     /** Strategy that separates words with a capitalized letter, and the first word starting with uppercase. */
     PascalCase {
-        override fun matches(phrase: CharSequence, isUpperCase: (Char) -> Boolean): Boolean {
+        override fun matches(phrase: CharSequence, isUpperCase: (kotlin.Char) -> Boolean): Boolean {
             if (phrase.isEmpty()) return true
             if (!isUpperCase(phrase.first())) return false
             if (phrase.containsAny("_", "-", " ")) return false
             return true
         }
 
-        override fun split(phrase: CharSequence, isUpperCase: (Char) -> Boolean): List<String> {
+        override fun split(phrase: CharSequence, isUpperCase: (kotlin.Char) -> Boolean): List<String> {
             var rem = phrase
             val words = mutableListOf<String>()
             while (rem.isNotEmpty()) {
@@ -55,7 +55,7 @@ public enum class CaseStyle {
                 }
             }
 
-        private fun CharSequence.takeWord(isUpperCase: (Char) -> Boolean): Pair<String, CharSequence> = when (length) {
+        private fun CharSequence.takeWord(isUpperCase: (kotlin.Char) -> Boolean): Pair<String, CharSequence> = when (length) {
             1 -> first().lowercase() to String.EMPTY
             2 -> toString().lowercase() to String.EMPTY
             else -> {
@@ -82,14 +82,14 @@ public enum class CaseStyle {
 
     /** Strategy that separates words with uppercase letters, and underscores instead of spaces. */
     SCREAMING_SNAKE_CASE {
-        override fun matches(phrase: CharSequence, isUpperCase: (Char) -> Boolean): Boolean {
+        override fun matches(phrase: CharSequence, isUpperCase: (kotlin.Char) -> Boolean): Boolean {
             if (phrase.isEmpty()) return true
             if (phrase.any { !isUpperCase(it) }) return false
             if (phrase.containsAny("-", " ")) return false
             return true
         }
 
-        override fun split(phrase: CharSequence, isUpperCase: (Char) -> Boolean): List<String> =
+        override fun split(phrase: CharSequence, isUpperCase: (kotlin.Char) -> Boolean): List<String> =
             if (phrase.isEmpty()) emptyList() else phrase.split('_').map { it.lowercase() }
 
         override fun join(words: Iterable<CharSequence>): String = words.joinToString("_") { word -> word.toString().uppercase() }
@@ -99,14 +99,14 @@ public enum class CaseStyle {
     @JsName("kebab_case")
     @Suppress("EnumEntryName")
     `kebab-case` {
-        override fun matches(phrase: CharSequence, isUpperCase: (Char) -> Boolean): Boolean {
+        override fun matches(phrase: CharSequence, isUpperCase: (kotlin.Char) -> Boolean): Boolean {
             if (phrase.isEmpty()) return true
             if (phrase.any { it != '-' && isUpperCase(it) }) return false
             if (phrase.containsAny("_", " ")) return false
             return true
         }
 
-        override fun split(phrase: CharSequence, isUpperCase: (Char) -> Boolean): List<String> = if (phrase.isEmpty()) emptyList() else phrase.split('-')
+        override fun split(phrase: CharSequence, isUpperCase: (kotlin.Char) -> Boolean): List<String> = if (phrase.isEmpty()) emptyList() else phrase.split('-')
         override fun join(words: Iterable<CharSequence>): String = words.joinToString("-")
     },
 
@@ -114,7 +114,7 @@ public enum class CaseStyle {
     @JsName("Title_Case")
     @Suppress("EnumEntryName")
     `Title Case` {
-        override fun matches(phrase: CharSequence, isUpperCase: (Char) -> Boolean): Boolean {
+        override fun matches(phrase: CharSequence, isUpperCase: (kotlin.Char) -> Boolean): Boolean {
             if (phrase.isEmpty()) return true
             if (!isUpperCase(phrase.first())) return false
             if (phrase.containsAny("_", "-")) return false
@@ -127,7 +127,7 @@ public enum class CaseStyle {
             }
         }
 
-        override fun split(phrase: CharSequence, isUpperCase: (Char) -> Boolean): List<String> =
+        override fun split(phrase: CharSequence, isUpperCase: (kotlin.Char) -> Boolean): List<String> =
             if (phrase.isEmpty()) emptyList() else phrase.split(' ').map { it.lowercase() }
 
         override fun join(words: Iterable<CharSequence>): String =
@@ -142,10 +142,10 @@ public enum class CaseStyle {
     ;
 
     /** Returns `true` if the specified [phrase] matches this [CaseStyle]. */
-    public abstract fun matches(phrase: CharSequence, isUpperCase: (Char) -> Boolean = { !it.isLowerCase() }): Boolean
+    public abstract fun matches(phrase: CharSequence, isUpperCase: (kotlin.Char) -> Boolean = { !it.isLowerCase() }): Boolean
 
     /** Splits the specified [phrase] with this [CaseStyle] into a list of words. */
-    public abstract fun split(phrase: CharSequence, isUpperCase: (Char) -> Boolean = { !it.isLowerCase() }): List<String>
+    public abstract fun split(phrase: CharSequence, isUpperCase: (kotlin.Char) -> Boolean = { !it.isLowerCase() }): List<String>
 
     /** Joins the specified [words] to a phrase with this [CaseStyle]. */
     public abstract fun join(words: Iterable<CharSequence>): String
