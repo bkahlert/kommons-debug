@@ -2,6 +2,7 @@ package com.bkahlert.kommons
 
 import com.bkahlert.kommons.ShutdownHookTestHelper.Companion.marker
 import com.bkahlert.kommons.test.testAll
+import com.bkahlert.kommons.text.randomString
 import io.kotest.assertions.asClue
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.paths.shouldExist
@@ -72,7 +73,7 @@ class JvmProgramTest {
                 it.shouldExist()
                 it.readText()
                     .shouldContain("An exception occurred during shutdown.")
-                    .shouldContain("at com.bkahlert.kommons.OnExitTestHelper\$Companion\$main\$1.invoke(JvmProgramTest.kt:107)")
+                    .shouldContain("at com.bkahlert.kommons.OnExitTestHelper\$Companion\$main\$1.invoke(JvmProgramTest.kt:108)")
                     .shouldContain("IllegalArgumentException: too much content")
             }
         }

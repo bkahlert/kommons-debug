@@ -1,5 +1,8 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.text.EMPTY
+import com.bkahlert.kommons.text.LineSeparators
+
 /** Constant `0x00` */
 public inline val Byte.Companion.ZERO: Byte get() = 0x0
 

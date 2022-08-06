@@ -1,10 +1,10 @@
 package com.bkahlert.kommons.debug
 
-import com.bkahlert.kommons.EMPTY
+import com.bkahlert.kommons.text.EMPTY
 import com.bkahlert.kommons.Parser
 import com.bkahlert.kommons.Parser.Companion.parser
 import com.bkahlert.kommons.Platform
-import com.bkahlert.kommons.takeUnlessEmpty
+import com.bkahlert.kommons.text.takeUnlessEmpty
 import kotlin.reflect.KFunction
 
 /** Representation of a single element of a [StackTrace] on [Platform.JS]. */

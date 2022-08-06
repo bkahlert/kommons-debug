@@ -1,5 +1,6 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.text.quoted
 import kotlin.reflect.KProperty1
 
 /** Returns the first enum entry matched by the specified [filter], or `null` otherwise. */

@@ -1,5 +1,13 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.text.CodePoint
+import com.bkahlert.kommons.text.ansiRemoved
+import com.bkahlert.kommons.text.asCodePointSequence
+import com.bkahlert.kommons.text.isLowerCase
+import com.bkahlert.kommons.text.isUpperCase
+import com.bkahlert.kommons.text.isWhitespace
+import com.bkahlert.kommons.text.string
+
 /**
  * Creates an identifier suited for applications that
  * ("only" respectively "at least") support the
@@ -43,6 +51,7 @@ public fun CharSequence?.toIdentifier(minLength: Int = 8): String {
                         char?.also { if (it.isUpperCase()) upperCaseLetters++ else if (it.isLowerCase()) lowerCaseLetters++ }
                     }.string
                 }
+
                 codePoint.isWhitespace -> "-"
                 else -> "_"
             }

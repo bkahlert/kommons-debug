@@ -1,5 +1,6 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.text.EMPTY
 import java.io.UncheckedIOException
 import java.nio.file.FileSystems
 import java.nio.file.LinkOption.NOFOLLOW_LINKS

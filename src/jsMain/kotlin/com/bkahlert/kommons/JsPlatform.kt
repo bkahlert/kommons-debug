@@ -1,5 +1,7 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.text.AnsiSupport
+
 /** Platforms this program can be run on. */
 public actual sealed interface Platform {
 

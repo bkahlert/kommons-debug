@@ -1,8 +1,9 @@
 package com.bkahlert.kommons
 
-import com.bkahlert.kommons.AnsiSupport.ANSI24
-import com.bkahlert.kommons.AnsiSupport.ANSI4
-import com.bkahlert.kommons.AnsiSupport.ANSI8
+import com.bkahlert.kommons.text.AnsiSupport
+import com.bkahlert.kommons.text.AnsiSupport.ANSI24
+import com.bkahlert.kommons.text.AnsiSupport.ANSI4
+import com.bkahlert.kommons.text.AnsiSupport.ANSI8
 import java.util.Locale
 
 /** Platforms this program can be run on. */

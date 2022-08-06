@@ -1,6 +1,6 @@
 package com.bkahlert.kommons.debug
 
-import com.bkahlert.kommons.quoted
+import com.bkahlert.kommons.text.quoted
 import com.bkahlert.kommons.toFileOrNull
 import mu.KotlinLogging
 import java.awt.Desktop

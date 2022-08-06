@@ -8,6 +8,7 @@ import com.bkahlert.kommons.test.createTempJarFileSystem
 import com.bkahlert.kommons.test.fixtures.SvgImageFixture
 import com.bkahlert.kommons.test.testAll
 import com.bkahlert.kommons.test.toNewJarFileSystem
+import com.bkahlert.kommons.text.string
 import io.kotest.assertions.asClue
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowUnit

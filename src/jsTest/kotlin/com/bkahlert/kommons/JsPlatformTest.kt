@@ -1,6 +1,7 @@
 package com.bkahlert.kommons
 
 import com.bkahlert.kommons.test.testAll
+import com.bkahlert.kommons.text.AnsiSupport
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlin.test.Test

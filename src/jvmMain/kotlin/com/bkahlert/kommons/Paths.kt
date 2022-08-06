@@ -1,5 +1,8 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.text.EMPTY
+import com.bkahlert.kommons.text.randomString
+import com.bkahlert.kommons.text.takeUnlessEmpty
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.BufferedReader
@@ -594,6 +597,7 @@ public fun <R> URI.usePath(block: (Path) -> R): R =
                     throw e
                 }
             }
+
             else -> throw ex
         }
     }::getOrThrow)
