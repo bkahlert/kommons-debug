@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.targets.js.yarn.yarn
 
 plugins {
     kotlin("multiplatform") version "1.7.10"
-    id("org.jetbrains.dokka") version "1.7.0"
+    id("org.jetbrains.dokka") version "1.7.10"
     id("maven-publish")
     signing
     id("nebula.release") version "16.0.0"
@@ -46,12 +46,13 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                @Suppress("SpellCheckingInspection")
                 implementation("io.github.microutils:kotlin-logging:2.1.23") { because("SLF4J logger API + Kotlin wrapper") }
             }
         }
         val commonTest by getting {
             dependencies {
-                implementation("com.bkahlert.kommons:kommons-test:0.4.1") { because("JUnit defaults, testEach") }
+                implementation("com.bkahlert.kommons:kommons-test:0.4.2") { because("JUnit defaults, testEach") }
             }
         }
         val jvmMain by getting {
@@ -69,7 +70,6 @@ kotlin {
         }
         val jsMain by getting {
             dependencies {
-                @Suppress("SpellCheckingInspection")
                 implementation(npm("xregexp", "5.1.0")) { because("code point sequence") }
                 implementation(npm("@stdlib/string-next-grapheme-cluster-break", "0.0.8")) { because("grapheme sequence") }
             }

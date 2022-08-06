@@ -1,11 +1,13 @@
 package com.bkahlert.kommons.text
 
 import com.bkahlert.kommons.test.testAll
+import com.bkahlert.kommons.text.Grapheme.Companion.graphemes
 import com.bkahlert.kommons.text.Text.ChunkedText
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.assertions.throwables.shouldThrowWithMessage
+import io.kotest.inspectors.forAll
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.sequences.shouldBeEmpty
@@ -28,6 +30,10 @@ class GraphemeTest {
         GraphemeBreakIterator("🇩🇪").asSequence().shouldContainExactly(4) // regional indicators
         GraphemeBreakIterator("👨🏾‍🦱").asSequence().shouldContainExactly(7) // emoji + skin tone modifier + ZWJ + curly hair
         GraphemeBreakIterator("👩‍👩‍👦‍👦").asSequence().shouldContainExactly(11) // long ZWJ sequence
+
+        listOf("", "a", "¶", "☰", "𝕓", "a̳o", "🫠", "🇩🇪", "👨🏾‍🦱", "👩‍👩‍👦‍👦").forAll {
+            GraphemeBreakIterator(it.cs).asSequence().toList() shouldBe GraphemeBreakIterator(it).asSequence().toList()
+        }
     }
 
     @Test fun grapheme_iterator() = testAll {
@@ -162,12 +168,12 @@ class GraphemeTest {
         "👨🏾‍🦱👩‍👩‍👦‍👦".asGraphemeOrNull() shouldBe null
     }
 
-    @Test fun text() = testAll {
+    @Test fun text_unit() = testAll(emojiCharSequence, emojiString) {
         Grapheme.name shouldBe "grapheme"
         Grapheme.textOf(String.EMPTY) shouldBe Text.emptyText()
-        Grapheme.textOf(emojiString) should beText(
+        Grapheme.textOf(it) should beText(
             ChunkedText(
-                emojiString,
+                it,
                 0..0,
                 1..2,
                 3..4,
@@ -178,5 +184,16 @@ class GraphemeTest {
             ),
             *emojiGraphemes
         )
+    }
+
+    @Test fun text_length() = testAll {
+        Grapheme.lengthOf(42) should {
+            it.value shouldBe 42
+            it.unit shouldBe Grapheme
+            it shouldBe TextLength(42, Grapheme)
+            it shouldNotBe TextLength(42, Word)
+        }
+
+        42.graphemes shouldBe Grapheme.lengthOf(42)
     }
 }

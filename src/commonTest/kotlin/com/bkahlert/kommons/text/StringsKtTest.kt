@@ -7,9 +7,9 @@ import com.bkahlert.kommons.debug.ClassWithDefaultToString
 import com.bkahlert.kommons.debug.OrdinaryClass
 import com.bkahlert.kommons.debug.ThrowingClass
 import com.bkahlert.kommons.test.testAll
-import com.bkahlert.kommons.text.TextLength.Companion.chars
-import com.bkahlert.kommons.text.TextLength.Companion.codePoints
-import com.bkahlert.kommons.text.TextLength.Companion.graphemes
+import com.bkahlert.kommons.text.Char.characters
+import com.bkahlert.kommons.text.CodePoint.Companion.codePoints
+import com.bkahlert.kommons.text.Grapheme.Companion.graphemes
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.inspectors.forAll
 import io.kotest.matchers.collections.shouldContain
@@ -241,7 +241,7 @@ class StringsKtTest {
             truncated.toString() shouldBe "a𝕓🫠🇩🇪👨 … ‍👩‍👦‍👦"
         }
         it.truncate(length = 100_000.graphemes) shouldBeSameInstanceAs it
-        shouldThrow<IllegalArgumentException> { it.truncate(length = 7.chars, marker = "1234567890") }
+        shouldThrow<IllegalArgumentException> { it.truncate(length = 7.characters, marker = "1234567890") }
             .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
     }
 
@@ -251,7 +251,7 @@ class StringsKtTest {
             truncated.toString() shouldBe "… 🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦"
         }
         it.truncateStart(length = 100_000.graphemes) shouldBeSameInstanceAs it
-        shouldThrow<IllegalArgumentException> { it.truncateStart(length = 7.chars, marker = "1234567890") }
+        shouldThrow<IllegalArgumentException> { it.truncateStart(length = 7.characters, marker = "1234567890") }
             .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
     }
 
@@ -261,7 +261,7 @@ class StringsKtTest {
             truncated.toString() shouldBe "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍ …"
         }
         it.truncateEnd(length = 100_000.graphemes) shouldBeSameInstanceAs it
-        shouldThrow<IllegalArgumentException> { it.truncateEnd(length = 7.chars, marker = "1234567890") }
+        shouldThrow<IllegalArgumentException> { it.truncateEnd(length = 7.characters, marker = "1234567890") }
             .message shouldBe "The specified length (7) must be greater or equal than the length of the marker \"1234567890\" (10)."
     }
 
@@ -476,7 +476,8 @@ internal const val emptyString: String = ""
 internal const val blankString: String = "   "
 internal val nullString: String? = null
 
-internal val emojiString: String = "a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦"
+internal val emojiCharSequence: CharSequence = StringBuilder("a𝕓🫠🇩🇪👨🏾‍🦱👩‍👩‍👦‍👦")
+internal val emojiString: String = emojiCharSequence.toString()
 internal val emojiChars: Array<kotlin.Char> = arrayOf(
     'a',
     '\uD835',

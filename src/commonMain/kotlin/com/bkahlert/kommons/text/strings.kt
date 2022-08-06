@@ -1,14 +1,14 @@
 package com.bkahlert.kommons.text
 
-import com.bkahlert.kommons.text.Text.Companion.asText
-import com.bkahlert.kommons.text.Text.Companion.mapText
-import com.bkahlert.kommons.text.TextLength.Companion.codePoints
 import com.bkahlert.kommons.debug.Compression.Always
 import com.bkahlert.kommons.debug.Typing.Untyped
 import com.bkahlert.kommons.debug.getOrNull
 import com.bkahlert.kommons.debug.properties
 import com.bkahlert.kommons.debug.render
 import com.bkahlert.kommons.debug.renderType
+import com.bkahlert.kommons.text.CodePoint.Companion.codePoints
+import com.bkahlert.kommons.text.Text.Companion.asText
+import com.bkahlert.kommons.text.Text.Companion.mapText
 import kotlin.random.Random
 import kotlin.reflect.KProperty
 

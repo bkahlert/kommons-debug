@@ -3,7 +3,6 @@ package com.bkahlert.kommons.text
 import com.bkahlert.kommons.asIterable
 import com.bkahlert.kommons.map
 import com.bkahlert.kommons.mapToRanges
-import com.bkahlert.kommons.text.Text.ChunkedText
 import kotlin.jvm.JvmInline
 
 /**
@@ -96,7 +95,7 @@ public value class CodePoint(
     public val isAlphanumeric: Boolean get() = Regex("[\\p{L} \\p{Nd}]").matches(string)
 
     /** Text unit for texts consisting of [CodePoint] chunks. */
-    public companion object : TextUnit<CodePoint> {
+    public companion object : ChunkingTextUnit<CodePoint>("code point") {
         /** The minimum index a code point can have. */
         public const val MIN_INDEX: Int = 0x0
 
@@ -106,10 +105,12 @@ public value class CodePoint(
         /** The range of indices a code point can have. */
         public val INDEX_RANGE: IntRange = MIN_INDEX..MAX_INDEX
 
-        override val name: String = "code point"
+        override fun chunk(text: CharSequence): BreakIterator = CodePointBreakIterator(text)
 
-        override fun textOf(text: CharSequence): Text<CodePoint> =
-            if (text.isEmpty()) Text.emptyText() else ChunkedText(text, CodePointBreakIterator(text), ::CodePoint)
+        override fun transform(text: CharSequence, range: IntRange): CodePoint = CodePoint(text, range)
+
+        /** Returns a new [TextLength] equal to this number of code points. */
+        public inline val Int.codePoints: TextLength<CodePoint> get() = lengthOf(this)
     }
 }
 

@@ -1,16 +1,15 @@
 package com.bkahlert.kommons.text
 
 import com.bkahlert.kommons.debug.render
-import com.bkahlert.kommons.mapToRanges
 import com.bkahlert.kommons.test.testAll
+import com.bkahlert.kommons.text.Char.characters
+import com.bkahlert.kommons.text.CodePoint.Companion.codePoints
+import com.bkahlert.kommons.text.Grapheme.Companion.graphemes
 import com.bkahlert.kommons.text.Text.ChunkedText
 import com.bkahlert.kommons.text.Text.Companion.asText
 import com.bkahlert.kommons.text.Text.Companion.emptyText
 import com.bkahlert.kommons.text.Text.Companion.mapText
 import com.bkahlert.kommons.text.Text.TextComposite
-import com.bkahlert.kommons.text.TextLength.Companion.chars
-import com.bkahlert.kommons.text.TextLength.Companion.codePoints
-import com.bkahlert.kommons.text.TextLength.Companion.graphemes
 import com.bkahlert.kommons.text.Word.Letters
 import com.bkahlert.kommons.text.Word.Space
 import com.bkahlert.kommons.toList
@@ -161,57 +160,53 @@ class TextKtTest {
         }
     }
 
-    // TODO move to corresponding unit
     @Test fun text_unit() = testAll {
-        Char.name shouldBe "char"
-        Char.textOf(emojiString).asList().shouldContainExactly(*emojiChars)
-
-        CodePoint.name shouldBe "code point"
-        CodePoint.textOf(emojiString).asList().shouldContainExactly(*emojiCodePoints)
-
-        Grapheme.name shouldBe "grapheme"
-        Grapheme.textOf(emojiString).asList().shouldContainExactly(*emojiGraphemes)
-
         Word.textOf(charSequence).asList().shouldContainExactly(
             Letters(charSequence, 0..3),
             Space(charSequence, 4..4),
             Letters(charSequence, 5..12),
         )
+
+        Word.textOf(string).asList().shouldContainExactly(
+            Letters(string, 0..5),
+        )
     }
 
     @Test fun text_length() = testAll {
-        42.chars shouldBe TextLength(42, Char)
-        42.codePoints shouldBe TextLength(42, CodePoint)
-        42.graphemes shouldBe TextLength(42, Grapheme)
+        TextLength(42, Word) should {
+            it shouldBe TextLength(42, Word)
+            it shouldNotBe TextLength(41, Word)
+            it shouldNotBe TextLength(43, Word)
+            it shouldNotBe 42.characters
+            it shouldNotBe 42.codePoints
+            it shouldNotBe 42.graphemes
 
-        42.chars shouldNotBe 41.chars
-        42.chars shouldNotBe 42.codePoints
+            it shouldBeLessThan TextLength(43, Word)
+            it shouldBeGreaterThan TextLength(41, Word)
 
-        42.chars shouldBeLessThan 43.chars
-        42.chars shouldBeGreaterThan 41.chars
+            TextLength(0, Word).toString() shouldBe "0 words"
+            TextLength(1, Word).toString() shouldBe "1 word"
+            it.toString() shouldBe "42 words"
 
-        0.chars.toString() shouldBe "0 chars"
-        1.chars.toString() shouldBe "1 char"
-        42.chars.toString() shouldBe "42 chars"
-
-        -(42.chars) shouldBe (-42).chars
-        42.chars + 37 shouldBe 79.chars
-        42.chars + 37.chars shouldBe 79.chars
-        42.chars - 37 shouldBe 5.chars
-        42.chars - 37.chars shouldBe 5.chars
-        42.chars * 2 shouldBe 84.chars
-        42.chars * 2.4 shouldBe 100.chars
-        42.chars / 2 shouldBe 21.chars
-        42.chars / 2.4 shouldBe 17.chars
-        42.chars.isNegative() shouldBe false
-        0.chars.isNegative() shouldBe false
-        (-42).chars.isNegative() shouldBe true
-        42.chars.isPositive() shouldBe true
-        0.chars.isPositive() shouldBe false
-        (-42).chars.isPositive() shouldBe false
-        42.chars.absoluteValue shouldBe 42.chars
-        0.chars.absoluteValue shouldBe 0.chars
-        (-42).chars.absoluteValue shouldBe 42.chars
+            -(it) shouldBe TextLength(-42, Word)
+            it + 37 shouldBe TextLength(79, Word)
+            it + TextLength(37, Word) shouldBe TextLength(79, Word)
+            it - 37 shouldBe TextLength(5, Word)
+            it - TextLength(37, Word) shouldBe TextLength(5, Word)
+            it * 2 shouldBe TextLength(84, Word)
+            it * 2.4 shouldBe TextLength(100, Word)
+            it / 2 shouldBe TextLength(21, Word)
+            it / 2.4 shouldBe TextLength(17, Word)
+            it.isNegative() shouldBe false
+            TextLength(0, Word).isNegative() shouldBe false
+            TextLength(-42, Word).isNegative() shouldBe true
+            it.isPositive() shouldBe true
+            TextLength(0, Word).isPositive() shouldBe false
+            TextLength(-42, Word).isPositive() shouldBe false
+            it.absoluteValue shouldBe it
+            TextLength(0, Word).absoluteValue shouldBe TextLength(0, Word)
+            TextLength(-42, Word).absoluteValue shouldBe it
+        }
     }
 
 
@@ -404,21 +399,16 @@ internal sealed class Word(
         val range: IntRange,
     ) : Word(text, range)
 
-    companion object : TextUnit<Word> {
-        override val name: String = "word"
-        override fun textOf(text: CharSequence): Text<Word> = ChunkedText(
-            text,
-            WordBreakIterator(text).mapToRanges().toList(),
-        ) { txt, range ->
-            val (whitespaces, nonWhitespaces) = txt.subSequence(range).partition { it.isWhitespace() }
-            when {
-                whitespaces.isEmpty() -> Letters(txt, range)
-                nonWhitespaces.isEmpty() -> Space(txt, range)
-                else -> Mixed(txt, range)
+    companion object : ChunkingTextUnit<Word>("word") {
+        override fun chunk(text: CharSequence): BreakIterator = WordBreakIterator(text)
+        override fun transform(text: CharSequence, range: IntRange): Word {
+            val (whitespaces, nonWhitespaces) = text.subSequence(range).partition { it.isWhitespace() }
+            return when {
+                whitespaces.isEmpty() -> Letters(text, range)
+                nonWhitespaces.isEmpty() -> Space(text, range)
+                else -> Mixed(text, range)
             }
         }
-
-        override fun toString(): String = name
     }
 }
 

@@ -1,6 +1,7 @@
 package com.bkahlert.kommons.text
 
 import com.bkahlert.kommons.test.testAll
+import com.bkahlert.kommons.text.CodePoint.Companion.codePoints
 import com.bkahlert.kommons.text.Text.ChunkedText
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
@@ -314,12 +315,12 @@ class CodePointTest {
         "Az09Αω𝌀𝍖षि🜃🜂🜁🜄".asCodePointSequence().forEach { it.isWhitespace shouldBe false }
     }
 
-    @Test fun text() = testAll {
+    @Test fun text_unit() = testAll(emojiCharSequence, emojiString) {
         CodePoint.name shouldBe "code point"
         CodePoint.textOf(String.EMPTY) shouldBe Text.emptyText()
-        CodePoint.textOf(emojiString) should beText(
+        CodePoint.textOf(it) should beText(
             ChunkedText(
-                emojiString,
+                it,
                 0..0,
                 1..2,
                 3..4,
@@ -340,6 +341,17 @@ class CodePointTest {
             ),
             *emojiCodePoints
         )
+    }
+
+    @Test fun text_length() = testAll {
+        CodePoint.lengthOf(42) should {
+            it.value shouldBe 42
+            it.unit shouldBe CodePoint
+            it shouldBe TextLength(42, CodePoint)
+            it shouldNotBe TextLength(42, Word)
+        }
+
+        42.codePoints shouldBe CodePoint.lengthOf(42)
     }
 
     @Test fun code_point_range() = testAll {

@@ -2,7 +2,6 @@ package com.bkahlert.kommons.text
 
 import com.bkahlert.kommons.map
 import com.bkahlert.kommons.mapToRanges
-import com.bkahlert.kommons.text.Text.ChunkedText
 import kotlin.jvm.JvmInline
 
 /**
@@ -24,10 +23,14 @@ public value class Grapheme private constructor(
     override fun toString(): String = value.toString()
 
     /** Text unit for texts consisting of [Grapheme] chunks. */
-    public companion object : TextUnit<Grapheme> {
-        override val name: String = "grapheme"
-        override fun textOf(text: CharSequence): Text<Grapheme> =
-            if (text.isEmpty()) Text.emptyText() else ChunkedText(text, GraphemeBreakIterator(text), ::Grapheme)
+    public companion object : ChunkingTextUnit<Grapheme>("grapheme") {
+
+        override fun chunk(text: CharSequence): BreakIterator = GraphemeBreakIterator(text)
+
+        override fun transform(text: CharSequence, range: IntRange): Grapheme = Grapheme(text, range)
+
+        /** Returns a new [TextLength] equal to this number of graphemes. */
+        public inline val Int.graphemes: TextLength<Grapheme> get() = lengthOf(this)
     }
 }
 

@@ -1,6 +1,5 @@
 package com.bkahlert.kommons.text
 
-import com.bkahlert.kommons.text.BreakIterator
 import com.ibm.icu.text.BreakIterator as IcuBreakIterator
 
 /** An [Iterator] that iterates [Grapheme] positions. */

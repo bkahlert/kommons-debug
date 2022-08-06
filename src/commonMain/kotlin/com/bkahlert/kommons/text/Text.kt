@@ -3,6 +3,7 @@ package com.bkahlert.kommons.text
 import com.bkahlert.kommons.locate
 import com.bkahlert.kommons.map
 import com.bkahlert.kommons.mapToRanges
+import com.bkahlert.kommons.text.Text.ChunkedText
 import com.bkahlert.kommons.text.Text.TextComposite
 import com.bkahlert.kommons.toList
 import kotlin.contracts.InvocationKind.EXACTLY_ONCE
@@ -246,6 +247,24 @@ public interface TextUnit<T> {
 
     /** Returns a new [Text] backed by the specified [text]. */
     public fun textOf(text: CharSequence): Text<T>
+
+    /** Returns a new [TextLength] equal to the specified [length]. */
+    public fun lengthOf(length: Int): TextLength<T>
+}
+
+/** A [TextUnit] of which the text chunks are created consecutively using a [BreakIterator]. */
+public abstract class ChunkingTextUnit<T>(
+    final override val name: String,
+) : TextUnit<T> {
+    /** Returns a [BreakIterator] that is used to chunk the specified [text]. */
+    protected abstract fun chunk(text: CharSequence): BreakIterator
+
+    /** Materializes the specified [text] at the specified [range] to an instance of [T]. */
+    protected abstract fun transform(text: CharSequence, range: IntRange): T
+
+    final override fun textOf(text: CharSequence): Text<T> = if (text.isEmpty()) Text.emptyText() else ChunkedText(text, chunk(text), ::transform)
+    final override fun lengthOf(length: Int): TextLength<T> = TextLength(length, this)
+    final override fun toString(): String = name
 }
 
 /** Represents the length of text in a given [TextUnit]. */
@@ -255,18 +274,6 @@ public class TextLength<T>(
     /** The unit of this text length. */
     public val unit: TextUnit<T>,
 ) : Comparable<TextLength<T>> {
-
-    public companion object {
-
-        /** Returns a [Char] text length equal to this [Int] number of chars. */
-        public inline val Int.chars: TextLength<kotlin.Char> get() = TextLength(this, Char)
-
-        /** Returns a [CodePoint] text length equal to this [Int] number of code points. */
-        public inline val Int.codePoints: TextLength<CodePoint> get() = TextLength(this, CodePoint)
-
-        /** Returns a [Grapheme] text length equal to this [Int] number of graphemes. */
-        public inline val Int.graphemes: TextLength<Grapheme> get() = TextLength(this, Grapheme)
-    }
 
     public override fun compareTo(other: TextLength<T>): Int = value.compareTo(other.value)
 

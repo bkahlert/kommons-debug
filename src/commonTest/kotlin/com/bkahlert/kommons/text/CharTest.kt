@@ -1,19 +1,21 @@
 package com.bkahlert.kommons.text
 
 import com.bkahlert.kommons.test.testAll
+import com.bkahlert.kommons.text.Char.characters
 import com.bkahlert.kommons.text.Text.ChunkedText
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test
 
 class CharTest {
 
-    @Test fun text() = testAll {
+    @Test fun text_unit() = testAll(emojiCharSequence, emojiString) {
         Char.name shouldBe "character"
         Char.textOf(String.EMPTY) shouldBe Text.emptyText()
-        Char.textOf(emojiString) should beText(
+        Char.textOf(it) should beText(
             ChunkedText(
-                emojiString,
+                it,
                 0..0,
                 1..1,
                 2..2,
@@ -45,5 +47,16 @@ class CharTest {
             ),
             *emojiChars
         )
+    }
+
+    @Test fun text_length() = testAll {
+        Char.lengthOf(42) should {
+            it.value shouldBe 42
+            it.unit shouldBe Char
+            it shouldBe TextLength(42, Char)
+            it shouldNotBe TextLength(42, Word)
+        }
+
+        42.characters shouldBe Char.lengthOf(42)
     }
 }
