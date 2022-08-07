@@ -1,7 +1,8 @@
 package com.bkahlert.kommons.text
 
 import com.bkahlert.kommons.Platform
-import com.bkahlert.kommons.Platform.JS
+import com.bkahlert.kommons.Platform.Browser
+import com.bkahlert.kommons.Platform.NodeJS
 import com.bkahlert.kommons.debug.ClassWithCustomToString
 import com.bkahlert.kommons.debug.ClassWithDefaultToString
 import com.bkahlert.kommons.debug.OrdinaryClass
@@ -360,7 +361,7 @@ class StringsKtTest {
 
     @Test fun as_string() = testAll {
         OrdinaryClass().asString() shouldBe when (Platform.Current) {
-            is JS -> """
+            Browser, NodeJS -> """
                 OrdinaryClass {
                     baseProperty: "base-property",
                     openBaseProperty: 42／0x2a,
@@ -381,7 +382,7 @@ class StringsKtTest {
                 }
             """.trimIndent()
         }
-        if (Platform.Current !is JS) {
+        if (Platform.Current != Browser && Platform.Current != NodeJS) {
             ThrowingClass().asString() shouldBe """
             ThrowingClass {
                 throwingProperty: <error:java.lang.RuntimeException: error reading property>,
@@ -395,7 +396,7 @@ class StringsKtTest {
         """.trimIndent()
 
         OrdinaryClass().asString(exclude = listOf(OrdinaryClass::ordinaryProperty)) shouldBe when (Platform.Current) {
-            is JS -> """
+            Browser, NodeJS -> """
                 OrdinaryClass {
                     baseProperty: "base-property",
                     openBaseProperty: 42／0x2a,

@@ -1,7 +1,8 @@
 package com.bkahlert.kommons.text
 
 import com.bkahlert.kommons.Platform
-import com.bkahlert.kommons.Platform.JS
+import com.bkahlert.kommons.Platform.Browser
+import com.bkahlert.kommons.Platform.NodeJS
 import com.bkahlert.kommons.test.fixtures.GifImageFixture
 import com.bkahlert.kommons.test.testAll
 import com.bkahlert.kommons.text.LineSeparators.CR
@@ -402,7 +403,7 @@ class RegexKtTest {
     @Test fun any_character_regex() = testAll {
         stringWithAllLineSeparators.replace(Regex.AnyCharacterRegex, "-") shouldBe "----------------------------"
         stringWithAllLineSeparators.replace(Regex("."), "-") shouldBe when (Platform.Current) {
-            is JS -> "---${CRLF}---${LF}---${CR}-------${PS}---${LS}---"
+            Browser, NodeJS -> "---${CRLF}---${LF}---${CR}-------${PS}---${LS}---"
             else -> "---${CRLF}---${LF}---${CR}---${NEL}---${PS}---${LS}---"
         }
     }

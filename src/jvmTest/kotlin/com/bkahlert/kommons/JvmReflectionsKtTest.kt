@@ -9,20 +9,29 @@ class JvmReflectionsKtTest {
 
     @Test fun all_sealed_subclasses() = testAll {
         JvmReflectionsKtTest::class.allSealedSubclasses.shouldBeEmpty()
-        Platform::class.allSealedSubclasses.shouldContainExactly(
-            Platform.JS::class,
-            Platform.JS.Browser::class,
-            Platform.JS.NodeJS::class,
-            Platform.JVM::class
+        SealedInterface::class.allSealedSubclasses.shouldContainExactly(
+            SealedInterface.SealedClass::class,
+            SealedInterface.SealedClass.SealedObjectInstance2::class,
+            SealedInterface.SealedClass.SealedObjectInstance3::class,
+            SealedInterface.SealedObjectInstance1::class,
         )
     }
 
     @Test fun all_sealed_object_instances() = testAll {
         JvmReflectionsKtTest::class.allSealedObjectInstances.shouldBeEmpty()
-        Platform::class.allSealedObjectInstances.shouldContainExactly(
-            Platform.JS.Browser,
-            Platform.JS.NodeJS,
-            Platform.JVM
+        SealedInterface::class.allSealedObjectInstances.shouldContainExactly(
+            SealedInterface.SealedClass.SealedObjectInstance2,
+            SealedInterface.SealedClass.SealedObjectInstance3,
+            SealedInterface.SealedObjectInstance1,
         )
     }
+}
+
+private sealed interface SealedInterface {
+    sealed class SealedClass : SealedInterface {
+        object SealedObjectInstance2 : SealedClass()
+        object SealedObjectInstance3 : SealedClass()
+    }
+
+    object SealedObjectInstance1 : SealedInterface
 }

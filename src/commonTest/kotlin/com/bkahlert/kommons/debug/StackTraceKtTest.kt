@@ -1,8 +1,9 @@
 package com.bkahlert.kommons.debug
 
 import com.bkahlert.kommons.Platform
-import com.bkahlert.kommons.Platform.JS
+import com.bkahlert.kommons.Platform.Browser
 import com.bkahlert.kommons.Platform.JVM
+import com.bkahlert.kommons.Platform.NodeJS
 import com.bkahlert.kommons.test.testAll
 import io.kotest.inspectors.shouldForAll
 import io.kotest.matchers.ints.shouldBeGreaterThan
@@ -32,18 +33,18 @@ class StackTraceTest {
     @Test fun get_first() = testAll {
         StackTrace.get().first() should {
             when (Platform.Current) {
-                JS.Browser -> {
+                Browser -> {
                     it.receiver shouldBe "StackTraceTest"
                     it.function shouldStartWith "get_first"
-                    it.file shouldContain "/commons.js"
+                    it.file shouldContain "${Platform.Current.fileSeparator}commons.js"
                     it.line shouldBeGreaterThan 0
                     it.column.shouldNotBeNull().shouldBeGreaterThan(0)
                 }
 
-                JS.NodeJS -> {
+                NodeJS -> {
                     it.receiver shouldBe "StackTraceTest"
                     it.function shouldStartWith "get_first"
-                    it.file shouldEndWith "/JsStackTrace.kt"
+                    it.file shouldEndWith "${Platform.Current.fileSeparator}JsStackTrace.kt"
                     it.line shouldBeGreaterThan 0
                     it.column.shouldNotBeNull().shouldBeGreaterThan(0)
                 }

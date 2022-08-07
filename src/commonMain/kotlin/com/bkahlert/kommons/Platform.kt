@@ -2,28 +2,26 @@ package com.bkahlert.kommons
 
 import com.bkahlert.kommons.text.AnsiSupport
 
-/** Platforms this program can be run on. */
-public expect sealed interface Platform {
+/** Platforms a program can run on. */
+public expect enum class Platform {
+
+    /** Browser platform */
+    Browser,
+
+    /** NodeJS platform */
+    NodeJS,
+
+    /** Java virtual machine */
+    JVM;
+
+    public companion object {
+        /** The platform this program runs on. */
+        public val Current: Platform
+    }
 
     /** Supported level for [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). */
     public val ansiSupport: AnsiSupport
 
-    /** JavaScript based platform, e.g. browser. */
-    public sealed interface JS : Platform {
-
-        /** Browser platform */
-        public object Browser : JS
-
-        /** NodeJS platform */
-        public object NodeJS : JS
-    }
-
-    /** Java virtual machine. */
-    public object JVM : Platform
-
-    public companion object {
-
-        /** The platforms this program runs on. */
-        public val Current: Platform
-    }
+    /** The separator used to separate path segments. */
+    public val fileSeparator: String
 }

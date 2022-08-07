@@ -1,5 +1,7 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.Platform.Browser
+import com.bkahlert.kommons.Platform.NodeJS
 import kotlinx.browser.window
 
 /** The running program. */
@@ -19,8 +21,8 @@ public actual object Program {
 
     private val onExitDelegate by lazy {
         when (Platform.Current) {
-            is Platform.JS.Browser -> ::browserOnExit
-            is Platform.JS.NodeJS -> ::nodeOnExit
+            Browser -> ::browserOnExit
+            NodeJS -> ::nodeOnExit
             else -> error("Unsupported platform")
         }
     }

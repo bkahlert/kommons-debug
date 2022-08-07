@@ -1,8 +1,9 @@
 package com.bkahlert.kommons.debug
 
 import com.bkahlert.kommons.Platform
-import com.bkahlert.kommons.Platform.JS
+import com.bkahlert.kommons.Platform.Browser
 import com.bkahlert.kommons.Platform.JVM
+import com.bkahlert.kommons.Platform.NodeJS
 import com.bkahlert.kommons.test.testAll
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -20,13 +21,13 @@ class ToCustomStringOrNullTest {
 
     @Test fun test_lambda() = testAll {
         {}.toCustomStringOrNull() shouldBe when (Platform.Current) {
-            is JS -> """
+            Browser, NodeJS -> """
                 function () {
                       return Unit_getInstance();
                     }
             """.trimIndent()
 
-            is JVM -> """
+            JVM -> """
                 () -> kotlin.Unit
             """.trimIndent()
 

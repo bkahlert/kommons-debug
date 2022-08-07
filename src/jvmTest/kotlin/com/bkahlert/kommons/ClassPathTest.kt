@@ -1,5 +1,6 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.test.shouldEndWith
 import com.bkahlert.kommons.test.testAll
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.withClue
@@ -27,16 +28,15 @@ class ClassPathTest {
         ClassPath(classPathTextFile) should {
             it.fileSystem.shouldBeInstanceOf<FileSystemDelegate>()
             it.isAbsolute shouldBe true
-            it.root.pathString shouldBe "/"
+            it.root.pathString shouldEndWith Platform.Current.fileSeparator
             it.fileName.pathString shouldBe "61C285F09D95930D0AE298B00AF09F918B0A.txt"
-            it.parent.pathString shouldEndWith "jvm/test"
+            it.parent.shouldEndWith("jvm", "test")
             it.nameCount shouldBeGreaterThan 3
             it.getName(it.nameCount - 2).pathString shouldBe "test"
-            it.subpath(it.nameCount - 3, it.nameCount - 1).pathString shouldBe "jvm/test"
+            it.subpath(it.nameCount - 3, it.nameCount - 1).shouldEndWith("jvm", "test")
             withClue("starts with self") { it.startsWith(it) shouldBe true }
             withClue("not starts without root") { it.startsWith(it.subpath(0, 2)) shouldBe false }
             withClue("starts with root") { it.startsWith(it.root / it.subpath(0, 2)) shouldBe true }
-            withClue("starts with root string") { it.startsWith("/") shouldBe true }
             withClue("ends with self") { it.endsWith(it) shouldBe true }
             withClue("not ends without file name") { it.endsWith(it.subpath(it.nameCount - 3, it.nameCount - 2)) shouldBe false }
             withClue("ends with file name") { it.endsWith(it.subpath(it.nameCount - 3, it.nameCount)) shouldBe true }
@@ -45,8 +45,8 @@ class ClassPathTest {
             it.resolve("..").normalize().pathString shouldBe it.parent.pathString
             it.relativize(it.parent).pathString shouldBe ".."
             it.toUri().toString() shouldMatch "file:.*/jvm/test/61C285F09D95930D0AE298B00AF09F918B0A\\.txt".toRegex()
-            it.toAbsolutePath().pathString shouldMatch "/.*/jvm/test/61C285F09D95930D0AE298B00AF09F918B0A\\.txt".toRegex()
-            it.toRealPath().pathString shouldMatch "/.*/jvm/test/61C285F09D95930D0AE298B00AF09F918B0A\\.txt".toRegex()
+            it.toAbsolutePath().shouldEndWith("jvm","test","61C285F09D95930D0AE298B00AF09F918B0A.txt")
+            it.toRealPath().shouldEndWith("jvm","test","61C285F09D95930D0AE298B00AF09F918B0A.txt")
             it.readText() shouldBe classPathTextFileText
             it.readBytes() shouldBe classPathTextFileBytes
         }
@@ -62,7 +62,6 @@ class ClassPathTest {
             withClue("starts with self") { it.startsWith(it) shouldBe true }
             withClue("not starts without root") { it.startsWith(it.subpath(0, 2)) shouldBe false }
             withClue("starts with root") { it.startsWith(it.root / it.subpath(0, 2)) shouldBe true }
-            withClue("starts with root string") { it.startsWith("/") shouldBe true }
             withClue("ends with self") { it.endsWith(it) shouldBe true }
             withClue("not ends without file name") { it.endsWith(it.subpath(it.nameCount - 3, it.nameCount - 2)) shouldBe false }
             withClue("ends with file name") { it.endsWith(it.subpath(it.nameCount - 3, it.nameCount)) shouldBe true }

@@ -1,8 +1,9 @@
 package com.bkahlert.kommons.debug
 
 import com.bkahlert.kommons.Platform
-import com.bkahlert.kommons.Platform.JS
+import com.bkahlert.kommons.Platform.Browser
 import com.bkahlert.kommons.Platform.JVM
+import com.bkahlert.kommons.Platform.NodeJS
 import com.bkahlert.kommons.debug.CustomToString.Ignore
 import com.bkahlert.kommons.debug.Typing.SimplyTyped
 import com.bkahlert.kommons.test.testAll
@@ -11,6 +12,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldMatch
 import kotlin.test.Test
 import kotlin.test.fail
+
 
 @Suppress("DEPRECATION")
 class TraceTest {
@@ -52,11 +54,11 @@ class TraceTest {
         buildString {
             "subject".trace("caption", highlight = true, includeCallSite = false, out = this::append) { it.length.toString() }
         } shouldBe when (Platform.Current) {
-            is JS -> """
+            Browser, NodeJS -> """
                 <span style="color:#01818F;font-weight:bold;">caption</span> <span style="color:#01818F;font-weight:bold;">⟨</span> <span style="color:#01E6FF;">"subject"</span> <span style="color:#01818F;font-weight:bold;">⟩</span> <span style="color:#01818F;font-weight:bold;">{</span> <span style="color:#01E6FF;">"7"</span> <span style="color:#01818F;font-weight:bold;">}</span>
             """.trimIndent()
 
-            is JVM -> """
+            JVM -> """
                 [1;36mcaption[0m [1;36m⟨[0m [96m"subject"[0m [1;36m⟩[0m [1;36m{[0m [96m"7"[0m [1;36m}[0m
             """.trimIndent()
 
@@ -70,16 +72,16 @@ class TraceTest {
         } should {
             @Suppress("RegExpRedundantEscape")
             when (Platform.Current) {
-                JS.Browser -> it shouldMatch """
+                Browser -> it shouldMatch """
                     .ͭ \(.*/commons\.js.*\) ⟨ "subject" ⟩ \{ "7" \}
                 """.trimIndent().toRegex()
 
-                JS.NodeJS -> it shouldMatch """
-                    .ͭ \(.*TraceKtTest\.kt:69\) ⟨ "subject" ⟩ \{ "7" \}
+                NodeJS -> it shouldMatch """
+                    .ͭ \(.*TraceKtTest\.kt:71\) ⟨ "subject" ⟩ \{ "7" \}
                 """.trimIndent().toRegex()
 
                 JVM -> it shouldBe """
-                    .ͭ (TraceKtTest.kt:69) ⟨ "subject" ⟩ { "7" }
+                    .ͭ (TraceKtTest.kt:71) ⟨ "subject" ⟩ { "7" }
                 """.trimIndent()
 
                 else -> fail("untested platform")
@@ -204,16 +206,16 @@ class TraceTest {
         } should {
             @Suppress("RegExpRedundantEscape")
             when (Platform.Current) {
-                JS.Browser -> it shouldMatch """
-                    .ͭ \(.*/commons\.js.*\) ⟨ !String "subject" ⟩
+                Browser -> it shouldMatch """
+                    .ͭ \(.*[\\/]commons\.js.*\) ⟨ !String "subject" ⟩
                 """.trimIndent().toRegex()
 
-                JS.NodeJS -> it shouldMatch """
-                    .ͭ \(.*/TraceKtTest\.kt:203\) ⟨ !String "subject" ⟩
+                NodeJS -> it shouldMatch """
+                    .ͭ \(.*[\\/]TraceKtTest\.kt:205\) ⟨ !String "subject" ⟩
                 """.trimIndent().toRegex()
 
                 JVM -> it shouldBe """
-                    .ͭ (TraceKtTest.kt:203) ⟨ !String "subject" ⟩
+                    .ͭ (TraceKtTest.kt:205) ⟨ !String "subject" ⟩
                 """.trimIndent()
 
                 else -> fail("untested platform")

@@ -1,38 +1,33 @@
 package com.bkahlert.kommons
 
+import com.bkahlert.kommons.debug.StackTrace
+import com.bkahlert.kommons.debug.get
 import com.bkahlert.kommons.text.AnsiSupport
 
-/** Platforms this program can be run on. */
-public actual sealed interface Platform {
+/** Platforms a program can run on. */
+public actual enum class Platform {
 
-    /** Supported level for [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). */
-    public actual val ansiSupport: AnsiSupport
+    /** Browser platform */
+    Browser,
 
-    /** JavaScript based platform, e.g. browser. */
-    public actual sealed interface JS : Platform {
-        /** Browser platform */
-        public actual object Browser : JS {
-            override val ansiSupport: AnsiSupport = AnsiSupport.NONE
-        }
+    /** NodeJS platform */
+    NodeJS,
 
-        /** NodeJS platform */
-        public actual object NodeJS : JS {
-            override val ansiSupport: AnsiSupport = AnsiSupport.NONE
-        }
-    }
-
-    /** Java virtual machine. */
-    public actual object JVM : Platform {
-        override val ansiSupport: AnsiSupport = AnsiSupport.NONE
-    }
+    /** Java virtual machine */
+    JVM;
 
     public actual companion object {
-        private val currentPlatform by lazy {
-            runCatching { kotlinx.browser.window }.fold({ JS.Browser }, { JS.NodeJS })
+        /** The platform this program runs on. */
+        public actual val Current: Platform by lazy {
+            runCatching { kotlinx.browser.window }.fold({ Browser }, { NodeJS })
         }
+    }
 
-        /** The platforms this program runs on. */
-        public actual val Current: Platform
-            get() = currentPlatform
+    /** Supported level for [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). */
+    public actual val ansiSupport: AnsiSupport = AnsiSupport.NONE
+
+    /** The separator used to separate path segments. */
+    public actual val fileSeparator: String by lazy {
+        if (StackTrace.get().firstNotNullOf { it.file }.contains('\\')) "\\" else "/"
     }
 }

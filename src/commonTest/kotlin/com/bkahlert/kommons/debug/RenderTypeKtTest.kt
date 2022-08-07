@@ -1,8 +1,9 @@
 package com.bkahlert.kommons.debug
 
 import com.bkahlert.kommons.Platform
-import com.bkahlert.kommons.Platform.JS
+import com.bkahlert.kommons.Platform.Browser
 import com.bkahlert.kommons.Platform.JVM
+import com.bkahlert.kommons.Platform.NodeJS
 import com.bkahlert.kommons.test.testAll
 import io.kotest.inspectors.shouldForAll
 import io.kotest.matchers.collections.shouldContainExactly
@@ -20,7 +21,7 @@ class RenderTypeTest {
 
     @Test fun render_primitive_types() = testAll {
         when (Platform.Current) {
-            is JS -> {
+            Browser, NodeJS -> {
                 PrimitiveTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
                     "String",
                     "Boolean", "Char", "Double", "Double",
@@ -45,7 +46,7 @@ class RenderTypeTest {
                 )
             }
 
-            is JVM -> {
+            JVM -> {
                 PrimitiveTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
                     "String",
                     "Boolean", "Char", "Float", "Double",
@@ -76,7 +77,7 @@ class RenderTypeTest {
 
     @Test fun render_collections() = testAll {
         when (Platform.Current) {
-            is JS -> {
+            Browser, NodeJS -> {
                 CollectionTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
                     "Iterable", "EmptySet", "List", "List"
                 )
@@ -85,7 +86,7 @@ class RenderTypeTest {
                 )
             }
 
-            is JVM -> {
+            JVM -> {
                 CollectionTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
                     "Iterable", "Set", "List", "List"
                 )
@@ -100,7 +101,7 @@ class RenderTypeTest {
 
     @Test fun render_classes() = testAll {
         when (Platform.Current) {
-            is JS -> {
+            Browser, NodeJS -> {
                 ClassTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
                     "Singleton",
                     "<object>",
@@ -133,7 +134,7 @@ class RenderTypeTest {
                 )
             }
 
-            is JVM -> {
+            JVM -> {
                 ClassTypes.allValues.map { it.renderType() } shouldContainExactly listOf(
                     "Singleton",
                     "<object>",
@@ -172,7 +173,7 @@ class RenderTypeTest {
 
     @Test fun test_functions() = testAll {
         when (Platform.Current) {
-            is JS -> {
+            Browser, NodeJS -> {
                 FunctionTypes.allValues.filterIsInstance<Function<*>>()
                     .map { it.renderFunctionType() }.shouldForAll { it shouldBe "Function" }
                 ({}).renderFunctionType() shouldBe "Function"
@@ -181,7 +182,7 @@ class RenderTypeTest {
                 ({}).renderFunctionType(simplified = false) shouldBe "Function"
             }
 
-            is JVM -> {
+            JVM -> {
                 FunctionTypes.allValues.filterIsInstance<Function<*>>()
                     .map { it.renderFunctionType() } shouldContainExactly listOf(
                     "work0() -> Unit",

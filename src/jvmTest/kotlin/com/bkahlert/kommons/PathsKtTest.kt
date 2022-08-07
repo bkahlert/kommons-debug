@@ -1,6 +1,7 @@
 package com.bkahlert.kommons
 
 import com.bkahlert.kommons.DeleteOnExecTestHelper.Variant
+import com.bkahlert.kommons.test.OneMinuteTimeout
 import com.bkahlert.kommons.test.createAnyFile
 import com.bkahlert.kommons.test.createDirectoryWithFiles
 import com.bkahlert.kommons.test.createTempJarFile
@@ -621,6 +622,7 @@ class PathsKtTest {
         }
     }
 
+    @OneMinuteTimeout
     @Test fun delete_on_exit(@TempDir tempDir: Path) = testAll {
         tempDir.createAnyFile("file-delete-default").asClue {
             IsolatedProcess.exec(DeleteOnExecTestHelper::class, Variant.Default.name, it.pathString) shouldBe 0

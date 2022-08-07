@@ -1,8 +1,9 @@
 package com.bkahlert.kommons.debug
 
 import com.bkahlert.kommons.Platform
-import com.bkahlert.kommons.Platform.JS
+import com.bkahlert.kommons.Platform.Browser
 import com.bkahlert.kommons.Platform.JVM
+import com.bkahlert.kommons.Platform.NodeJS
 import com.bkahlert.kommons.test.testAll
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
@@ -26,7 +27,7 @@ class PropertiesTest {
             put("baseProperty", "base-property")
             put("openBaseProperty", 42)
             put("protectedOpenBaseProperty", "protected-open-base-property")
-            if (Platform.Current is JS) put("privateBaseProperty", "private-base-property")
+            if (Platform.Current == Browser || Platform.Current == NodeJS) put("privateBaseProperty", "private-base-property")
             put("singletonProperty", "singleton-property")
             put("privateSingletonProperty", "private-singleton-property")
         }
@@ -39,8 +40,8 @@ class PropertiesTest {
             put("openBaseProperty", 42)
             put("protectedOpenBaseProperty", "protected-open-base-property")
             when (Platform.Current) {
-                is JS -> put("privateBaseProperty", "private-base-property")
-                is JVM -> put("size", 2)
+                Browser, NodeJS -> put("privateBaseProperty", "private-base-property")
+                JVM -> put("size", 2)
                 else -> fail("untested platform")
             }
             put("singletonProperty", "singleton-property")
@@ -56,8 +57,8 @@ class PropertiesTest {
             put("openBaseProperty", 42)
             put("protectedOpenBaseProperty", "protected-open-base-property")
             when (Platform.Current) {
-                is JS -> put("privateBaseProperty", "private-base-property")
-                is JVM -> {
+                Browser, NodeJS -> put("privateBaseProperty", "private-base-property")
+                JVM -> {
                     put("size", 2)
                     put("keys", MapImplementingSingleton.keys)
                     put("values", MapImplementingSingleton.values)
@@ -83,7 +84,7 @@ class PropertiesTest {
             put("baseProperty", "base-property")
             put("openBaseProperty", 42)
             put("protectedOpenBaseProperty", "protected-open-base-property")
-            if (Platform.Current is JS) put("privateBaseProperty", "private-base-property")
+            if (Platform.Current == Browser || Platform.Current == NodeJS) put("privateBaseProperty", "private-base-property")
             put("ordinaryProperty", "ordinary-property")
             put("privateOrdinaryProperty", "private-ordinary-property")
         }
@@ -91,11 +92,11 @@ class PropertiesTest {
             put("baseProperty", "base-property")
             put("openBaseProperty", 37)
             put("protectedOpenBaseProperty", "overridden-protected-open-base-property")
-            if (Platform.Current is JS) put("privateBaseProperty", "private-base-property")
+            if (Platform.Current == Browser || Platform.Current == NodeJS) put("privateBaseProperty", "private-base-property")
             put("dataProperty", "data-property")
             put("privateDataProperty", "private-data-property")
         }
-        if (Platform.Current !is JS) {
+        if (Platform.Current != Browser && Platform.Current != NodeJS) {
             ThrowingClass().properties should {
                 it["throwingProperty"].shouldBeInstanceOf<PropertyAccessError>()
                 it["privateThrowingProperty"].shouldBeInstanceOf<PropertyAccessError>()

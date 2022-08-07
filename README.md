@@ -169,9 +169,9 @@ URL("file:///home/john/dev/project/src/jvm/kotlin/packages/source.kt").locate()
 
 Reflects the running program and provides:
 
-- `Platform.isDebugging`: Returns whether the program is running in debug mode.
-- `Platform.isIntelliJ`: Returns whether the program is running in IntelliJ.
-- `Platform.onExit`: Allows registering callbacks that are invoked when the program exits.
+- `Program.isDebugging`: Returns whether the program is running in debug mode.
+- `Program.isIntelliJ`: Returns whether the program is running in IntelliJ.
+- `Program.onExit`: Allows registering callbacks that are invoked when the program exits.
 
 #### Platform
 
@@ -179,6 +179,7 @@ Reflects the platform the program runs on (e.g. `Platform.JVM`)
 and provides:
 
 - `Platform.ansiSupport`: Returns to what extent ANSI escape codes are supported.
+- `Platform.fileSeparator`: Returns the separator used to separate path segments.
 
 #### Stack Trace
 
