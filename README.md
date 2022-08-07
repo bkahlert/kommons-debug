@@ -260,7 +260,7 @@ Transliterations and transforms can be done using `String.transform`.
 - `truncate`/`truncateStart`/`truncateEnd`: truncates a string to a given length
 - `toIdentifier`: create an identifier from any string that resembles it
 - `randomString`: create a random string
-- [LineSeparators](src/commonMain/kotlin/com/bkahlert/kommons/LineSeparators.kt): many extension functions to work with usual and exotic Unicode line
+- [LineSeparators](src/commonMain/kotlin/com/bkahlert/kommons/text/LineSeparators.kt): many extension functions to work with usual and exotic Unicode line
   breaks.
 
 #### Examples
@@ -554,16 +554,6 @@ Safely read files with
 and write files with
 `useOutputStream`, `useBufferedOutputStream`, `useWriter`, and `useBufferedWriter`.
 
-Map URIs and URLs to a Path with `usePath`, which also works for class path resource.
-
-#### Example
-
-```kotlin
-standardLibraryClassPath.usePath {
-    it.pathString
-} // [cryptic] kotlin/text/Regex [cryptic] java/lang/Object ...
-```
-
 Find the class directory, the source directory or the source file itself of a class.
 
 #### Example
@@ -574,15 +564,15 @@ Foo::class.findSourceDirectoryOrNull()   // /home/john/dev/project/src/jvmTest/k
 Foo::class.findSourceFileOrNull()        // /home/john/dev/project/src/jvmTest/kotlin/packages/source.kt
 ```
 
-Access a class path resource like any other NIO 2 path using `ClassPath`.
+Access class path resources like any other NIO 2 path using the `classpath` URI scheme.
 
 #### Example
 
 ```kotlin
-ClassPath("dir/to/resource").readText()
-ClassPath("dir/to/resource").readBytes()
-ClassPath("dir/to/resource").copyToDirectory(SystemLocations.Temp)
-ClassPath("dir/to/resource").useBufferedReader { it.readLine() }
+Paths.get("classpath:dir/to/resource").readText()
+Paths.get("classpath:dir/to/resource").readBytes()
+Paths.get("classpath:dir/to/resource").copyToDirectory(SystemLocations.Temp)
+Paths.get("classpath:dir/to/resource").useBufferedReader { it.readLine() }
 ```
 
 ### Miscellaneous

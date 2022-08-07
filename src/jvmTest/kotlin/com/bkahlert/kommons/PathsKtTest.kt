@@ -35,18 +35,36 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.net.URI
 import java.net.URL
+import java.nio.channels.SeekableByteChannel
+import java.nio.file.AccessMode
+import java.nio.file.CopyOption
 import java.nio.file.DirectoryNotEmptyException
+import java.nio.file.DirectoryStream
+import java.nio.file.DirectoryStream.Filter
 import java.nio.file.FileAlreadyExistsException
+import java.nio.file.FileStore
+import java.nio.file.FileSystem
 import java.nio.file.FileSystemNotFoundException
 import java.nio.file.Files
+import java.nio.file.LinkOption
 import java.nio.file.LinkOption.NOFOLLOW_LINKS
 import java.nio.file.NoSuchFileException
 import java.nio.file.NotDirectoryException
+import java.nio.file.OpenOption
 import java.nio.file.Path
+import java.nio.file.PathMatcher
 import java.nio.file.Paths
-import java.nio.file.ProviderNotFoundException
 import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
+import java.nio.file.WatchEvent.Kind
+import java.nio.file.WatchEvent.Modifier
+import java.nio.file.WatchKey
+import java.nio.file.WatchService
+import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.attribute.FileAttribute
+import java.nio.file.attribute.FileAttributeView
 import java.nio.file.attribute.FileTime
+import java.nio.file.attribute.UserPrincipalLookupService
+import java.nio.file.spi.FileSystemProvider
 import kotlin.io.path.appendText
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createDirectory
@@ -656,22 +674,6 @@ class PathsKtTest {
         }
     }
 
-    @Test fun use_path(@TempDir tempDir: Path) = testAll {
-        val regularFile = tempDir.createAnyFile()
-        regularFile.toUri().usePath { it.readText() } shouldBe SvgImageFixture.contents
-        regularFile.toUri().toURL().usePath { it.readText() } shouldBe SvgImageFixture.contents
-
-        standardLibraryClassPathClass.toURI().usePath { it.readBytes() } shouldBe standardLibraryClassPathClassBytes
-        standardLibraryClassPathClass.usePath { it.readBytes() } shouldBe standardLibraryClassPathClassBytes
-
-        val classPathTextPath = checkNotNull(Program.contextClassLoader.getResource(classPathTextFile))
-        classPathTextPath.toURI().usePath { it.readBytes() } shouldBe classPathTextFileBytes
-        classPathTextPath.usePath { it.readBytes() } shouldBe classPathTextFileBytes
-
-        shouldThrow<ProviderNotFoundException> { URI("https://example.com").usePath { } }
-        shouldThrow<ProviderNotFoundException> { URL("https://example.com").usePath { } }
-    }
-
 
     @Test fun use_input_stream(@TempDir tempDir: Path) = testAll {
         tempDir.createAnyFile().useInputStream { it.readBytes().decodeToString() } shouldBe SvgImageFixture.contents
@@ -755,3 +757,76 @@ fun Path.symbolicLink(): Path = resolveRandom().apply {
 
 fun Path.createJarAndResolve(): Path =
     createTempJarFile().toNewJarFileSystem().getPath("file")
+
+
+internal object UnsupportedFileSystemProvider : FileSystemProvider() {
+    override fun getScheme(): String = "unsupported"
+    override fun newFileSystem(uri: URI, env: MutableMap<String, *>): FileSystem = UnsupportedFileSystem
+    override fun getFileSystem(uri: URI): FileSystem = UnsupportedFileSystem
+    override fun getPath(uri: URI): Path = UnsupportedPath
+    override fun newByteChannel(path: Path, options: MutableSet<out OpenOption>, vararg attrs: FileAttribute<*>): SeekableByteChannel =
+        throw UnsupportedOperationException()
+
+    override fun newDirectoryStream(dir: Path, filter: Filter<in Path>): DirectoryStream<Path> = throw UnsupportedOperationException()
+    override fun createDirectory(dir: Path, vararg attrs: FileAttribute<*>) = throw UnsupportedOperationException()
+    override fun delete(path: Path) = throw UnsupportedOperationException()
+    override fun copy(source: Path, target: Path, vararg options: CopyOption) = throw UnsupportedOperationException()
+    override fun move(source: Path, target: Path, vararg options: CopyOption) = throw UnsupportedOperationException()
+    override fun isSameFile(path: Path, path2: Path): Boolean = path == UnsupportedPath && path2 == UnsupportedPath
+    override fun isHidden(path: Path): Boolean = false
+    override fun getFileStore(path: Path): FileStore = throw UnsupportedOperationException()
+    override fun checkAccess(path: Path, vararg modes: AccessMode) = Unit
+    override fun <V : FileAttributeView> getFileAttributeView(path: Path, type: Class<V>, vararg options: LinkOption): V =
+        throw UnsupportedOperationException()
+
+    override fun <A : BasicFileAttributes> readAttributes(path: Path, type: Class<A>, vararg options: LinkOption): A = throw UnsupportedOperationException()
+    override fun readAttributes(path: Path, attributes: String, vararg options: LinkOption): MutableMap<String, Any> = throw UnsupportedOperationException()
+    override fun setAttribute(path: Path, attribute: String, value: Any, vararg options: LinkOption) = throw UnsupportedOperationException()
+}
+
+internal object UnsupportedFileSystem : FileSystem() {
+    override fun close(): Unit = Unit
+    override fun provider(): FileSystemProvider = UnsupportedFileSystemProvider
+    override fun isOpen(): Boolean = true
+    override fun isReadOnly(): Boolean = true
+    override fun getSeparator(): String = "/"
+    override fun getRootDirectories(): MutableIterable<Path> = throw UnsupportedOperationException()
+    override fun getFileStores(): MutableIterable<FileStore> = throw UnsupportedOperationException()
+    override fun supportedFileAttributeViews(): MutableSet<String> = mutableSetOf()
+    override fun getPath(first: String, vararg more: String): Path = UnsupportedPath
+    override fun getPathMatcher(syntaxAndPattern: String): PathMatcher = throw UnsupportedOperationException()
+    override fun getUserPrincipalLookupService(): UserPrincipalLookupService = throw UnsupportedOperationException()
+    override fun newWatchService(): WatchService = throw UnsupportedOperationException()
+}
+
+internal object UnsupportedPath : Path {
+    override fun toString(): String = "com.bkahlert.kommons.UnsupportedPath"
+    override fun hashCode(): Int = 1
+    override fun equals(other: Any?): Boolean = other is UnsupportedPath
+    override fun compareTo(other: Path): Int = throw UnsupportedOperationException()
+    override fun getFileSystem(): FileSystem = UnsupportedFileSystem
+    override fun isAbsolute(): Boolean = true
+    override fun getRoot(): Path = throw UnsupportedOperationException()
+    override fun getFileName(): Path = throw UnsupportedOperationException()
+    override fun getParent(): Path = throw UnsupportedOperationException()
+    override fun getNameCount(): Int = throw UnsupportedOperationException()
+    override fun getName(index: Int): Path = throw UnsupportedOperationException()
+    override fun subpath(beginIndex: Int, endIndex: Int): Path = throw UnsupportedOperationException()
+    override fun startsWith(other: Path): Boolean = throw UnsupportedOperationException()
+    override fun startsWith(other: String): Boolean = throw UnsupportedOperationException()
+    override fun endsWith(other: Path): Boolean = throw UnsupportedOperationException()
+    override fun endsWith(other: String): Boolean = throw UnsupportedOperationException()
+    override fun normalize(): Path = throw UnsupportedOperationException()
+    override fun resolve(other: Path): Path = throw UnsupportedOperationException()
+    override fun resolve(other: String): Path = throw UnsupportedOperationException()
+    override fun resolveSibling(other: Path): Path = throw UnsupportedOperationException()
+    override fun resolveSibling(other: String): Path = throw UnsupportedOperationException()
+    override fun relativize(other: Path): Path = throw UnsupportedOperationException()
+    override fun toFile(): File = throw UnsupportedOperationException()
+    override fun toUri(): URI = URI("${UnsupportedFileSystemProvider.scheme}:/path")
+    override fun toAbsolutePath(): Path = throw UnsupportedOperationException()
+    override fun toRealPath(vararg options: LinkOption?): Path = throw UnsupportedOperationException()
+    override fun iterator(): MutableIterator<Path> = throw UnsupportedOperationException()
+    override fun register(watcher: WatchService, vararg events: Kind<*>): WatchKey = throw UnsupportedOperationException()
+    override fun register(watcher: WatchService, events: Array<out Kind<*>>, vararg modifiers: Modifier?): WatchKey = throw UnsupportedOperationException()
+}

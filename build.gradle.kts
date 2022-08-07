@@ -52,7 +52,7 @@ kotlin {
         }
         val commonTest by getting {
             dependencies {
-                implementation("com.bkahlert.kommons:kommons-test:0.4.2") { because("JUnit defaults, testEach") }
+                implementation("com.bkahlert.kommons:kommons-test:0.4.4") { because("JUnit defaults, testEach") }
             }
         }
         val jvmMain by getting {
